@@ -607,7 +607,18 @@ input { font-family: inherit; }
   font-size: 12px;
   padding: 0 6px;
 }
-.ttl__num { width: 50px; text-align: right; }
+.ttl__num {
+  width: 50px;
+  text-align: right;
+  /* Hide the number-spinner arrows across engines */
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.ttl__num::-webkit-outer-spin-button,
+.ttl__num::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
 .ttl__unit { padding-right: 4px; cursor: pointer; }
 .ttl__num:disabled {
   opacity: 0.4;
