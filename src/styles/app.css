@@ -590,6 +590,35 @@ input { font-family: inherit; }
 .notice-screen a { color: var(--accent); font-size: 13px; text-decoration: none; }
 .notice-screen a:hover { text-decoration: underline; }
 
+/* Inline auto-revoke control on each repo row */
+.ttl {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.ttl__num,
+.ttl__unit {
+  height: 30px;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 0 6px;
+}
+.ttl__num { width: 50px; text-align: right; }
+.ttl__unit { padding-right: 4px; cursor: pointer; }
+.ttl__num:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.ttl__num:focus,
+.ttl__unit:focus {
+  outline: none;
+  border-color: var(--border-strong);
+}
+
 /* Shared-link row: make the URL clickable without losing the styled look */
 .repo-row__link .repo-row__url {
   color: inherit;

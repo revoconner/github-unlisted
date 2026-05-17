@@ -8,6 +8,7 @@ export interface ShareTarget {
 	owner: string;
 	repo: string;
 	createdAt?: number;
+	expiresAt?: number;
 }
 
 const KEY_PREFIX = "share:";
@@ -43,12 +44,22 @@ function instKey(installationId: number): string {
 	return `inst:${installationId}`;
 }
 
-export async function createShare(target: ShareTarget): Promise<string> {
+// ttlSeconds: a positive number sets an auto-revoke window, null means never
+// expire, undefined falls back to the global SHARE_LINK_TTL_SECONDS env.
+export async function createShare(
+	target: ShareTarget,
+	ttlSeconds?: number | null,
+): Promise<string> {
 	const id = globalThis.crypto.randomUUID();
-	const ttl = getTtlSeconds();
+	const ttl = ttlSeconds === undefined ? getTtlSeconds() : ttlSeconds;
 	const key = `${KEY_PREFIX}${id}`;
 	const redis = getRedis();
-	const record: ShareTarget = { ...target, createdAt: Date.now() };
+	const now = Date.now();
+	const record: ShareTarget = {
+		...target,
+		createdAt: now,
+		expiresAt: ttl ? now + ttl * 1000 : undefined,
+	};
 	if (ttl) {
 		await redis.set(key, record, { ex: ttl });
 	} else {
@@ -57,6 +68,27 @@ export async function createShare(target: ShareTarget): Promise<string> {
 	// Reverse index so webhook cleanup can purge an installation's links.
 	await redis.sadd(instKey(target.installationId), id);
 	return id;
+}
+
+// Reset an existing share's auto-revoke window. null clears it (never expires).
+export async function updateShareTtl(
+	id: string,
+	ttlSeconds: number | null,
+): Promise<ShareTarget | null> {
+	const redis = getRedis();
+	const key = `${KEY_PREFIX}${id}`;
+	const current = await redis.get<ShareTarget>(key);
+	if (!current) return null;
+	const next: ShareTarget = {
+		...current,
+		expiresAt: ttlSeconds ? Date.now() + ttlSeconds * 1000 : undefined,
+	};
+	if (ttlSeconds) {
+		await redis.set(key, next, { ex: ttlSeconds });
+	} else {
+		await redis.set(key, next);
+	}
+	return next;
 }
 
 export async function resolveShare(id: string): Promise<ShareTarget | null> {

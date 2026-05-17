@@ -2,7 +2,7 @@ import "@/styles/app.css";
 import Link from "next/link";
 import { highlight } from "@/lib/highlight";
 import { getInstallationOctokit } from "@/lib/github-app";
-import { getContents, getRepoMeta } from "@/lib/github-repo";
+import { type DirEntry, getContents, getRepoMeta } from "@/lib/github-repo";
 import { isMarkdown, renderMarkdown } from "@/lib/markdown";
 import { buildHref, parseView } from "@/lib/repo-path";
 import { resolveShare } from "@/lib/share-store";
@@ -98,8 +98,25 @@ export default async function ViewPage({
 	);
 
 	const crumbs = parsed.path ? parsed.path.split("/") : [];
-	const sidebarEntries =
-		contents.kind === "dir" ? contents.entries : [];
+
+	// A file view shows its containing folder in the sidebar so navigation
+	// stays usable instead of an empty tree.
+	let sidebarEntries: DirEntry[] = [];
+	if (contents.kind === "dir") {
+		sidebarEntries = contents.entries;
+	} else if (contents.kind === "file") {
+		const parentPath = parsed.path.includes("/")
+			? parsed.path.slice(0, parsed.path.lastIndexOf("/"))
+			: "";
+		const parent = await getContents(
+			octokit,
+			target.owner,
+			target.repo,
+			parentPath,
+			ref,
+		);
+		if (parent.kind === "dir") sidebarEntries = parent.entries;
+	}
 
 	let codeHtml: string | null = null;
 	let mdHtml: string | null = null;
@@ -108,6 +125,27 @@ export default async function ViewPage({
 			mdHtml = renderMarkdown(contents.text);
 		} else {
 			codeHtml = await highlight(contents.text, contents.name);
+		}
+	}
+
+	// At the repository root, render its README.md beneath the listing.
+	let rootReadmeHtml: string | null = null;
+	if (contents.kind === "dir" && parsed.path === "") {
+		const readme = contents.entries.find(
+			(e) =>
+				e.type === "file" && /^readme\./i.test(e.name) && isMarkdown(e.name),
+		);
+		if (readme) {
+			const rc = await getContents(
+				octokit,
+				target.owner,
+				target.repo,
+				readme.path,
+				ref,
+			);
+			if (rc.kind === "file" && !rc.isBinary && rc.text) {
+				rootReadmeHtml = renderMarkdown(rc.text);
+			}
 		}
 	}
 
@@ -239,25 +277,34 @@ export default async function ViewPage({
 					)}
 
 					{contents.kind === "dir" && (
-						<div className="tree">
-							{contents.entries.map((e) => (
-								<div className="tree__row" key={e.path}>
-									<Link
-										href={buildHref(
-											target.owner,
-											target.repo,
-											e.type === "dir" ? "tree" : "blob",
-											ref,
-											e.path,
-											shareId,
-										)}
-									>
-										{e.type === "dir" ? <FolderIcon /> : <FileIcon />}
-										{e.name}
-									</Link>
-								</div>
-							))}
-						</div>
+						<>
+							<div className="tree">
+								{contents.entries.map((e) => (
+									<div className="tree__row" key={e.path}>
+										<Link
+											href={buildHref(
+												target.owner,
+												target.repo,
+												e.type === "dir" ? "tree" : "blob",
+												ref,
+												e.path,
+												shareId,
+											)}
+										>
+											{e.type === "dir" ? <FolderIcon /> : <FileIcon />}
+											{e.name}
+										</Link>
+									</div>
+								))}
+							</div>
+							{rootReadmeHtml && (
+								// biome-ignore lint/security/noDangerouslySetInnerHtml: markdown-it with html:false
+								<div
+									className="readme"
+									dangerouslySetInnerHTML={{ __html: rootReadmeHtml }}
+								/>
+							)}
+						</>
 					)}
 
 					{contents.kind === "file" && (

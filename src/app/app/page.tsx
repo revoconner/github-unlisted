@@ -75,8 +75,13 @@ export default async function AppPage({
 			e instanceof Error ? e.message : "Failed to load repositories";
 	}
 
-	let shares: { id: string; owner: string; repo: string; createdAt?: number }[] =
-		[];
+	let shares: {
+		id: string;
+		owner: string;
+		repo: string;
+		createdAt?: number;
+		expiresAt?: number;
+	}[] = [];
 	try {
 		const lists = await Promise.all(
 			session.installationIds.map((id) => listSharesForInstallation(id)),
@@ -86,6 +91,7 @@ export default async function AppPage({
 			owner: s.owner,
 			repo: s.repo,
 			createdAt: s.createdAt,
+			expiresAt: s.expiresAt,
 		}));
 	} catch {
 		// Non-fatal.

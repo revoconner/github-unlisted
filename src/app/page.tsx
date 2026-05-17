@@ -43,8 +43,8 @@ export default async function Page() {
 				</nav>
 
 				{session ? (
-					<a className="nav-cta" href="/app">
-						Dashboard
+					<a className="nav-cta" href="/api/github/logout">
+						Sign Out
 					</a>
 				) : (
 					<a className="nav-cta" href="/api/github/login">

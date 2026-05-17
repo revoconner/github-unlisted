@@ -15,9 +15,89 @@ interface Share {
 	owner: string;
 	repo: string;
 	createdAt?: number;
+	expiresAt?: number;
 }
 
 type Filter = "all" | "shared" | "notshared" | "public" | "private";
+
+type Unit = "days" | "weeks" | "months" | "years" | "never";
+
+// Months/years use fixed 30d/365d windows — close enough for a revoke timer.
+const UNIT_SECONDS: Record<Exclude<Unit, "never">, number> = {
+	days: 86400,
+	weeks: 604800,
+	months: 2592000,
+	years: 31536000,
+};
+
+interface TtlSel {
+	amount: number;
+	unit: Unit;
+}
+
+function ttlFor(sel: TtlSel): number | null {
+	if (sel.unit === "never") return null;
+	return Math.max(1, Math.floor(sel.amount)) * UNIT_SECONDS[sel.unit];
+}
+
+function until(ts: number): string {
+	const s = Math.floor((ts - Date.now()) / 1000);
+	if (s <= 0) return "soon";
+	const m = s / 60;
+	if (m < 60) return `in ${Math.ceil(m)}m`;
+	const h = m / 60;
+	if (h < 24) return `in ${Math.ceil(h)}h`;
+	const d = h / 24;
+	if (d < 14) return `in ${Math.ceil(d)}d`;
+	const w = d / 7;
+	if (w < 10) return `in ${Math.ceil(w)}w`;
+	const mo = d / 30;
+	if (mo < 24) return `in ${Math.ceil(mo)}mo`;
+	return `in ${Math.ceil(d / 365)}y`;
+}
+
+function ExpiryControl({
+	sel,
+	disabled,
+	onChange,
+}: {
+	sel: TtlSel;
+	disabled?: boolean;
+	onChange: (s: TtlSel) => void;
+}) {
+	const never = sel.unit === "never";
+	return (
+		<span className="ttl">
+			<input
+				type="number"
+				min={1}
+				className="ttl__num"
+				aria-label="Auto-revoke amount"
+				value={sel.amount}
+				disabled={disabled || never}
+				onChange={(e) =>
+					onChange({
+						...sel,
+						amount: Math.max(1, Math.floor(Number(e.target.value) || 1)),
+					})
+				}
+			/>
+			<select
+				className="ttl__unit"
+				aria-label="Auto-revoke unit"
+				value={sel.unit}
+				disabled={disabled}
+				onChange={(e) => onChange({ ...sel, unit: e.target.value as Unit })}
+			>
+				<option value="days">days</option>
+				<option value="weeks">weeks</option>
+				<option value="months">months</option>
+				<option value="years">years</option>
+				<option value="never">never revoke</option>
+			</select>
+		</span>
+	);
+}
 
 function ago(ts?: number): string {
 	if (!ts) return "";
@@ -47,6 +127,12 @@ export function DashboardClient({
 	const [filter, setFilter] = React.useState<Filter>("all");
 	const [busy, setBusy] = React.useState<string | null>(null);
 	const [copied, setCopied] = React.useState<string | null>(null);
+	const [ttlSel, setTtlSel] = React.useState<Record<string, TtlSel>>({});
+
+	const getSel = (key: string): TtlSel =>
+		ttlSel[key] ?? { amount: 1, unit: "never" };
+	const setSel = (key: string, s: TtlSel) =>
+		setTtlSel((prev) => ({ ...prev, [key]: s }));
 
 	const shareByRepo = React.useMemo(() => {
 		const m = new Map<string, Share>();
@@ -91,6 +177,25 @@ export function DashboardClient({
 					installationId: r.installationId,
 					owner: r.owner,
 					repo: r.name,
+					ttlSeconds: ttlFor(getSel(r.fullName)),
+				}),
+			});
+			if (!res.ok) throw new Error();
+			router.refresh();
+		} finally {
+			setBusy(null);
+		}
+	};
+
+	const applyTtl = async (r: Repo, s: Share) => {
+		setBusy(r.fullName);
+		try {
+			const res = await fetch("/api/share", {
+				method: "PATCH",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					id: s.id,
+					ttlSeconds: ttlFor(getSel(r.fullName)),
 				}),
 			});
 			if (!res.ok) throw new Error();
@@ -257,14 +362,33 @@ export function DashboardClient({
 													</span>
 												</>
 											)}
+											<span className="sep">·</span>
+											<span className="created">
+												{share.expiresAt
+													? `revokes ${until(share.expiresAt)}`
+													: "no auto-revoke"}
+											</span>
 										</div>
 									) : (
 										<div className="repo-row__empty">not shared</div>
 									)}
 								</div>
 								<div className="repo-row__actions">
+									<ExpiryControl
+										sel={getSel(r.fullName)}
+										disabled={rowBusy}
+										onChange={(s) => setSel(r.fullName, s)}
+									/>
 									{share ? (
 										<>
+											<button
+												type="button"
+												className="btn btn--secondary btn--sm"
+												disabled={rowBusy}
+												onClick={() => applyTtl(r, share)}
+											>
+												{rowBusy ? "…" : "Set"}
+											</button>
 											<button
 												type="button"
 												className="btn btn--ghost btn--sm"
