@@ -1,6 +1,11 @@
+import { getSession } from "@/lib/session";
+
+export const dynamic = "force-dynamic";
+
 const APP_SLUG = process.env.NEXT_PUBLIC_GITHUB_APP_SLUG;
 
-export default function Page() {
+export default async function Page() {
+	const session = await getSession();
 	const installUrl = APP_SLUG
 		? `https://github.com/apps/${APP_SLUG}/installations/new`
 		: null;
@@ -15,18 +20,43 @@ export default function Page() {
 				the repos you want to share.
 			</p>
 
-			{installUrl ? (
-				<a
-					href={installUrl}
-					className="rounded-md bg-neutral-900 px-5 py-3 font-medium text-white hover:bg-neutral-700"
-				>
-					Install on GitHub
-				</a>
+			{session ? (
+				<div className="flex flex-col items-center gap-2">
+					<a
+						href="/app"
+						className="rounded-md bg-neutral-900 px-5 py-3 font-medium text-white hover:bg-neutral-700"
+					>
+						Open your repositories →
+					</a>
+					<p className="text-xs text-neutral-500">
+						Signed in as {session.login} ·{" "}
+						<a href="/api/github/logout" className="underline">
+							sign out
+						</a>
+					</p>
+				</div>
 			) : (
-				<p className="rounded-md border border-dashed border-neutral-300 px-4 py-3 text-sm text-neutral-500">
-					Set <code>NEXT_PUBLIC_GITHUB_APP_SLUG</code> to your registered
-					GitHub App slug to enable the install button.
-				</p>
+				<div className="flex flex-col items-center gap-3">
+					<a
+						href="/api/github/login"
+						className="rounded-md bg-neutral-900 px-5 py-3 font-medium text-white hover:bg-neutral-700"
+					>
+						Sign in with GitHub
+					</a>
+					{installUrl ? (
+						<a
+							href={installUrl}
+							className="text-sm text-neutral-600 underline"
+						>
+							New here? Install the app on your repositories
+						</a>
+					) : (
+						<p className="rounded-md border border-dashed border-neutral-300 px-4 py-3 text-sm text-neutral-500">
+							Set <code>NEXT_PUBLIC_GITHUB_APP_SLUG</code> to enable the
+							install link.
+						</p>
+					)}
+				</div>
 			)}
 
 			<p className="text-sm text-neutral-500">

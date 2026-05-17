@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { listInstallationRepos } from "@/lib/github-app";
 import { getSession } from "@/lib/session";
-import { createShare } from "@/lib/share-store";
+import { createShare, deleteShare, resolveShare } from "@/lib/share-store";
 
 export async function POST(request: Request) {
 	const session = await getSession();
@@ -45,4 +45,28 @@ export async function POST(request: Request) {
 		id,
 		url: `${origin}/${owner}/${repo}?s=${id}`,
 	});
+}
+
+export async function DELETE(request: Request) {
+	const session = await getSession();
+	if (!session) {
+		return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+	}
+
+	const id = new URL(request.url).searchParams.get("id") ?? "";
+	if (!id) {
+		return NextResponse.json({ error: "Missing id" }, { status: 400 });
+	}
+
+	const target = await resolveShare(id);
+	if (!target) {
+		// Already gone — treat as success (idempotent).
+		return NextResponse.json({ ok: true });
+	}
+	if (!session.installationIds.includes(target.installationId)) {
+		return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+	}
+
+	await deleteShare(id);
+	return NextResponse.json({ ok: true });
 }

@@ -1,9 +1,14 @@
 import { CreateShareButton } from "@/components/create-share-button";
+import { ShareLinkRow } from "@/components/share-link-row";
 import {
 	type InstallationRepo,
 	listInstallationRepos,
 } from "@/lib/github-app";
 import { getSession } from "@/lib/session";
+import {
+	listSharesForInstallation,
+	type ShareRecord,
+} from "@/lib/share-store";
 
 type RepoRow = InstallationRepo & { installationId: number };
 
@@ -74,6 +79,16 @@ export default async function AppPage({
 			e instanceof Error ? e.message : "Failed to load repositories";
 	}
 
+	let shares: ShareRecord[] = [];
+	try {
+		const lists = await Promise.all(
+			session.installationIds.map((id) => listSharesForInstallation(id)),
+		);
+		shares = lists.flat();
+	} catch {
+		// Non-fatal: the dashboard still works without the existing-links list.
+	}
+
 	return (
 		<main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 px-6 py-12">
 			<header className="flex items-center justify-between">
@@ -120,6 +135,26 @@ export default async function AppPage({
 					</li>
 				))}
 			</ul>
+
+			<section className="flex flex-col gap-2">
+				<h2 className="text-lg font-semibold">Your share links</h2>
+				{shares.length === 0 ? (
+					<p className="text-sm text-neutral-600">
+						No links yet. Create one from a repository above.
+					</p>
+				) : (
+					<ul className="divide-y rounded-md border">
+						{shares.map((s) => (
+							<ShareLinkRow
+								key={s.id}
+								id={s.id}
+								owner={s.owner}
+								repo={s.repo}
+							/>
+						))}
+					</ul>
+				)}
+			</section>
 		</main>
 	);
 }
