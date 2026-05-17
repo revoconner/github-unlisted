@@ -1,7 +1,10 @@
 node_modules/
+node_modules/*
 .next/
+.next/*
 next-env.d.ts
 .vercel/
+vercel/*
 .env*
 !.env.example
 *.log
