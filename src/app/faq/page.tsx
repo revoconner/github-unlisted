@@ -37,7 +37,11 @@ export default async function FaqPage() {
 					<a href="/faq" className="is-active" aria-current="page">
 						FAQ
 					</a>
-					<a href="https://github.com/" target="_blank" rel="noopener">
+					<a
+						href="https://github.com/revoconner/github-unlisted"
+						target="_blank"
+						rel="noopener"
+					>
 						GITHUB
 					</a>
 				</nav>

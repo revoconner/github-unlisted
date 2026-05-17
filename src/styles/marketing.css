@@ -179,11 +179,9 @@ button { font-family: inherit; cursor: pointer; }
   color: var(--muted);
 }
 .site-footer a .url {
-  color: var(--text-2);
-  font-family: var(--font-mono);
-  text-transform: none;
-  letter-spacing: 0;
-  font-size: 13px;
+  font-family: var(--font-sans);
+  text-transform: inherit;
+  color: var(--accent);
 }
 .site-footer a:hover .url { color: var(--text); }
 

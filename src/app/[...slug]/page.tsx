@@ -3,6 +3,7 @@ import Link from "next/link";
 import { highlight } from "@/lib/highlight";
 import { getInstallationOctokit } from "@/lib/github-app";
 import { getContents, getRepoMeta } from "@/lib/github-repo";
+import { isMarkdown, renderMarkdown } from "@/lib/markdown";
 import { buildHref, parseView } from "@/lib/repo-path";
 import { resolveShare } from "@/lib/share-store";
 
@@ -101,8 +102,13 @@ export default async function ViewPage({
 		contents.kind === "dir" ? contents.entries : [];
 
 	let codeHtml: string | null = null;
+	let mdHtml: string | null = null;
 	if (contents.kind === "file" && !contents.isBinary && contents.text) {
-		codeHtml = await highlight(contents.text, contents.name);
+		if (isMarkdown(contents.name)) {
+			mdHtml = renderMarkdown(contents.text);
+		} else {
+			codeHtml = await highlight(contents.text, contents.name);
+		}
 	}
 
 	return (
@@ -270,6 +276,12 @@ export default async function ViewPage({
 							</div>
 							{contents.isBinary ? (
 								<div className="tree__empty">Binary file not shown.</div>
+							) : mdHtml ? (
+								// biome-ignore lint/security/noDangerouslySetInnerHtml: markdown-it with html:false
+								<div
+									className="readme"
+									dangerouslySetInnerHTML={{ __html: mdHtml }}
+								/>
 							) : codeHtml ? (
 								// biome-ignore lint/security/noDangerouslySetInnerHtml: Shiki output
 								<div

@@ -33,7 +33,11 @@ export default async function Page() {
 
 				<nav className="nav-links" aria-label="Primary">
 					<a href="/faq">FAQ</a>
-					<a href="https://github.com/" target="_blank" rel="noopener">
+					<a
+						href="https://github.com/revoconner/github-unlisted"
+						target="_blank"
+						rel="noopener"
+					>
 						GITHUB
 					</a>
 				</nav>
@@ -83,7 +87,7 @@ export default async function Page() {
 					<span className="hero-cta__divider" aria-hidden="true" />
 					<a
 						className="hero-cta__label"
-						href="https://github.com/"
+						href="https://github.com/revoconner/github-unlisted"
 						target="_blank"
 						rel="noopener"
 					>

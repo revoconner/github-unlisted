@@ -236,10 +236,19 @@ export function DashboardClient({
 									</div>
 									{share ? (
 										<div className="repo-row__link">
-											<span className="host">github-unlisted.com/</span>
-											<span className="slug">
-												{r.owner}/{r.name}
-											</span>
+											<a
+												className="repo-row__url"
+												href={`/${r.owner}/${r.name}?s=${share.id}`}
+												target="_blank"
+												rel="noopener"
+											>
+												<span className="host">
+													github-unlisted.com/
+												</span>
+												<span className="slug">
+													{r.owner}/{r.name}
+												</span>
+											</a>
 											{share.createdAt && (
 												<>
 													<span className="sep">·</span>
