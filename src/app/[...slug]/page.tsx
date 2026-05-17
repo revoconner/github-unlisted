@@ -1,11 +1,18 @@
 import "@/styles/app.css";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { highlight } from "@/lib/highlight";
 import { getInstallationOctokit } from "@/lib/github-app";
-import { type DirEntry, getContents, getRepoMeta } from "@/lib/github-repo";
+import {
+	type DirEntry,
+	getContents,
+	getRepoMeta,
+	getRepoTree,
+} from "@/lib/github-repo";
 import { isMarkdown, renderMarkdown } from "@/lib/markdown";
 import { buildHref, parseView } from "@/lib/repo-path";
 import { resolveShare } from "@/lib/share-store";
+import { RepoTree } from "@/components/repo-tree";
 import { SidebarTree } from "@/components/sidebar-tree";
 
 export const dynamic = "force-dynamic";
@@ -98,7 +105,27 @@ export default async function ViewPage({
 		ref,
 	);
 
+	// The bare repo link opens the README as a file (not a directory listing).
+	if (contents.kind === "dir" && parsed.path === "") {
+		const readme = contents.entries.find(
+			(e) =>
+				e.type === "file" && /^readme\./i.test(e.name) && isMarkdown(e.name),
+		);
+		if (readme) {
+			redirect(
+				buildHref(target.owner, target.repo, "blob", ref, readme.path, shareId),
+			);
+		}
+	}
+
 	const crumbs = parsed.path ? parsed.path.split("/") : [];
+
+	// Whole-repo tree for the sidebar (one recursive call). Falls back to the
+	// current directory's listing if the ref can't be read or the tree is too
+	// large for the API to return in full.
+	const tree = await getRepoTree(octokit, target.owner, target.repo, ref);
+	const fullTree =
+		tree && !tree.truncated && tree.items.length > 0 ? tree.items : null;
 
 	// A file view shows its containing folder in the sidebar so navigation
 	// stays usable instead of an empty tree.
@@ -129,27 +156,6 @@ export default async function ViewPage({
 		}
 	}
 
-	// At the repository root, render its README.md beneath the listing.
-	let rootReadmeHtml: string | null = null;
-	if (contents.kind === "dir" && parsed.path === "") {
-		const readme = contents.entries.find(
-			(e) =>
-				e.type === "file" && /^readme\./i.test(e.name) && isMarkdown(e.name),
-		);
-		if (readme) {
-			const rc = await getContents(
-				octokit,
-				target.owner,
-				target.repo,
-				readme.path,
-				ref,
-			);
-			if (rc.kind === "file" && !rc.isBinary && rc.text) {
-				rootReadmeHtml = renderMarkdown(rc.text);
-			}
-		}
-	}
-
 	return (
 		<div className="app-shell">
 			<header className="topbar">
@@ -176,15 +182,26 @@ export default async function ViewPage({
 
 			<div className="viewer">
 				<aside className="viewer__sidebar">
-					<SidebarTree
-						entries={sidebarEntries}
-						owner={target.owner}
-						repo={target.repo}
-						refName={ref}
-						shareId={shareId}
-						parentPath={crumbs.slice(0, -1).join("/")}
-						showParent={Boolean(parsed.path)}
-					/>
+					{fullTree ? (
+						<RepoTree
+							items={fullTree}
+							owner={target.owner}
+							repo={target.repo}
+							refName={ref}
+							shareId={shareId}
+							activePath={parsed.path}
+						/>
+					) : (
+						<SidebarTree
+							entries={sidebarEntries}
+							owner={target.owner}
+							repo={target.repo}
+							refName={ref}
+							shareId={shareId}
+							parentPath={crumbs.slice(0, -1).join("/")}
+							showParent={Boolean(parsed.path)}
+						/>
+					)}
 				</aside>
 
 				<section className="viewer__main">
@@ -235,34 +252,25 @@ export default async function ViewPage({
 					)}
 
 					{contents.kind === "dir" && (
-						<>
-							<div className="tree">
-								{contents.entries.map((e) => (
-									<div className="tree__row" key={e.path}>
-										<Link
-											href={buildHref(
-												target.owner,
-												target.repo,
-												e.type === "dir" ? "tree" : "blob",
-												ref,
-												e.path,
-												shareId,
-											)}
-										>
-											{e.type === "dir" ? <FolderIcon /> : <FileIcon />}
-											{e.name}
-										</Link>
-									</div>
-								))}
-							</div>
-							{rootReadmeHtml && (
-								// biome-ignore lint/security/noDangerouslySetInnerHtml: markdown-it with html:false
-								<div
-									className="readme"
-									dangerouslySetInnerHTML={{ __html: rootReadmeHtml }}
-								/>
-							)}
-						</>
+						<div className="tree">
+							{contents.entries.map((e) => (
+								<div className="tree__row" key={e.path}>
+									<Link
+										href={buildHref(
+											target.owner,
+											target.repo,
+											e.type === "dir" ? "tree" : "blob",
+											ref,
+											e.path,
+											shareId,
+										)}
+									>
+										{e.type === "dir" ? <FolderIcon /> : <FileIcon />}
+										{e.name}
+									</Link>
+								</div>
+							))}
+						</div>
 					)}
 
 					{contents.kind === "file" && (

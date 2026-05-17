@@ -51,6 +51,46 @@ export type Contents =
 	  }
 	| { kind: "notfound" };
 
+export interface TreeItem {
+	path: string;
+	type: "dir" | "file";
+}
+
+// One recursive Git Trees call for the whole repo so the sidebar can render a
+// real tree client-side. ref is always a branch in this product. Returns null
+// if the ref can't be resolved; truncated=true means the repo exceeded the
+// API's tree limit and the caller should fall back to per-directory listing.
+export async function getRepoTree(
+	octokit: Octokit,
+	owner: string,
+	repo: string,
+	ref: string,
+): Promise<{ items: TreeItem[]; truncated: boolean } | null> {
+	try {
+		const branch = await octokit.rest.repos.getBranch({
+			owner,
+			repo,
+			branch: ref,
+		});
+		const treeSha = branch.data.commit.commit.tree.sha;
+		const { data } = await octokit.rest.git.getTree({
+			owner,
+			repo,
+			tree_sha: treeSha,
+			recursive: "true",
+		});
+		const items: TreeItem[] = [];
+		for (const t of data.tree) {
+			if (!t.path) continue;
+			if (t.type === "tree") items.push({ path: t.path, type: "dir" });
+			else if (t.type === "blob") items.push({ path: t.path, type: "file" });
+		}
+		return { items, truncated: Boolean(data.truncated) };
+	} catch {
+		return null;
+	}
+}
+
 export async function getContents(
 	octokit: Octokit,
 	owner: string,
