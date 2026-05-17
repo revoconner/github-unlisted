@@ -2,7 +2,12 @@
 
 **Share a private GitHub repository as a read-only link — no collaborator invites, no GitHub account needed for the person you send it to.**
 
-Live at **[github-unlisted.com](https://github-unlisted.com)**. Free and open source.
+**IT'S COMPLETELY FREE**
+
+Live at **[github-unlisted.com](https://github-unlisted.com)**. 
+
+<img width="1180" height="699" alt="image_207" src="https://github.com/user-attachments/assets/31028dc6-f929-431a-b422-aa2a0329fe09" />
+
 
 ## What it is
 
