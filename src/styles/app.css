@@ -495,14 +495,14 @@ input { font-family: inherit; }
   margin: 20px 0 24px;
   flex-wrap: wrap;
 }
-.readme code,
+.readme :not(pre) > code,
 .readme .inline-code {
   font-family: var(--font-mono);
   background: var(--surface);
   padding: 1px 6px;
   border-radius: 4px;
   color: var(--accent);
-  font-size: 13px;
+  font-size: 0.88em;
 }
 .readme pre {
   background: var(--bg-2);
@@ -516,6 +516,86 @@ input { font-family: inherit; }
   overflow: auto;
 }
 .readme pre .prompt { color: var(--faint); }
+/* Code inside a block (incl. Shiki) keeps the block's own styling */
+.readme pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  color: inherit;
+  font-size: inherit;
+}
+
+/* ─── Markdown body typography (overrides the app reset; scoped to
+   the file/markdown viewer only) ─────────────────────────────── */
+.readme a {
+  color: var(--accent);
+  text-decoration: none;
+}
+.readme a:hover { text-decoration: underline; }
+
+.readme h3 { margin: 24px 0 10px; font-size: 16.5px; font-weight: 600; color: var(--text); }
+.readme h4 { margin: 20px 0 8px;  font-size: 14.5px; font-weight: 600; color: var(--text); }
+.readme h5,
+.readme h6 { margin: 18px 0 8px;  font-size: 13px;   font-weight: 600; color: var(--text-2); }
+
+.readme h1,
+.readme h2 {
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.readme ul,
+.readme ol {
+  margin: 0 0 14px;
+  padding-left: 26px;
+}
+.readme ul { list-style: disc; }
+.readme ol { list-style: decimal; }
+.readme li { margin: 4px 0; }
+.readme li > ul,
+.readme li > ol { margin: 4px 0 6px; }
+.readme li::marker { color: var(--muted); }
+/* GFM task lists */
+.readme li.task-list-item { list-style: none; margin-left: -20px; }
+.readme li.task-list-item input { margin-right: 8px; }
+
+.readme blockquote {
+  margin: 0 0 14px;
+  padding: 2px 16px;
+  border-left: 3px solid var(--border-strong);
+  color: var(--text-3);
+}
+
+.readme hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 24px 0;
+}
+
+.readme img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+
+.readme strong { color: var(--text); font-weight: 600; }
+.readme em { font-style: italic; }
+
+.readme table {
+  border-collapse: collapse;
+  margin: 0 0 16px;
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  overflow: auto;
+}
+.readme th,
+.readme td {
+  border: 1px solid var(--border);
+  padding: 6px 13px;
+  text-align: left;
+}
+.readme th { background: var(--surface); color: var(--text); font-weight: 600; }
 
 /* ─── Signed-out / error screen (not in concept; minimal) ───── */
 .signin-screen {
