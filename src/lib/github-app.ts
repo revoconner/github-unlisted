@@ -29,3 +29,28 @@ export function getInstallationOctokit(installationId: number): Octokit {
 		auth: { appId, privateKey, installationId },
 	});
 }
+
+export interface InstallationRepo {
+	owner: string;
+	name: string;
+	fullName: string;
+	private: boolean;
+	defaultBranch: string;
+}
+
+export async function listInstallationRepos(
+	installationId: number,
+): Promise<InstallationRepo[]> {
+	const octokit = getInstallationOctokit(installationId);
+	const repos = await octokit.paginate(
+		"GET /installation/repositories",
+		{ per_page: 100 },
+	);
+	return repos.map((r) => ({
+		owner: r.owner.login,
+		name: r.name,
+		fullName: r.full_name,
+		private: r.private,
+		defaultBranch: r.default_branch,
+	}));
+}
