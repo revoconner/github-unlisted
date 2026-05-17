@@ -6,6 +6,7 @@ import { type DirEntry, getContents, getRepoMeta } from "@/lib/github-repo";
 import { isMarkdown, renderMarkdown } from "@/lib/markdown";
 import { buildHref, parseView } from "@/lib/repo-path";
 import { resolveShare } from "@/lib/share-store";
+import { SidebarTree } from "@/components/sidebar-tree";
 
 export const dynamic = "force-dynamic";
 
@@ -175,58 +176,15 @@ export default async function ViewPage({
 
 			<div className="viewer">
 				<aside className="viewer__sidebar">
-					<div className="viewer__sidebar-search">
-						<label className="field">
-							<span className="field__icon" aria-hidden="true">
-								<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-									<circle cx="11" cy="11" r="7" />
-									<line x1="21" y1="21" x2="16.65" y2="16.65" />
-								</svg>
-							</span>
-							<input type="search" placeholder="Find a file" />
-						</label>
-					</div>
-					<div className="tree">
-						{parsed.path && (
-							<div className="tree__row">
-								<Link
-									href={buildHref(
-										target.owner,
-										target.repo,
-										"tree",
-										ref,
-										crumbs.slice(0, -1).join("/"),
-										shareId,
-									)}
-								>
-									<span className="chev" aria-hidden="true">
-										..
-									</span>
-									parent directory
-								</Link>
-							</div>
-						)}
-						{sidebarEntries.length === 0 && (
-							<div className="tree__empty">No files here.</div>
-						)}
-						{sidebarEntries.map((e) => (
-							<div className="tree__row" key={e.path}>
-								<Link
-									href={buildHref(
-										target.owner,
-										target.repo,
-										e.type === "dir" ? "tree" : "blob",
-										ref,
-										e.path,
-										shareId,
-									)}
-								>
-									{e.type === "dir" ? <FolderIcon /> : <FileIcon />}
-									{e.name}
-								</Link>
-							</div>
-						))}
-					</div>
+					<SidebarTree
+						entries={sidebarEntries}
+						owner={target.owner}
+						repo={target.repo}
+						refName={ref}
+						shareId={shareId}
+						parentPath={crumbs.slice(0, -1).join("/")}
+						showParent={Boolean(parsed.path)}
+					/>
 				</aside>
 
 				<section className="viewer__main">
