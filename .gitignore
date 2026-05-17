@@ -1,0 +1,12 @@
+node_modules/
+.next/
+next-env.d.ts
+.vercel/
+.env*
+!.env.example
+*.log
+.DS_Store
+*.bat
+CLAUDE.md
+secrets.txt
+*private-key.pem

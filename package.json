@@ -1,0 +1,16 @@
+{
+  "name": "github-unlisted",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --webpack -p 3000",
+    "build": "next build",
+    "start": "next start",
+    "lint": "biome lint",
+    "format": "biome format --write",
+    "check": "biome check",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  }
+}
