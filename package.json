@@ -19,7 +19,8 @@
     "next": "^16.2.6",
     "octokit": "^5.0.5",
     "react": "^19.2.6",
-    "react-dom": "^19.2.6"
+    "react-dom": "^19.2.6",
+    "shiki": "^4.0.2"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.15",

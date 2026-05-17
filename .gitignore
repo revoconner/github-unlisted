@@ -13,6 +13,8 @@ vercel/*
 CLAUDE.md
 secrets.txt
 *private-key.pem
-
 .vercel
 .env*.local
+phase7 concept/
+phase7 concept/*
+STATUS.md

@@ -1,4 +1,6 @@
+import "@/styles/app.css";
 import Link from "next/link";
+import { highlight } from "@/lib/highlight";
 import { getInstallationOctokit } from "@/lib/github-app";
 import { getContents, getRepoMeta } from "@/lib/github-repo";
 import { buildHref, parseView } from "@/lib/repo-path";
@@ -8,13 +10,31 @@ export const dynamic = "force-dynamic";
 
 function Notice({ title, detail }: { title: string; detail?: string }) {
 	return (
-		<main className="mx-auto flex min-h-screen max-w-xl flex-col items-center justify-center gap-3 px-6 text-center">
-			<h1 className="text-2xl font-semibold">{title}</h1>
-			{detail && <p className="text-sm text-neutral-600">{detail}</p>}
-			<Link href="/" className="text-sm text-neutral-600 underline">
-				Home
-			</Link>
-		</main>
+		<div className="notice-screen">
+			<h1>{title}</h1>
+			{detail && <p>{detail}</p>}
+			<Link href="/">Home</Link>
+		</div>
+	);
+}
+
+function FolderIcon() {
+	return (
+		<span className="icon-d" aria-hidden="true">
+			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+				<path d="M3 7a2 2 0 0 1 2-2h4l2 3h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+			</svg>
+		</span>
+	);
+}
+function FileIcon() {
+	return (
+		<span className="icon-f" aria-hidden="true">
+			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+				<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+				<polyline points="14 2 14 8 20 8" />
+			</svg>
+		</span>
 	);
 }
 
@@ -29,9 +49,7 @@ export default async function ViewPage({
 	const sp = await searchParams;
 
 	const parsed = parseView(slug);
-	if (!parsed) {
-		return <Notice title="Not found" />;
-	}
+	if (!parsed) return <Notice title="Not found" />;
 
 	const shareId = typeof sp.s === "string" ? sp.s : "";
 	if (!shareId) {
@@ -52,14 +70,11 @@ export default async function ViewPage({
 			/>
 		);
 	}
-
-	// A shareId is bound to one repo; don't let it be reused for another path.
 	if (target.owner !== parsed.owner || target.repo !== parsed.repo) {
 		return <Notice title="This link does not match this repository" />;
 	}
 
 	const octokit = getInstallationOctokit(target.installationId);
-
 	let meta: Awaited<ReturnType<typeof getRepoMeta>>;
 	try {
 		meta = await getRepoMeta(octokit, target.owner, target.repo);
@@ -82,106 +97,194 @@ export default async function ViewPage({
 	);
 
 	const crumbs = parsed.path ? parsed.path.split("/") : [];
+	const sidebarEntries =
+		contents.kind === "dir" ? contents.entries : [];
+
+	let codeHtml: string | null = null;
+	if (contents.kind === "file" && !contents.isBinary && contents.text) {
+		codeHtml = await highlight(contents.text, contents.name);
+	}
 
 	return (
-		<main className="mx-auto max-w-4xl px-4 py-8">
-			<header className="mb-4 flex items-center justify-between gap-3 border-b pb-3">
-				<h1 className="font-mono text-lg">
-					{meta.fullName}
-					<span className="ml-2 text-xs text-neutral-500">
-						{meta.private ? "private" : "public"} · {ref}
+		<div className="app-shell">
+			<header className="topbar">
+				<a className="wordmark" href="/" aria-label="github unlisted home">
+					<span className="mark" aria-hidden="true">
+						<svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+							<title>unlisted</title>
+							<line x1="2" y1="11" x2="11" y2="2" stroke="#ff38ae" strokeWidth="1.6" strokeLinecap="round" />
+							<line x1="5" y1="14" x2="14" y2="5" stroke="#ff38ae" strokeWidth="1.6" strokeLinecap="round" opacity="0.55" />
+							<line x1="8" y1="17" x2="17" y2="8" stroke="#ff38ae" strokeWidth="1.6" strokeLinecap="round" opacity="0.25" />
+						</svg>
 					</span>
-				</h1>
-				<a
-					href={`https://github.com/${meta.fullName}`}
-					target="_blank"
-					rel="noopener noreferrer"
-					className="text-xs text-neutral-500 underline"
-				>
-					on GitHub
+					<span className="word">
+						<span className="pre">github</span>{" "}
+						<span className="post">unlisted</span>
+					</span>
 				</a>
+				<div className="topbar__right">
+					<span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--text-3)" }}>
+						{meta.fullName} · {ref}
+					</span>
+				</div>
 			</header>
 
-			<nav className="mb-4 font-mono text-sm">
-				<Link
-					href={buildHref(
-						target.owner,
-						target.repo,
-						"tree",
-						ref,
-						"",
-						shareId,
-					)}
-					className="text-blue-600 hover:underline"
-				>
-					{target.repo}
-				</Link>
-				{crumbs.map((c, i) => {
-					const sub = crumbs.slice(0, i + 1).join("/");
-					return (
-						<span key={sub}>
-							{" / "}
+			<div className="viewer">
+				<aside className="viewer__sidebar">
+					<div className="viewer__sidebar-search">
+						<label className="field">
+							<span className="field__icon" aria-hidden="true">
+								<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+									<circle cx="11" cy="11" r="7" />
+									<line x1="21" y1="21" x2="16.65" y2="16.65" />
+								</svg>
+							</span>
+							<input type="search" placeholder="Find a file" />
+						</label>
+					</div>
+					<div className="tree">
+						{parsed.path && (
+							<div className="tree__row">
+								<Link
+									href={buildHref(
+										target.owner,
+										target.repo,
+										"tree",
+										ref,
+										crumbs.slice(0, -1).join("/"),
+										shareId,
+									)}
+								>
+									<span className="chev" aria-hidden="true">
+										..
+									</span>
+									parent directory
+								</Link>
+							</div>
+						)}
+						{sidebarEntries.length === 0 && (
+							<div className="tree__empty">No files here.</div>
+						)}
+						{sidebarEntries.map((e) => (
+							<div className="tree__row" key={e.path}>
+								<Link
+									href={buildHref(
+										target.owner,
+										target.repo,
+										e.type === "dir" ? "tree" : "blob",
+										ref,
+										e.path,
+										shareId,
+									)}
+								>
+									{e.type === "dir" ? <FolderIcon /> : <FileIcon />}
+									{e.name}
+								</Link>
+							</div>
+						))}
+					</div>
+				</aside>
+
+				<section className="viewer__main">
+					<div className="viewer__topinfo">
+						<div className="viewer__crumbs">
 							<Link
 								href={buildHref(
 									target.owner,
 									target.repo,
 									"tree",
 									ref,
-									sub,
+									"",
 									shareId,
 								)}
-								className="text-blue-600 hover:underline"
 							>
-								{c}
+								{target.repo}
 							</Link>
-						</span>
-					);
-				})}
-			</nav>
-
-			{contents.kind === "notfound" && (
-				<p className="text-sm text-neutral-600">Path not found on {ref}.</p>
-			)}
-
-			{contents.kind === "dir" && (
-				<ul className="divide-y rounded-md border">
-					{contents.entries.map((e) => (
-						<li key={e.path} className="px-4 py-2 font-mono text-sm">
-							<Link
-								href={buildHref(
-									target.owner,
-									target.repo,
-									e.type === "dir" ? "tree" : "blob",
-									ref,
-									e.path,
-									shareId,
-								)}
-								className="text-blue-600 hover:underline"
-							>
-								{e.type === "dir" ? "📁 " : "📄 "}
-								{e.name}
-							</Link>
-						</li>
-					))}
-				</ul>
-			)}
-
-			{contents.kind === "file" && (
-				<div className="rounded-md border">
-					<div className="border-b bg-neutral-50 px-4 py-2 font-mono text-xs">
-						{contents.name} · {contents.size} bytes
+							{crumbs.map((c, i) => {
+								const sub = crumbs.slice(0, i + 1).join("/");
+								const isLast = i === crumbs.length - 1;
+								return (
+									<span key={sub}>
+										<span className="sep"> / </span>
+										{isLast ? (
+											c
+										) : (
+											<Link
+												href={buildHref(
+													target.owner,
+													target.repo,
+													"tree",
+													ref,
+													sub,
+													shareId,
+												)}
+											>
+												{c}
+											</Link>
+										)}
+									</span>
+								);
+							})}
+						</div>
 					</div>
-					{contents.isBinary ? (
-						<p className="px-4 py-6 text-sm text-neutral-600">
-							Binary file not shown.
-						</p>
-					) : (
-						<pre className="overflow-x-auto px-4 py-3 text-xs leading-relaxed">
-							<code>{contents.text}</code>
-						</pre>
+
+					{contents.kind === "notfound" && (
+						<div className="tree__empty">Path not found on {ref}.</div>
 					)}
-				</div>
-			)}
-		</main>
+
+					{contents.kind === "dir" && (
+						<div className="tree">
+							{contents.entries.map((e) => (
+								<div className="tree__row" key={e.path}>
+									<Link
+										href={buildHref(
+											target.owner,
+											target.repo,
+											e.type === "dir" ? "tree" : "blob",
+											ref,
+											e.path,
+											shareId,
+										)}
+									>
+										{e.type === "dir" ? <FolderIcon /> : <FileIcon />}
+										{e.name}
+									</Link>
+								</div>
+							))}
+						</div>
+					)}
+
+					{contents.kind === "file" && (
+						<>
+							<div className="filebar">
+								<span>
+									{contents.name} · {contents.size} bytes
+								</span>
+								<a
+									href={`https://github.com/${meta.fullName}/blob/${ref}/${parsed.path}`}
+									target="_blank"
+									rel="noopener noreferrer"
+								>
+									on GitHub
+								</a>
+							</div>
+							{contents.isBinary ? (
+								<div className="tree__empty">Binary file not shown.</div>
+							) : codeHtml ? (
+								// biome-ignore lint/security/noDangerouslySetInnerHtml: Shiki output
+								<div
+									className="codeblock"
+									dangerouslySetInnerHTML={{ __html: codeHtml }}
+								/>
+							) : (
+								<div className="codeblock codeblock--plain">
+									<pre>{contents.text}</pre>
+								</div>
+							)}
+						</>
+					)}
+				</section>
+			</div>
+		</div>
 	);
 }

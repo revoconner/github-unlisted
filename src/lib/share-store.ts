@@ -7,6 +7,7 @@ export interface ShareTarget {
 	installationId: number;
 	owner: string;
 	repo: string;
+	createdAt?: number;
 }
 
 const KEY_PREFIX = "share:";
@@ -47,10 +48,11 @@ export async function createShare(target: ShareTarget): Promise<string> {
 	const ttl = getTtlSeconds();
 	const key = `${KEY_PREFIX}${id}`;
 	const redis = getRedis();
+	const record: ShareTarget = { ...target, createdAt: Date.now() };
 	if (ttl) {
-		await redis.set(key, target, { ex: ttl });
+		await redis.set(key, record, { ex: ttl });
 	} else {
-		await redis.set(key, target);
+		await redis.set(key, record);
 	}
 	// Reverse index so webhook cleanup can purge an installation's links.
 	await redis.sadd(instKey(target.installationId), id);
