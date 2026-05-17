@@ -10,6 +10,7 @@ import {
 	getRepoTree,
 } from "@/lib/github-repo";
 import { isMarkdown, renderMarkdown } from "@/lib/markdown";
+import { renderMarkdownGitHub } from "@/lib/markdown-github";
 import { buildHref, parseView } from "@/lib/repo-path";
 import { resolveShare } from "@/lib/share-store";
 import { RepoTree } from "@/components/repo-tree";
@@ -150,7 +151,13 @@ export default async function ViewPage({
 	let mdHtml: string | null = null;
 	if (contents.kind === "file" && !contents.isBinary && contents.text) {
 		if (isMarkdown(contents.name)) {
-			mdHtml = renderMarkdown(contents.text);
+			mdHtml =
+				(await renderMarkdownGitHub(
+					octokit,
+					target.owner,
+					target.repo,
+					contents.text,
+				)) ?? renderMarkdown(contents.text);
 		} else {
 			codeHtml = await highlight(contents.text, contents.name);
 		}
@@ -290,7 +297,7 @@ export default async function ViewPage({
 							{contents.isBinary ? (
 								<div className="tree__empty">Binary file not shown.</div>
 							) : mdHtml ? (
-								// biome-ignore lint/security/noDangerouslySetInnerHtml: markdown-it with html:false
+								// biome-ignore lint/security/noDangerouslySetInnerHtml: GitHub-sanitized HTML (or markdown-it html:false fallback)
 								<div
 									className="readme"
 									dangerouslySetInnerHTML={{ __html: mdHtml }}

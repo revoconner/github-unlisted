@@ -54,9 +54,18 @@ export async function highlight(
 	code: string,
 	filename: string,
 ): Promise<string | null> {
+	return highlightByLang(code, langFor(filename));
+}
+
+// Same, but the caller already knows the Shiki language id (e.g. a fenced
+// code block's info string from GitHub-rendered markdown).
+export async function highlightByLang(
+	code: string,
+	lang: string,
+): Promise<string | null> {
 	try {
 		return await codeToHtml(code, {
-			lang: langFor(filename),
+			lang: lang || "text",
 			theme: "github-dark",
 		});
 	} catch {
