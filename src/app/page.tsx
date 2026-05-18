@@ -33,6 +33,7 @@ export default async function Page() {
 
 				<nav className="nav-links" aria-label="Primary">
 					<a href="/faq">FAQ</a>
+					<a href="/privacy">PRIVACY</a>
 					<a
 						href="https://github.com/revoconner/github-unlisted"
 						target="_blank"
