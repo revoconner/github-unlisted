@@ -12,11 +12,19 @@ import {
 import { isMarkdown, renderMarkdown } from "@/lib/markdown";
 import { renderMarkdownGitHub } from "@/lib/markdown-github";
 import { buildHref, parseView } from "@/lib/repo-path";
+import { pageMetadata } from "@/lib/seo";
 import { resolveShare } from "@/lib/share-store";
 import { RepoTree } from "@/components/repo-tree";
 import { SidebarTree } from "@/components/sidebar-tree";
 
 export const dynamic = "force-dynamic";
+
+// Share links expose private repositories — never index them.
+export const metadata = pageMetadata({
+	title: "Shared repository",
+	path: "/",
+	index: false,
+});
 
 function Notice({ title, detail }: { title: string; detail?: string }) {
 	return (

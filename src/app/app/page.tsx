@@ -1,10 +1,17 @@
 import "@/styles/app.css";
 import { DashboardClient } from "@/components/dashboard-client";
 import { listInstallationRepos } from "@/lib/github-app";
+import { pageMetadata } from "@/lib/seo";
 import { getSession } from "@/lib/session";
 import { listSharesForInstallation } from "@/lib/share-store";
 
 export const dynamic = "force-dynamic";
+
+export const metadata = pageMetadata({
+	title: "Dashboard",
+	path: "/app",
+	index: false,
+});
 
 const APP_SLUG = process.env.NEXT_PUBLIC_GITHUB_APP_SLUG;
 

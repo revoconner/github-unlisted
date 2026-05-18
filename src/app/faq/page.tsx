@@ -1,14 +1,17 @@
-import type { Metadata } from "next";
 import "@/styles/marketing.css";
 import { FaqAccordion } from "@/components/faq-accordion";
+import { JsonLd } from "@/components/json-ld";
 import { getSession } from "@/lib/session";
+import { breadcrumbLd, pageMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-	title: "FAQ — Unlisted Repo",
-	description: "Frequently asked questions about Unlisted Repo.",
-};
+export const metadata = pageMetadata({
+	title: "FAQ",
+	description:
+		"Frequently asked questions about Unlisted Repo — how private repo sharing, access control, and link revocation work.",
+	path: "/faq",
+});
 
 export default async function FaqPage() {
 	const session = await getSession();
@@ -84,6 +87,13 @@ export default async function FaqPage() {
 					</svg>
 				</a>
 			</footer>
+
+			<JsonLd
+				data={breadcrumbLd([
+					{ name: "Home", path: "/" },
+					{ name: "FAQ", path: "/faq" },
+				])}
+			/>
 		</div>
 	);
 }
