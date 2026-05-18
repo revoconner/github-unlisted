@@ -13,7 +13,7 @@ const ITEMS: { q: string; a: React.ReactNode }[] = [
 	},
 	{
 		q: "Can you see the private repos I share?",
-		a: "Not unless you share it with me. The store is Upstash and auth is a GitHub App with GitHub OAuth — I do not have access to your data.",
+		a: "Honest answer: technically I could. Like any GitHub App (the same as Vercel, CodeRabbit, and others), the server holds the app key and fetches your repo from GitHub to display it, so the content passes through the server in plain form. There is no end-to-end encryption that would make this impossible. What protects you: the app is read-only and limited to the repos you choose, you can revoke it instantly in GitHub (it stops working immediately), nothing from your repo is ever stored (it is streamed live per request), share links carry no credentials and can be set to expire, and the whole project is open source so the behaviour is auditable. I do not read your repositories, but you are trusting that, the same as installing any third-party GitHub App.",
 	},
 	{
 		q: "How long does a shared link last for?",
