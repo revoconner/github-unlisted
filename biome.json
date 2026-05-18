@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.0.0/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.4.15/schema.json",
 	"formatter": {
 		"enabled": true,
 		"indentStyle": "tab"
@@ -12,10 +12,18 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"recommended": true
+			"recommended": true,
+			"a11y": {
+				"noSvgWithoutTitle": "off"
+			}
 		}
 	},
 	"files": {
-		"ignore": [".next", "node_modules"]
+		"includes": [
+			"**",
+			"!**/.next",
+			"!**/node_modules",
+			"!phase7 concept"
+		]
 	}
 }

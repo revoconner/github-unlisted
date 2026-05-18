@@ -42,13 +42,13 @@ export function FaqAccordion() {
 	const total = `/0${ITEMS.length}`;
 
 	return (
-		<div className="faq-list" role="list">
+		<ul className="faq-list">
 			{ITEMS.map((item, i) => {
 				const isOpen = open === i;
 				const qId = `q-${i + 1}`;
 				const aId = `a-${i + 1}`;
 				return (
-					<div className="faq-item" role="listitem" key={item.q}>
+					<li className="faq-item" key={item.q}>
 						<button
 							type="button"
 							className="faq-q"
@@ -69,19 +69,18 @@ export function FaqAccordion() {
 								</svg>
 							</span>
 						</button>
-						<div
+						<section
 							className="faq-a"
 							id={aId}
-							role="region"
 							aria-labelledby={qId}
 						>
 							<div className="faq-a__inner">
 								<div className="faq-a__body">{item.a}</div>
 							</div>
-						</div>
-					</div>
+						</section>
+					</li>
 				);
 			})}
-		</div>
+		</ul>
 	);
 }

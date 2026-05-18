@@ -305,15 +305,15 @@ export default async function ViewPage({
 							{contents.isBinary ? (
 								<div className="tree__empty">Binary file not shown.</div>
 							) : mdHtml ? (
-								// biome-ignore lint/security/noDangerouslySetInnerHtml: GitHub-sanitized HTML (or markdown-it html:false fallback)
 								<div
 									className="readme"
+									// biome-ignore lint/security/noDangerouslySetInnerHtml: GitHub-sanitized HTML (or markdown-it html:false fallback)
 									dangerouslySetInnerHTML={{ __html: mdHtml }}
 								/>
 							) : codeHtml ? (
-								// biome-ignore lint/security/noDangerouslySetInnerHtml: Shiki output
 								<div
 									className="codeblock"
+									// biome-ignore lint/security/noDangerouslySetInnerHtml: Shiki output
 									dangerouslySetInnerHTML={{ __html: codeHtml }}
 								/>
 							) : (

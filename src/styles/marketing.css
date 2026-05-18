@@ -382,8 +382,11 @@ button { font-family: inherit; cursor: pointer; }
 /* Accordion */
 .faq-list {
   border-top: 1px solid var(--border-soft);
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
-.faq-item { border-bottom: 1px solid var(--border-soft); }
+.faq-item { border-bottom: 1px solid var(--border-soft); list-style: none; }
 
 .faq-q {
   width: 100%;
@@ -468,6 +471,7 @@ button { font-family: inherit; cursor: pointer; }
   color: var(--accent);
   border-bottom: 1px dashed rgba(255, 56, 174, 0.4);
 }
+/* biome-ignore lint/style/noDescendingSpecificity: intentional hover refinement of .faq-a__body a */
 .faq-a__body a:hover { border-bottom-style: solid; }
 
 /* ─── Responsive (basic) ────────────────────────────────────── */

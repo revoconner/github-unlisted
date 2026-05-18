@@ -650,6 +650,7 @@ input { font-family: inherit; }
   font-size: 12.75px;
   line-height: 1.6;
   overflow: auto;
+  /* biome-ignore lint/complexity/noImportantStyles: must override Shiki's inline background-color */
   background: var(--bg-2) !important;
   border-radius: 0;
 }

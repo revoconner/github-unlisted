@@ -255,7 +255,11 @@ export function DashboardClient({
 					<a className="btn btn--ghost btn--sm" href="/api/github/logout">
 						Sign out
 					</a>
-					<span className="avatar" aria-label={`Signed in as @${login}`}>
+					<span
+						className="avatar"
+						role="img"
+						aria-label={`Signed in as @${login}`}
+					>
 						{login.slice(0, 2).toUpperCase()}
 					</span>
 				</div>
@@ -307,7 +311,7 @@ export function DashboardClient({
 							type="button"
 							className="pill"
 							role="tab"
-							aria-pressed={filter === p.key}
+							aria-selected={filter === p.key}
 							onClick={() => setFilter(p.key)}
 						>
 							{p.label} <span className="pill__count">{p.n}</span>
