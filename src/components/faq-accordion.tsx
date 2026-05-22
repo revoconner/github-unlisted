@@ -20,6 +20,40 @@ const ITEMS: { q: string; a: React.ReactNode }[] = [
 		a: "However long you wish to share it for. You can set an expiration duration, or set it to never expire.",
 	},
 	{
+		q: "Do you track me or use analytics?",
+		a: "I use Vercel Web Analytics to see aggregate page views and where traffic comes from — purely so I know whether anyone is actually using this. It is cookieless, does not assign you a persistent identifier, and does not follow you across other sites. There is no third-party advertising or cross-site tracking on the site.",
+	},
+	{
+		q: "How do I uninstall the app?",
+		a: (
+			<>
+				Uninstalling is done from GitHub, not from this site. Go to{" "}
+				<a
+					href="https://github.com/settings/installations"
+					target="_blank"
+					rel="noopener"
+				>
+					github.com/settings/installations
+				</a>{" "}
+				(or, for an organization, your org's Settings →
+				Third-party Access → GitHub Apps), find <em>Unlisted Repo</em>,
+				click <strong>Configure</strong>, scroll to the <em>Danger Zone</em>,
+				and choose <strong>Uninstall</strong>. The app loses access
+				immediately, any active share links stop working, and the
+				associated share records are purged. If you also want to remove the
+				OAuth authorization, revoke it under{" "}
+				<a
+					href="https://github.com/settings/apps/authorizations"
+					target="_blank"
+					rel="noopener"
+				>
+					Authorized GitHub Apps
+				</a>
+				.
+			</>
+		),
+	},
+	{
 		q: "What other projects have you made?",
 		a: (
 			<>
