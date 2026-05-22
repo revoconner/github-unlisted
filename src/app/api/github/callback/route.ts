@@ -7,6 +7,8 @@ import {
 } from "@/lib/github-oauth";
 import { setSession } from "@/lib/session";
 
+const APP_SLUG = process.env.NEXT_PUBLIC_GITHUB_APP_SLUG;
+
 export async function GET(request: Request) {
 	const url = new URL(request.url);
 	const origin = url.origin;
@@ -38,7 +40,10 @@ export async function GET(request: Request) {
 		const user = await getAuthedUser(userToken);
 		const installations = await listUserInstallations(userToken);
 		if (installations.length === 0) {
-			return NextResponse.redirect(`${origin}/app?needs_install=1`);
+			const target = APP_SLUG
+				? `https://github.com/apps/${APP_SLUG}/installations/new`
+				: `${origin}/app?needs_install=1`;
+			return NextResponse.redirect(target);
 		}
 		await setSession({
 			login: user.login,
