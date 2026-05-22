@@ -57,7 +57,7 @@ export default async function PrivacyPage() {
 			<main className="legal-content">
 				<div className="legal-content__inner legal">
 					<h1>Privacy Policy</h1>
-					<p className="legal-updated">Last updated: 19 May 2026</p>
+					<p className="legal-updated">Last updated: 22 May 2026</p>
 
 					<p>
 						This Privacy Policy explains how the Unlisted Repo service
@@ -137,8 +137,15 @@ export default async function PrivacyPage() {
 							<strong>Operational data.</strong> Our infrastructure
 							providers process standard technical data (such as IP
 							address and request metadata) in server logs for security,
-							reliability, and abuse prevention. We do not operate
-							third-party analytics, advertising, or tracking
+							reliability, and abuse prevention.
+						</li>
+						<li>
+							<strong>Aggregate analytics.</strong> We use Vercel Web
+							Analytics to measure aggregate page views and traffic
+							sources so we can understand overall usage of the Service.
+							It is cookieless, does not assign you a persistent
+							identifier, and does not track you across other sites. We
+							do not operate any advertising or cross-site tracking
 							technologies.
 						</li>
 					</ul>
@@ -148,8 +155,9 @@ export default async function PrivacyPage() {
 						The Service uses strictly necessary, first-party cookies only:
 						a signed session cookie that keeps you authenticated, and a
 						short-lived state cookie used to protect the sign-in flow
-						against cross-site request forgery. No advertising, analytics,
-						or cross-site tracking cookies are used, so no cookie consent
+						against cross-site request forgery. Our analytics provider
+						(Vercel Web Analytics) is cookieless, and no advertising or
+						cross-site tracking cookies are used, so no cookie consent
 						banner is required for non-essential cookies.
 					</p>
 
@@ -194,8 +202,9 @@ export default async function PrivacyPage() {
 							identity (GitHub App and OAuth).
 						</li>
 						<li>
-							<strong>Vercel</strong> for application hosting and request
-							handling.
+							<strong>Vercel</strong> for application hosting, request
+							handling, and cookieless, aggregate web analytics (Vercel
+							Web Analytics).
 						</li>
 						<li>
 							<strong>Upstash</strong> for the key-value store that holds
