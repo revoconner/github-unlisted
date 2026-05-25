@@ -1,1 +1,77 @@
 @import "tailwindcss";
+
+/* Maintenance notice popup. Site-wide; rendered in the root layout
+   so it appears on every route. Token fallbacks let the styles work
+   on pages backed by either marketing.css or app.css (the shared
+   token names — --surface, --border, --accent — are identical across
+   both stylesheets, so the fallback hex codes only kick in if the
+   notice ever renders on a page without one of those stylesheets). */
+.maint-overlay {
+	position: fixed;
+	inset: 0;
+	z-index: 200;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 24px;
+}
+
+.maint-backdrop {
+	position: absolute;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.6);
+	backdrop-filter: blur(4px);
+	-webkit-backdrop-filter: blur(4px);
+	border: 0;
+	padding: 0;
+	cursor: pointer;
+}
+
+.maint-card {
+	position: relative;
+	z-index: 1;
+	max-width: 420px;
+	width: 100%;
+	padding: 30px 28px 24px;
+	border-radius: 14px;
+	background: var(--surface, #161922);
+	border: 1px solid var(--border, #262a35);
+	color: var(--text, #f1f2f5);
+	box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
+	font-family: var(--font-sans, system-ui, sans-serif);
+}
+
+.maint-close {
+	position: absolute;
+	top: 12px;
+	right: 12px;
+	width: 30px;
+	height: 30px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	background: transparent;
+	border: 1px solid var(--border, #262a35);
+	border-radius: 7px;
+	color: var(--text-2, #b4b7c0);
+	cursor: pointer;
+	padding: 0;
+}
+.maint-close:hover {
+	color: var(--text, #f1f2f5);
+	border-color: var(--border-strong, #363a47);
+}
+
+.maint-body {
+	margin: 0 0 14px;
+	font-size: 14.5px;
+	line-height: 1.55;
+	color: var(--text-2, #b4b7c0);
+}
+
+.maint-eta {
+	margin: 0;
+	font-size: 13px;
+	line-height: 1.55;
+	color: var(--accent, #ff38ae);
+}

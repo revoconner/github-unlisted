@@ -1,7 +1,8 @@
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
-import { Analytics } from "@vercel/analytics/next";
 import { JsonLd } from "@/components/json-ld";
+import { MaintenanceNotice } from "@/components/maintenance-notice";
 import { SITE, siteGraphLd } from "@/lib/seo";
 import "./globals.css";
 
@@ -67,6 +68,7 @@ export default function RootLayout({
 		>
 			<body>
 				{children}
+				<MaintenanceNotice />
 				<JsonLd data={siteGraphLd()} />
 				<Analytics />
 			</body>
