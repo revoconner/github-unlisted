@@ -556,6 +556,11 @@ body[data-viewer-tree="open"] {
 	flex-wrap: wrap;
 	justify-content: flex-end;
 }
+/* Copy + Revoke wrapper. Transparent on desktop (children flow into
+   the actions flex row), promoted to a full-width sub-row on phone. */
+.repo-row__actions-cr {
+	display: contents;
+}
 
 /* ─── Viewer (recipient screen) ────────────────────────────── */
 .viewer {
@@ -1092,6 +1097,12 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	.readme {
 		padding: 30px 32px;
 	}
+	/* The "github-unlisted.com/" prefix takes meaningful space and the
+	   slug carries the same identity on its own — drop it from tablet
+	   and below. */
+	.repo-row__link .host {
+		display: none;
+	}
 }
 
 /* Sheet breakpoint — sidebar leaves the grid and becomes a fixed
@@ -1156,9 +1167,27 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	.repo-row {
 		grid-template-columns: 1fr;
 		padding: 14px 16px;
+		border-bottom-color: var(--accent-border);
+	}
+	/* Force the share-url to take the whole first line so the created /
+	   revokes meta wraps below the slug, then drop the leading "·" that
+	   would otherwise show at the start of row 2. */
+	.repo-row__link .repo-row__url {
+		flex-basis: 100%;
+	}
+	.repo-row__link .repo-row__url + .sep {
+		display: none;
 	}
 	.repo-row__actions {
 		justify-content: flex-start;
+	}
+	/* Promote the Copy + Revoke wrapper from `display: contents` to a
+	   full-width sub-row so those two buttons sit on their own line
+	   below ExpiryControl + Set. */
+	.repo-row__actions-cr {
+		display: flex;
+		gap: 6px;
+		flex-basis: 100%;
 	}
 
 	.viewer__topinfo {

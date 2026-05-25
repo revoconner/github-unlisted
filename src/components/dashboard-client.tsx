@@ -241,9 +241,35 @@ export function DashboardClient({
 					<span className="mark" aria-hidden="true">
 						<svg width="16" height="16" viewBox="0 0 16 16" fill="none">
 							<title>unlisted</title>
-							<line x1="2" y1="11" x2="11" y2="2" stroke="#ff38ae" strokeWidth="1.6" strokeLinecap="round" />
-							<line x1="5" y1="14" x2="14" y2="5" stroke="#ff38ae" strokeWidth="1.6" strokeLinecap="round" opacity="0.55" />
-							<line x1="8" y1="17" x2="17" y2="8" stroke="#ff38ae" strokeWidth="1.6" strokeLinecap="round" opacity="0.25" />
+							<line
+								x1="2"
+								y1="11"
+								x2="11"
+								y2="2"
+								stroke="#ff38ae"
+								strokeWidth="1.6"
+								strokeLinecap="round"
+							/>
+							<line
+								x1="5"
+								y1="14"
+								x2="14"
+								y2="5"
+								stroke="#ff38ae"
+								strokeWidth="1.6"
+								strokeLinecap="round"
+								opacity="0.55"
+							/>
+							<line
+								x1="8"
+								y1="17"
+								x2="17"
+								y2="8"
+								stroke="#ff38ae"
+								strokeWidth="1.6"
+								strokeLinecap="round"
+								opacity="0.25"
+							/>
 						</svg>
 					</span>
 					<span className="word">
@@ -286,7 +312,16 @@ export function DashboardClient({
 				<div className="dashboard__searchrow">
 					<label className="field">
 						<span className="field__icon" aria-hidden="true">
-							<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+							<svg
+								width="15"
+								height="15"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="2"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+							>
 								<circle cx="11" cy="11" r="7" />
 								<line x1="21" y1="21" x2="16.65" y2="16.65" />
 							</svg>
@@ -351,9 +386,7 @@ export function DashboardClient({
 												target="_blank"
 												rel="noopener"
 											>
-												<span className="host">
-													github-unlisted.com/
-												</span>
+												<span className="host">github-unlisted.com/</span>
 												<span className="slug">
 													{r.owner}/{r.name}
 												</span>
@@ -393,21 +426,23 @@ export function DashboardClient({
 											>
 												{rowBusy ? "…" : "Set"}
 											</button>
-											<button
-												type="button"
-												className="btn btn--ghost btn--sm"
-												onClick={() => copy(share)}
-											>
-												{copied === share.id ? "Copied" : "Copy"}
-											</button>
-											<button
-												type="button"
-												className="btn btn--danger btn--sm"
-												disabled={rowBusy}
-												onClick={() => revoke(share)}
-											>
-												{rowBusy ? "…" : "Revoke"}
-											</button>
+											<div className="repo-row__actions-cr">
+												<button
+													type="button"
+													className="btn btn--ghost btn--sm"
+													onClick={() => copy(share)}
+												>
+													{copied === share.id ? "Copied" : "Copy"}
+												</button>
+												<button
+													type="button"
+													className="btn btn--danger btn--sm"
+													disabled={rowBusy}
+													onClick={() => revoke(share)}
+												>
+													{rowBusy ? "…" : "Revoke"}
+												</button>
+											</div>
 										</>
 									) : (
 										<button
