@@ -251,7 +251,7 @@ body[data-viewer-tree="open"] {
 .btn--ghost {
 	background: transparent;
 	color: var(--text-2);
-	border-color: transparent;
+	border-color: var(--color-neutral-500);
 }
 .btn--ghost:hover {
 	color: var(--text);
