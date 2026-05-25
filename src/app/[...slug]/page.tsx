@@ -1,7 +1,9 @@
 import "@/styles/app.css";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { highlight } from "@/lib/highlight";
+import { RepoTree } from "@/components/repo-tree";
+import { SidebarTree } from "@/components/sidebar-tree";
+import { ViewerTreeToggle } from "@/components/viewer-tree-toggle";
 import { getInstallationOctokit } from "@/lib/github-app";
 import {
 	type DirEntry,
@@ -9,13 +11,12 @@ import {
 	getRepoMeta,
 	getRepoTree,
 } from "@/lib/github-repo";
+import { highlight } from "@/lib/highlight";
 import { isMarkdown, renderMarkdown } from "@/lib/markdown";
 import { renderMarkdownGitHub } from "@/lib/markdown-github";
 import { buildHref, parseView } from "@/lib/repo-path";
 import { pageMetadata } from "@/lib/seo";
 import { resolveShare } from "@/lib/share-store";
-import { RepoTree } from "@/components/repo-tree";
-import { SidebarTree } from "@/components/sidebar-tree";
 
 export const dynamic = "force-dynamic";
 
@@ -39,7 +40,16 @@ function Notice({ title, detail }: { title: string; detail?: string }) {
 function FolderIcon() {
 	return (
 		<span className="icon-d" aria-hidden="true">
-			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+			<svg
+				width="14"
+				height="14"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				strokeWidth="2"
+				strokeLinecap="round"
+				strokeLinejoin="round"
+			>
 				<path d="M3 7a2 2 0 0 1 2-2h4l2 3h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
 			</svg>
 		</span>
@@ -48,7 +58,16 @@ function FolderIcon() {
 function FileIcon() {
 	return (
 		<span className="icon-f" aria-hidden="true">
-			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+			<svg
+				width="14"
+				height="14"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				strokeWidth="2"
+				strokeLinecap="round"
+				strokeLinejoin="round"
+			>
 				<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
 				<polyline points="14 2 14 8 20 8" />
 			</svg>
@@ -178,9 +197,35 @@ export default async function ViewPage({
 					<span className="mark" aria-hidden="true">
 						<svg width="16" height="16" viewBox="0 0 16 16" fill="none">
 							<title>unlisted</title>
-							<line x1="2" y1="11" x2="11" y2="2" stroke="#ff38ae" strokeWidth="1.6" strokeLinecap="round" />
-							<line x1="5" y1="14" x2="14" y2="5" stroke="#ff38ae" strokeWidth="1.6" strokeLinecap="round" opacity="0.55" />
-							<line x1="8" y1="17" x2="17" y2="8" stroke="#ff38ae" strokeWidth="1.6" strokeLinecap="round" opacity="0.25" />
+							<line
+								x1="2"
+								y1="11"
+								x2="11"
+								y2="2"
+								stroke="#ff38ae"
+								strokeWidth="1.6"
+								strokeLinecap="round"
+							/>
+							<line
+								x1="5"
+								y1="14"
+								x2="14"
+								y2="5"
+								stroke="#ff38ae"
+								strokeWidth="1.6"
+								strokeLinecap="round"
+								opacity="0.55"
+							/>
+							<line
+								x1="8"
+								y1="17"
+								x2="17"
+								y2="8"
+								stroke="#ff38ae"
+								strokeWidth="1.6"
+								strokeLinecap="round"
+								opacity="0.25"
+							/>
 						</svg>
 					</span>
 					<span className="word">
@@ -189,7 +234,7 @@ export default async function ViewPage({
 					</span>
 				</a>
 				<div className="topbar__right">
-					<span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--text-3)" }}>
+					<span className="topbar__meta">
 						{meta.fullName} · {ref}
 					</span>
 				</div>
@@ -221,6 +266,7 @@ export default async function ViewPage({
 
 				<section className="viewer__main">
 					<div className="viewer__topinfo">
+						<ViewerTreeToggle />
 						<div className="viewer__crumbs">
 							<Link
 								href={buildHref(

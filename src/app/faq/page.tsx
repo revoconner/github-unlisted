@@ -1,8 +1,9 @@
 import "@/styles/marketing.css";
 import { FaqAccordion } from "@/components/faq-accordion";
 import { JsonLd } from "@/components/json-ld";
-import { getSession } from "@/lib/session";
+import { SiteDrawer } from "@/components/site-drawer";
 import { breadcrumbLd, pageMetadata } from "@/lib/seo";
+import { getSession } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
@@ -25,9 +26,35 @@ export default async function FaqPage() {
 					<span className="mark" aria-hidden="true">
 						<svg width="16" height="16" viewBox="0 0 16 16" fill="none">
 							<title>unlisted</title>
-							<line x1="2" y1="11" x2="11" y2="2" stroke="#ff38ae" strokeWidth="1.6" strokeLinecap="round" />
-							<line x1="5" y1="14" x2="14" y2="5" stroke="#ff38ae" strokeWidth="1.6" strokeLinecap="round" opacity="0.55" />
-							<line x1="8" y1="17" x2="17" y2="8" stroke="#ff38ae" strokeWidth="1.6" strokeLinecap="round" opacity="0.25" />
+							<line
+								x1="2"
+								y1="11"
+								x2="11"
+								y2="2"
+								stroke="#ff38ae"
+								strokeWidth="1.6"
+								strokeLinecap="round"
+							/>
+							<line
+								x1="5"
+								y1="14"
+								x2="14"
+								y2="5"
+								stroke="#ff38ae"
+								strokeWidth="1.6"
+								strokeLinecap="round"
+								opacity="0.55"
+							/>
+							<line
+								x1="8"
+								y1="17"
+								x2="17"
+								y2="8"
+								stroke="#ff38ae"
+								strokeWidth="1.6"
+								strokeLinecap="round"
+								opacity="0.25"
+							/>
 						</svg>
 					</span>
 					<span className="word">
@@ -53,6 +80,8 @@ export default async function FaqPage() {
 				<a className="nav-cta" href={session ? "/app" : "/api/github/login"}>
 					{session ? "Dashboard" : "Sign In"}
 				</a>
+
+				<SiteDrawer signedIn={Boolean(session)} active="faq" />
 			</header>
 
 			<main className="faq-content">
@@ -68,8 +97,8 @@ export default async function FaqPage() {
 					</h1>
 
 					<p className="faq-lede">
-						A short list. If you have something else on your mind, the
-						source is on GitHub.
+						A short list. If you have something else on your mind, the source is
+						on GitHub.
 					</p>
 
 					<FaqAccordion />
@@ -82,7 +111,17 @@ export default async function FaqPage() {
 				</span>
 				<a href="https://www.revoconner.com" target="_blank" rel="noopener">
 					Visit <span className="url">www.revoconner.com</span>
-					<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+					<svg
+						width="11"
+						height="11"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						strokeWidth="2"
+						strokeLinecap="round"
+						strokeLinejoin="round"
+						aria-hidden="true"
+					>
 						<path d="M7 17L17 7" />
 						<polyline points="7 7 17 7 17 17" />
 					</svg>
