@@ -442,6 +442,10 @@ body[data-viewer-tree="open"] {
 	display: flex;
 	gap: 10px;
 	min-width: 0;
+	padding-right: 50px;
+}
+.dashboard__searchrow .field {
+	flex: 1;
 }
 .btn--filter {
 	display: inline-flex;
@@ -474,19 +478,18 @@ body[data-viewer-tree="open"] {
 	border-radius: 10px;
 	background: transparent;
 	border: 1px solid var(--border-soft);
-	color: var(--text-3);
+	color: var(--text-2);
 	font-size: var(--fs-btn);
 	cursor: pointer;
 }
 .pill[aria-selected="true"],
 .pill[aria-pressed="true"] {
 	background: var(--surface-2);
-	border-color: var(--border-strong);
+	border-color: var(--accent);
 	color: var(--text);
 }
 .pill__count {
 	font-family: var(--font-mono);
-	font-size: 10.5px;
 	color: var(--faint);
 }
 .pill[aria-selected="true"] .pill__count,
@@ -1186,13 +1189,17 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 		gap: 4px;
 		align-items: flex-start;
 	}
-	/* Stack filters: search on row 1 (full width of .dashboard), dropdown
-	   on row 2 (also full width). */
+	/* Stack filters: search on row 1 (full width of .dashboard, since the
+	   desktop right-padding gets zeroed here), dropdown on row 2 sized to
+	   its content. */
 	.dashboard__filters {
 		grid-template-columns: 1fr;
 	}
+	.dashboard__searchrow {
+		padding-right: 0;
+	}
 	.dashboard__pills-select {
-		width: 100%;
+		justify-self: start;
 	}
 
 	.repo-row {
