@@ -1132,6 +1132,21 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	.dashboard__searchrow {
 		padding-right: 10px;
 	}
+	/* Repo rows collapse to a single column on tablet and phone — the
+	   right-side actions stack under the main info. Solid-black bottom
+	   border keeps the dividers visible against the surface without
+	   leaning on the muted token. */
+	.repo-row {
+		grid-template-columns: 1fr;
+		border-bottom-color: #000;
+	}
+	.repo-row__main {
+		padding-top: 20px;
+	}
+	.repo-row__actions {
+		padding: 15px 0 10px 0;
+		justify-content: flex-start;
+	}
 }
 
 /* Sheet breakpoint — sidebar leaves the grid and becomes a fixed
@@ -1205,13 +1220,11 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 		justify-self: start;
 	}
 
+	/* Only the horizontal padding tightens on phone — grid columns,
+	   bottom border, and actions alignment all inherit from the tablet
+	   block above. */
 	.repo-row {
-		grid-template-columns: 1fr;
 		padding: 14px 16px;
-		border-bottom-color: var(--accent-border);
-	}
-	.repo-row__actions {
-		justify-content: flex-start;
 	}
 
 	.viewer__topinfo {
