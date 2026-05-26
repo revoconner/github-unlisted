@@ -282,9 +282,7 @@ export function DashboardClient({
 				<nav className="nav-links" aria-label="Primary">
 					<a href="/faq">FAQ</a>
 					<a href="/privacy">PRIVACY</a>
-					<a href="/status">
-						STATUS <span className="status-dot" aria-hidden="true" />
-					</a>
+					<a href="/status">STATUS</a>
 				</nav>
 
 				<div className="topbar__right">

@@ -68,9 +68,7 @@ export default async function FaqPage() {
 						FAQ
 					</a>
 					<a href="/privacy">PRIVACY</a>
-					<a href="/status">
-						STATUS <span className="status-dot" aria-hidden="true" />
-					</a>
+					<a href="/status">STATUS</a>
 				</nav>
 
 				<a className="nav-cta" href={session ? "/app" : "/api/github/login"}>

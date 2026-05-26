@@ -26,7 +26,7 @@ const incidents: Incident[] = [
 		startedUtc: "2026-05-26 00:30 UTC",
 		symptoms:
 			"UI changes for the dashboard to be more user friendly and have coherent user experience.",
-		endedUtc: "Ongoing",
+		endedUtc: "2026-05-26 03:57 UTC",
 	},
 ];
 
@@ -83,7 +83,7 @@ export default async function StatusPage() {
 					<a href="/faq">FAQ</a>
 					<a href="/privacy">PRIVACY</a>
 					<a href="/status" className="is-active" aria-current="page">
-						STATUS <span className="status-dot" aria-hidden="true" />
+						STATUS
 					</a>
 				</nav>
 

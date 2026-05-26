@@ -92,7 +92,7 @@ export function SiteDrawer({ signedIn, active = null }: Props) {
 						className={active === "status" ? "is-active" : undefined}
 						aria-current={active === "status" ? "page" : undefined}
 					>
-						Status <span className="status-dot" aria-hidden="true" />
+						Status
 					</a>
 					{signedIn ? (
 						<>
