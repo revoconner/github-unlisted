@@ -379,7 +379,9 @@ export function DashboardClient({
 										{share && <span className="chip chip--shared">shared</span>}
 									</div>
 									{share ? (
-										<div className="repo-row__link">
+										<div
+											className={`repo-row__link${share.expiresAt ? "" : " repo-row__link--idle"}`}
+										>
 											{share.createdAt && (
 												<>
 													<span className="created">

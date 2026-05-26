@@ -530,6 +530,12 @@ body[data-viewer-tree="open"] {
 	color: var(--accent);
 	flex-wrap: wrap;
 }
+/* Shares with no auto-revoke read as steady-state, not time-sensitive,
+   so dim the whole line to faint — keeps accent for the rows that
+   actually have a deadline. */
+.repo-row__link--idle {
+	color: var(--faint);
+}
 
 .repo-row__empty {
 	font-family: var(--font-mono);
