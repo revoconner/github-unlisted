@@ -380,26 +380,14 @@ export function DashboardClient({
 									</div>
 									{share ? (
 										<div className="repo-row__link">
-											<a
-												className="repo-row__url"
-												href={`/${r.owner}/${r.name}?s=${share.id}`}
-												target="_blank"
-												rel="noopener"
-											>
-												<span className="host">github-unlisted.com/</span>
-												<span className="slug">
-													{r.owner}/{r.name}
-												</span>
-											</a>
 											{share.createdAt && (
 												<>
-													<span className="sep">·</span>
 													<span className="created">
 														created {ago(share.createdAt)}
 													</span>
+													<span className="sep">·</span>
 												</>
 											)}
-											<span className="sep">·</span>
 											<span className="created">
 												{share.expiresAt
 													? `revokes ${until(share.expiresAt)}`
@@ -411,13 +399,28 @@ export function DashboardClient({
 									)}
 								</div>
 								<div className="repo-row__actions">
-									<ExpiryControl
-										sel={getSel(r.fullName)}
-										disabled={rowBusy}
-										onChange={(s) => setSel(r.fullName, s)}
-									/>
 									{share ? (
 										<>
+											<a
+												className="btn btn--ghost btn--sm"
+												href={`/${r.owner}/${r.name}?s=${share.id}`}
+												target="_blank"
+												rel="noopener"
+											>
+												Visit
+											</a>
+											<button
+												type="button"
+												className="btn btn--ghost btn--sm"
+												onClick={() => copy(share)}
+											>
+												{copied === share.id ? "Copied" : "Copy"}
+											</button>
+											<ExpiryControl
+												sel={getSel(r.fullName)}
+												disabled={rowBusy}
+												onChange={(s) => setSel(r.fullName, s)}
+											/>
 											<button
 												type="button"
 												className="btn btn--secondary btn--sm"
@@ -426,33 +429,31 @@ export function DashboardClient({
 											>
 												{rowBusy ? "…" : "Set"}
 											</button>
-											<div className="repo-row__actions-cr">
-												<button
-													type="button"
-													className="btn btn--ghost btn--sm"
-													onClick={() => copy(share)}
-												>
-													{copied === share.id ? "Copied" : "Copy"}
-												</button>
-												<button
-													type="button"
-													className="btn btn--danger btn--sm"
-													disabled={rowBusy}
-													onClick={() => revoke(share)}
-												>
-													{rowBusy ? "…" : "Revoke"}
-												</button>
-											</div>
+											<button
+												type="button"
+												className="btn btn--danger btn--sm"
+												disabled={rowBusy}
+												onClick={() => revoke(share)}
+											>
+												{rowBusy ? "…" : "Revoke"}
+											</button>
 										</>
 									) : (
-										<button
-											type="button"
-											className="btn btn--accent btn--sm"
-											disabled={rowBusy}
-											onClick={() => create(r)}
-										>
-											{rowBusy ? "Creating…" : "Share link"}
-										</button>
+										<>
+											<ExpiryControl
+												sel={getSel(r.fullName)}
+												disabled={rowBusy}
+												onChange={(s) => setSel(r.fullName, s)}
+											/>
+											<button
+												type="button"
+												className="btn btn--accent btn--sm"
+												disabled={rowBusy}
+												onClick={() => create(r)}
+											>
+												{rowBusy ? "Creating…" : "Share link"}
+											</button>
+										</>
 									)}
 								</div>
 							</article>
