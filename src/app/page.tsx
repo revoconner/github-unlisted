@@ -1,6 +1,11 @@
 import "@/styles/marketing.css";
 import { SiteDrawer } from "@/components/site-drawer";
 import { getSession } from "@/lib/session";
+import {
+	CURRENT_STATUS,
+	statusDotAriaLabel,
+	statusDotClass,
+} from "@/lib/site-status";
 
 export const dynamic = "force-dynamic";
 
@@ -56,7 +61,14 @@ export default async function Page() {
 				<nav className="nav-links" aria-label="Primary">
 					<a href="/faq">FAQ</a>
 					<a href="/privacy">PRIVACY</a>
-					<a href="/status">STATUS</a>
+					<a href="/status">
+						STATUS{" "}
+						<span
+							className={`status-dot ${statusDotClass(CURRENT_STATUS)}`}
+							role="img"
+							aria-label={statusDotAriaLabel(CURRENT_STATUS)}
+						/>
+					</a>
 				</nav>
 
 				{session ? (

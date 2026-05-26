@@ -301,24 +301,9 @@ body[data-viewer-tree="open"] {
 	flex-shrink: 0;
 }
 
-/* ─── Chips ────────────────────────────────────────────────── */
-.chip {
-	display: inline-flex;
-	align-items: center;
-	gap: 5px;
-	padding: 2px 8px;
-	border-radius: 5px;
-	font-family: var(--font-mono);
-	font-size: 10.5px;
-	font-weight: 500;
-	letter-spacing: 0.01em;
-	white-space: nowrap;
-	border: 1px solid transparent;
-}
-.chip--md {
-	padding: 3px 9px;
-	font-size: 11.5px;
-}
+/* ─── Chips (dashboard-specific variants) ──────────────────────
+   .chip base + .chip--md + status pills (--okay / --medium /
+   --critical / --incident / --maintenance) live in globals.css. */
 .chip--public {
 	background: var(--green-dim);
 	border-color: var(--green-border);

@@ -3,6 +3,11 @@ import { JsonLd } from "@/components/json-ld";
 import { SiteDrawer } from "@/components/site-drawer";
 import { breadcrumbLd, pageMetadata } from "@/lib/seo";
 import { getSession } from "@/lib/session";
+import {
+	CURRENT_STATUS,
+	statusDotAriaLabel,
+	statusDotClass,
+} from "@/lib/site-status";
 
 export const dynamic = "force-dynamic";
 
@@ -67,7 +72,14 @@ export default async function PrivacyPage() {
 					<a href="/privacy" className="is-active" aria-current="page">
 						PRIVACY
 					</a>
-					<a href="/status">STATUS</a>
+					<a href="/status">
+						STATUS{" "}
+						<span
+							className={`status-dot ${statusDotClass(CURRENT_STATUS)}`}
+							role="img"
+							aria-label={statusDotAriaLabel(CURRENT_STATUS)}
+						/>
+					</a>
 				</nav>
 
 				<a className="nav-cta" href={session ? "/app" : "/api/github/login"}>

@@ -36,18 +36,29 @@ body[data-drawer="open"] {
 	border-bottom-color: var(--accent);
 }
 
-/* Pulsing amber indicator. Rendered next to /status nav links and
-   inside the drawer to signal an ongoing incident. */
+/* Pulsing status indicator next to STATUS nav links and inside the
+   drawer. Always visible; color modifier (.status-dot--okay / --medium
+   / --critical) is driven by CURRENT_STATUS in src/lib/site-status.ts. */
 .status-dot {
 	display: inline-block;
 	width: 8px;
 	height: 8px;
 	margin-left: 6px;
 	border-radius: 50%;
-	background: var(--amber, #f5b756);
-	box-shadow: 0 0 8px 1px rgba(245, 183, 86, 0.7);
 	vertical-align: middle;
 	animation: status-dot-pulse 2.4s ease-in-out infinite;
+}
+.status-dot--okay {
+	background: #22c55e;
+	box-shadow: 0 0 8px 1px rgba(34, 197, 94, 0.7);
+}
+.status-dot--medium {
+	background: #f5b756;
+	box-shadow: 0 0 8px 1px rgba(245, 183, 86, 0.7);
+}
+.status-dot--critical {
+	background: #ef4444;
+	box-shadow: 0 0 8px 1px rgba(239, 68, 68, 0.7);
 }
 @keyframes status-dot-pulse {
 	0%,
@@ -59,6 +70,53 @@ body[data-drawer="open"] {
 		opacity: 0.55;
 		transform: scale(0.85);
 	}
+}
+
+/* Chip / pill primitive. Base lives here so it works on every page;
+   color variants split between this file (status-page pills) and
+   app.css (dashboard-specific variants: --public / --private /
+   --shared / --neutral / --danger). */
+.chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	padding: 2px 8px;
+	border-radius: 5px;
+	font-family: var(--font-mono);
+	font-size: 10.5px;
+	font-weight: 500;
+	letter-spacing: 0.01em;
+	white-space: nowrap;
+	border: 1px solid transparent;
+}
+.chip--md {
+	padding: 3px 9px;
+	font-size: 11.5px;
+}
+.chip--okay {
+	background: rgba(34, 197, 94, 0.14);
+	border-color: rgba(34, 197, 94, 0.32);
+	color: #22c55e;
+}
+.chip--medium {
+	background: rgba(245, 183, 86, 0.14);
+	border-color: rgba(245, 183, 86, 0.32);
+	color: #f5b756;
+}
+.chip--critical {
+	background: rgba(239, 68, 68, 0.14);
+	border-color: rgba(239, 68, 68, 0.32);
+	color: #ef4444;
+}
+.chip--incident {
+	background: rgba(239, 68, 68, 0.14);
+	border-color: rgba(239, 68, 68, 0.32);
+	color: #ef4444;
+}
+.chip--maintenance {
+	background: rgba(255, 255, 255, 0.04);
+	border-color: rgba(255, 255, 255, 0.1);
+	color: #b4b7c0;
 }
 
 /* Hamburger button + slide-in drawer panel. Visible only on phone via
