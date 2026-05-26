@@ -1,14 +1,40 @@
 import "@/styles/marketing.css";
+import { JsonLd } from "@/components/json-ld";
 import { SiteDrawer } from "@/components/site-drawer";
+import { breadcrumbLd, pageMetadata } from "@/lib/seo";
 import { getSession } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
-export default async function Page() {
+export const metadata = pageMetadata({
+	title: "Status",
+	description:
+		"Historical status of Unlisted Repo: ongoing maintenance work and past incidents.",
+	path: "/status",
+});
+
+interface Incident {
+	id: string;
+	startedUtc: string;
+	symptoms: string;
+	endedUtc: string;
+}
+
+const incidents: Incident[] = [
+	{
+		id: "2026-05-26-dashboard-ui",
+		startedUtc: "2026-05-26 00:30 UTC",
+		symptoms:
+			"UI changes for the dashboard to be more user friendly and have coherent user experience.",
+		endedUtc: "Ongoing",
+	},
+];
+
+export default async function StatusPage() {
 	const session = await getSession();
 
 	return (
-		<div className="page-landing">
+		<div className="page-status">
 			<div className="bloom" aria-hidden="true" />
 
 			<header className="site-nav">
@@ -56,75 +82,46 @@ export default async function Page() {
 				<nav className="nav-links" aria-label="Primary">
 					<a href="/faq">FAQ</a>
 					<a href="/privacy">PRIVACY</a>
-					<a href="/status">
+					<a href="/status" className="is-active" aria-current="page">
 						STATUS <span className="status-dot" aria-hidden="true" />
 					</a>
 				</nav>
 
-				{session ? (
-					<a className="nav-cta" href="/api/github/logout">
-						Sign Out
-					</a>
-				) : (
-					<a className="nav-cta" href="/api/github/login">
-						Sign In
-					</a>
-				)}
+				<a className="nav-cta" href={session ? "/app" : "/api/github/login"}>
+					{session ? "Dashboard" : "Sign In"}
+				</a>
 
-				<SiteDrawer signedIn={Boolean(session)} />
+				<SiteDrawer signedIn={Boolean(session)} active="status" />
 			</header>
 
-			<main className="hero">
-				<div className="hero__inner">
-					<h1 className="hero__title">
-						Share a private repo as
-						<br />
-						<span className="bracket-word">
-							<span className="word">unlisted</span>
-						</span>{" "}
-						repo.
-					</h1>
-					<p className="hero__sub">
-						Share a private repo with a read-only link. No GitHub account needed
-						for the recipient. You retain all control.
-					</p>
+			<main className="status-content">
+				<div className="status-content__inner">
+					<div className="status-eyebrow">
+						<span className="rule" aria-hidden="true" />
+						<span className="label-accent">STATUS</span>
+						<span>· Historical record</span>
+					</div>
+
+					<h1 className="status-title">Historical status</h1>
+
+					<ul className="status-list">
+						{incidents.map((inc) => {
+							const ongoing = inc.endedUtc.toLowerCase() === "ongoing";
+							return (
+								<li key={inc.id} className="status-row">
+									<div className="status-row__time">{inc.startedUtc}</div>
+									<div className="status-row__symptoms">{inc.symptoms}</div>
+									<div
+										className={`status-row__end${ongoing ? " is-ongoing" : ""}`}
+									>
+										{inc.endedUtc}
+									</div>
+								</li>
+							);
+						})}
+					</ul>
 				</div>
 			</main>
-
-			<div className="hero-cta">
-				<div className="hero-cta__row">
-					{session ? (
-						<a className="btn btn--outline-accent" href="/app">
-							Open your repositories
-						</a>
-					) : (
-						<a className="btn btn--outline-accent" href="/api/github/login">
-							<svg
-								width="14"
-								height="14"
-								viewBox="0 0 24 24"
-								fill="currentColor"
-								aria-hidden="true"
-							>
-								<path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2.1c-3.3.7-4-1.6-4-1.6-.5-1.4-1.3-1.8-1.3-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1.1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.7-5.5 6 .4.4.8 1.1.8 2.2v3.2c0 .3.2.7.8.6A12 12 0 0 0 12 .3" />
-							</svg>
-							Install on GitHub
-						</a>
-					)}
-					<span className="hero-cta__divider" aria-hidden="true" />
-					<a
-						className="hero-cta__label"
-						href="https://github.com/revoconner/github-unlisted"
-						target="_blank"
-						rel="noopener"
-					>
-						Source code
-					</a>
-				</div>
-				<div className="hero-cta__tagline">
-					Free and open source \ no hidden cost
-				</div>
-			</div>
 
 			<footer className="site-footer">
 				<span>
@@ -148,6 +145,13 @@ export default async function Page() {
 					</svg>
 				</a>
 			</footer>
+
+			<JsonLd
+				data={breadcrumbLd([
+					{ name: "Home", path: "/" },
+					{ name: "Status", path: "/status" },
+				])}
+			/>
 		</div>
 	);
 }

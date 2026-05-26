@@ -23,6 +23,7 @@
 	--accent: #ff38ae;
 	--lavender: #b39bff;
 	--accent-complimentary: hsl(from var(--accent) calc(h + 172) s 60.8%);
+	--amber: #f5b756;
 
 	/* Type families */
 	--font-sans:
@@ -360,6 +361,7 @@ body[data-drawer="open"] {
 .hero-cta__label {
 	font-family: var(--font-sans);
 	font-size: var(--fs-caption);
+	font-weight: 700;
 	letter-spacing: 0.18em;
 	text-transform: uppercase;
 	color: rgb(191, 42, 129);
@@ -618,6 +620,122 @@ body[data-drawer="open"] {
 	font-weight: 600;
 }
 
+/* ─── Status page ──────────────────────────────────────────── */
+.page-status {
+	position: relative;
+	z-index: 1;
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+.status-content {
+	flex: 1;
+	display: flex;
+	justify-content: center;
+	padding: 60px 60px 80px;
+	position: relative;
+	z-index: 2;
+}
+.status-content__inner {
+	width: 100%;
+	max-width: 880px;
+}
+.status-eyebrow {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	font-family: var(--font-mono);
+	font-size: var(--fs-caption);
+	color: var(--muted);
+	letter-spacing: 0.22em;
+	text-transform: uppercase;
+	margin-bottom: 22px;
+}
+.status-eyebrow .rule {
+	width: 28px;
+	height: 1px;
+	background: var(--border-strong);
+}
+.status-eyebrow .label-accent {
+	color: var(--accent);
+}
+.status-title {
+	margin: 0 0 32px;
+	font-family: var(--font-sans);
+	font-weight: 400;
+	font-size: var(--fs-display);
+	line-height: 1.02;
+	letter-spacing: -0.028em;
+	color: var(--text);
+	text-wrap: balance;
+	text-shadow: var(--shadow-hero);
+}
+.status-list {
+	border-top: 1px solid var(--border-soft);
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+.status-row {
+	display: grid;
+	grid-template-columns: 200px 1fr auto;
+	gap: 18px;
+	align-items: start;
+	padding: 20px 4px;
+	border-bottom: 1px solid var(--border-soft);
+}
+.status-row__time {
+	font-family: var(--font-mono);
+	font-size: var(--fs-caption);
+	color: var(--text-3);
+	letter-spacing: 0.02em;
+	white-space: nowrap;
+}
+.status-row__symptoms {
+	font-size: var(--fs-body);
+	color: var(--text);
+	line-height: 1.55;
+	text-wrap: pretty;
+}
+.status-row__end {
+	font-family: var(--font-mono);
+	font-size: var(--fs-caption);
+	color: var(--text-3);
+	letter-spacing: 0.04em;
+	white-space: nowrap;
+	text-align: right;
+}
+.status-row__end.is-ongoing {
+	color: var(--amber);
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+}
+
+/* Pulsing amber indicator. Reused by the desktop nav links and the
+   mobile drawer link to signal an ongoing incident on /status. */
+.status-dot {
+	display: inline-block;
+	width: 8px;
+	height: 8px;
+	margin-left: 6px;
+	border-radius: 50%;
+	background: var(--amber);
+	box-shadow: 0 0 8px 1px rgba(245, 183, 86, 0.7);
+	vertical-align: middle;
+	animation: status-dot-pulse 2.4s ease-in-out infinite;
+}
+@keyframes status-dot-pulse {
+	0%,
+	100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+	50% {
+		opacity: 0.55;
+		transform: scale(0.85);
+	}
+}
+
 /* ─── Hamburger + drawer (phone only) ──────────────────────── */
 .hamburger {
 	display: none;
@@ -787,18 +905,28 @@ body[data-drawer="open"] {
 		display: inline-flex;
 	}
 
+	/* Footer pushed to the bottom of the viewport regardless of how
+	   little content the page has — every marketing-shell page wrapper
+	   is flex column with min-height: 100vh, so margin-top: auto on the
+	   last child does the right thing. */
 	.site-footer {
 		padding: 16px 22px;
 		flex-direction: column;
 		align-items: flex-start;
 		gap: 10px;
+		margin-top: auto;
 	}
 
+	/* Phone home hero: shrink to content (no flex:1 stretching), drop
+	   the place-items centering so the title sits near the top instead
+	   of floating in the vertical middle. */
 	.hero {
-		padding: 32px 22px 12px;
+		flex: 0 0 auto;
+		padding: 16px 22px 0;
+		place-items: start center;
 	}
 	.hero__sub {
-		margin-top: 24px;
+		margin-top: 18px;
 	}
 	.hero-cta {
 		padding-bottom: 40px;
@@ -837,6 +965,17 @@ body[data-drawer="open"] {
 	}
 	.legal h2 {
 		margin-top: 26px;
+	}
+
+	.status-content {
+		padding: 22px 22px 50px;
+	}
+	.status-row {
+		grid-template-columns: 1fr;
+		gap: 6px;
+	}
+	.status-row__end {
+		text-align: left;
 	}
 }
 

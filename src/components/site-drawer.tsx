@@ -4,7 +4,7 @@ import * as React from "react";
 
 interface Props {
 	signedIn: boolean;
-	active?: "faq" | "privacy" | null;
+	active?: "faq" | "privacy" | "status" | null;
 }
 
 export function SiteDrawer({ signedIn, active = null }: Props) {
@@ -121,11 +121,11 @@ export function SiteDrawer({ signedIn, active = null }: Props) {
 						Privacy
 					</a>
 					<a
-						href="https://github.com/revoconner/github-unlisted"
-						target="_blank"
-						rel="noopener"
+						href="/status"
+						className={active === "status" ? "is-active" : undefined}
+						aria-current={active === "status" ? "page" : undefined}
 					>
-						GitHub
+						Status <span className="status-dot" aria-hidden="true" />
 					</a>
 					{signedIn ? (
 						<>

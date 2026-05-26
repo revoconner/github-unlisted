@@ -68,12 +68,8 @@ export default async function FaqPage() {
 						FAQ
 					</a>
 					<a href="/privacy">PRIVACY</a>
-					<a
-						href="https://github.com/revoconner/github-unlisted"
-						target="_blank"
-						rel="noopener"
-					>
-						GITHUB
+					<a href="/status">
+						STATUS <span className="status-dot" aria-hidden="true" />
 					</a>
 				</nav>
 
