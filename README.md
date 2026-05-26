@@ -33,11 +33,15 @@ Done with it? Revoke the link in one click, or remove the repo's access in your 
 
 ## Privacy
 
-Your code is read on demand through GitHub's official app permissions and shown in the browser. Share links carry no passwords or tokens — only an opaque, single-purpose identifier tied to one repository. Nothing about your repository is stored on our side beyond the link mapping you create.
+Your code is read on demand through GitHub's official app permissions and shown in the browser. Share links carry no passwords or tokens — only an opaque, single-purpose identifier tied to one repository. Nothing about your repository is stored on our side beyond the link mapping you create. Read [Privacy](https://www.github-unlisted.com/privacy) for the complete statement.
 
 ## Questions
 
 See the [FAQ](https://github-unlisted.com/faq).
+
+## AI use disclaimer
+
+Parts of the UI, have been built by AI - [Claude](Claude.ai) under strict manual review, guidelines and manual testing.
 
 ---
 
