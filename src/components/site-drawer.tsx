@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { createPortal } from "react-dom";
 
 interface Props {
 	signedIn: boolean;
@@ -9,6 +10,11 @@ interface Props {
 
 export function SiteDrawer({ signedIn, active = null }: Props) {
 	const [open, setOpen] = React.useState(false);
+	const [mounted, setMounted] = React.useState(false);
+
+	React.useEffect(() => {
+		setMounted(true);
+	}, []);
 
 	React.useEffect(() => {
 		if (!open) {
@@ -26,46 +32,8 @@ export function SiteDrawer({ signedIn, active = null }: Props) {
 		};
 	}, [open]);
 
-	return (
+	const overlay = (
 		<>
-			<button
-				type="button"
-				className="hamburger"
-				aria-label={open ? "Close menu" : "Open menu"}
-				aria-expanded={open}
-				aria-controls="site-drawer-panel"
-				onClick={() => setOpen((v) => !v)}
-			>
-				{open ? (
-					<svg
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						strokeWidth="2"
-						strokeLinecap="round"
-						strokeLinejoin="round"
-						aria-hidden="true"
-					>
-						<line x1="18" y1="6" x2="6" y2="18" />
-						<line x1="6" y1="6" x2="18" y2="18" />
-					</svg>
-				) : (
-					<svg
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						strokeWidth="2"
-						strokeLinecap="round"
-						strokeLinejoin="round"
-						aria-hidden="true"
-					>
-						<line x1="3" y1="6" x2="21" y2="6" />
-						<line x1="3" y1="12" x2="21" y2="12" />
-						<line x1="3" y1="18" x2="21" y2="18" />
-					</svg>
-				)}
-			</button>
-
 			{open && (
 				<button
 					type="button"
@@ -74,7 +42,6 @@ export function SiteDrawer({ signedIn, active = null }: Props) {
 					onClick={() => setOpen(false)}
 				/>
 			)}
-
 			<aside
 				id="site-drawer-panel"
 				className="drawer-panel"
@@ -143,6 +110,52 @@ export function SiteDrawer({ signedIn, active = null }: Props) {
 					)}
 				</nav>
 			</aside>
+		</>
+	);
+
+	return (
+		<>
+			<button
+				type="button"
+				className="hamburger"
+				aria-label={open ? "Close menu" : "Open menu"}
+				aria-expanded={open}
+				aria-controls="site-drawer-panel"
+				onClick={() => setOpen((v) => !v)}
+			>
+				{open ? (
+					<svg
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						strokeWidth="2"
+						strokeLinecap="round"
+						strokeLinejoin="round"
+						aria-hidden="true"
+					>
+						<line x1="18" y1="6" x2="6" y2="18" />
+						<line x1="6" y1="6" x2="18" y2="18" />
+					</svg>
+				) : (
+					<svg
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						strokeWidth="2"
+						strokeLinecap="round"
+						strokeLinejoin="round"
+						aria-hidden="true"
+					>
+						<line x1="3" y1="6" x2="21" y2="6" />
+						<line x1="3" y1="12" x2="21" y2="12" />
+						<line x1="3" y1="18" x2="21" y2="18" />
+					</svg>
+				)}
+			</button>
+			{/* Portal so the backdrop + panel escape any stacking context
+			    created by the surrounding nav (the dashboard topbar has
+			    backdrop-filter which traps fixed children otherwise). */}
+			{mounted && createPortal(overlay, document.body)}
 		</>
 	);
 }
