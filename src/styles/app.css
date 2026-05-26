@@ -1129,6 +1129,9 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	.dashboard__pills-select {
 		display: block;
 	}
+	.dashboard__searchrow {
+		padding-right: 10px;
+	}
 }
 
 /* Sheet breakpoint — sidebar leaves the grid and becomes a fixed
