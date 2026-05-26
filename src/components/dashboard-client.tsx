@@ -309,49 +309,66 @@ export function DashboardClient({
 					</span>
 				</div>
 
-				<div className="dashboard__searchrow">
-					<label className="field">
-						<span className="field__icon" aria-hidden="true">
-							<svg
-								width="15"
-								height="15"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								strokeWidth="2"
-								strokeLinecap="round"
-								strokeLinejoin="round"
-							>
-								<circle cx="11" cy="11" r="7" />
-								<line x1="21" y1="21" x2="16.65" y2="16.65" />
-							</svg>
-						</span>
-						<input
-							type="search"
-							placeholder="Search repositories"
-							value={query}
-							onChange={(e) => setQuery(e.target.value)}
-						/>
-					</label>
-				</div>
+				<div className="dashboard__filters">
+					<div className="dashboard__searchrow">
+						<label className="field">
+							<span className="field__icon" aria-hidden="true">
+								<svg
+									width="15"
+									height="15"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									strokeWidth="2"
+									strokeLinecap="round"
+									strokeLinejoin="round"
+								>
+									<circle cx="11" cy="11" r="7" />
+									<line x1="21" y1="21" x2="16.65" y2="16.65" />
+								</svg>
+							</span>
+							<input
+								type="search"
+								placeholder="Search repositories"
+								value={query}
+								onChange={(e) => setQuery(e.target.value)}
+							/>
+						</label>
+					</div>
 
-				<div
-					className="dashboard__pills"
-					role="tablist"
-					aria-label="Filter repositories"
-				>
-					{pills.map((p) => (
-						<button
-							key={p.key}
-							type="button"
-							className="pill"
-							role="tab"
-							aria-selected={filter === p.key}
-							onClick={() => setFilter(p.key)}
-						>
-							{p.label} <span className="pill__count">{p.n}</span>
-						</button>
-					))}
+					{/* Desktop: button row. Tablet/phone: native select (below).
+					    Visibility is swapped by media query in app.css. */}
+					<div
+						className="dashboard__pills"
+						role="tablist"
+						aria-label="Filter repositories"
+					>
+						{pills.map((p) => (
+							<button
+								key={p.key}
+								type="button"
+								className="pill"
+								role="tab"
+								aria-selected={filter === p.key}
+								onClick={() => setFilter(p.key)}
+							>
+								{p.label} <span className="pill__count">{p.n}</span>
+							</button>
+						))}
+					</div>
+
+					<select
+						className="dashboard__pills-select"
+						aria-label="Filter repositories"
+						value={filter}
+						onChange={(e) => setFilter(e.target.value as Filter)}
+					>
+						{pills.map((p) => (
+							<option key={p.key} value={p.key}>
+								{p.label} ({p.n})
+							</option>
+						))}
+					</select>
 				</div>
 
 				<div className="repo-list">

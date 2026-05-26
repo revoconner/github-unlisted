@@ -429,10 +429,19 @@ body[data-viewer-tree="open"] {
 	font-weight: 400;
 }
 
+/* Filters row: search on the left, filter group on the right. Two-col
+   grid on desktop and tablet (collapses to single column on phone). */
+.dashboard__filters {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	gap: 12px;
+	align-items: center;
+	margin-bottom: 18px;
+}
 .dashboard__searchrow {
 	display: flex;
 	gap: 10px;
-	margin-bottom: 14px;
+	min-width: 0;
 }
 .btn--filter {
 	display: inline-flex;
@@ -447,24 +456,29 @@ body[data-viewer-tree="open"] {
 	font-size: var(--fs-ui);
 }
 
+/* Desktop pill bar: five equal-width slots so every pill shares the
+   width of the widest one. The search field height (42px) is matched
+   on each pill so the two halves of the filters row align. */
 .dashboard__pills {
-	display: flex;
+	display: grid;
+	grid-template-columns: repeat(5, 1fr);
 	gap: 6px;
-	margin-bottom: 18px;
-	flex-wrap: wrap;
 }
 .pill {
 	display: inline-flex;
 	align-items: center;
+	justify-content: center;
 	gap: 7px;
-	padding: 5px 11px;
-	border-radius: 7px;
+	height: 42px;
+	padding: 0 14px;
+	border-radius: 10px;
 	background: transparent;
 	border: 1px solid var(--border-soft);
 	color: var(--text-3);
 	font-size: var(--fs-btn);
 	cursor: pointer;
 }
+.pill[aria-selected="true"],
 .pill[aria-pressed="true"] {
 	background: var(--surface-2);
 	border-color: var(--border-strong);
@@ -475,8 +489,37 @@ body[data-viewer-tree="open"] {
 	font-size: 10.5px;
 	color: var(--faint);
 }
+.pill[aria-selected="true"] .pill__count,
 .pill[aria-pressed="true"] .pill__count {
 	color: var(--text-3);
+}
+
+/* Tablet/phone filter dropdown — replaces the pill bar via media
+   query swap below. Custom chevron is encoded as a data URI so
+   appearance:none doesn't strip the affordance. */
+.dashboard__pills-select {
+	display: none;
+	height: 42px;
+	padding: 0 38px 0 14px;
+	border-radius: 10px;
+	background-color: var(--surface);
+	border: 1px solid var(--border);
+	color: var(--text);
+	font: inherit;
+	font-size: var(--fs-ui);
+	cursor: pointer;
+	min-width: 0;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23b4b7c0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right 12px center;
+	background-size: 12px;
+}
+.dashboard__pills-select:focus {
+	outline: none;
+	border-color: var(--border-strong);
 }
 
 /* Repo list card */
@@ -531,10 +574,10 @@ body[data-viewer-tree="open"] {
 	flex-wrap: wrap;
 }
 /* Shares with no auto-revoke read as steady-state, not time-sensitive,
-   so dim the whole line to faint — keeps accent for the rows that
+   so dim the whole line to different color — keeps accent for the rows that
    actually have a deadline. */
 .repo-row__link--idle {
-	color: var(--faint);
+	color: var(--amber);
 }
 
 .repo-row__empty {
@@ -1074,6 +1117,15 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	.readme {
 		padding: 30px 32px;
 	}
+	/* Swap the pill bar for a dropdown — the bar fits poorly once the
+	   sidebar narrows. The select keeps the same filter semantics in
+	   a single compact control. */
+	.dashboard__pills {
+		display: none;
+	}
+	.dashboard__pills-select {
+		display: block;
+	}
 }
 
 /* Sheet breakpoint — sidebar leaves the grid and becomes a fixed
@@ -1133,6 +1185,14 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 		flex-direction: column;
 		gap: 4px;
 		align-items: flex-start;
+	}
+	/* Stack filters: search on row 1 (full width of .dashboard), dropdown
+	   on row 2 (also full width). */
+	.dashboard__filters {
+		grid-template-columns: 1fr;
+	}
+	.dashboard__pills-select {
+		width: 100%;
 	}
 
 	.repo-row {
