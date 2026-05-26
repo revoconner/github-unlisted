@@ -922,7 +922,7 @@ body[data-drawer="open"] {
 	   of floating in the vertical middle. */
 	.hero {
 		flex: 0 0 auto;
-		padding: 16px 22px 0;
+		padding: 100px 22px;
 		place-items: start center;
 	}
 	.hero__sub {
