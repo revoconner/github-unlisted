@@ -39,10 +39,29 @@ Your code is read on demand through GitHub's official app permissions and shown 
 
 See the [FAQ](https://github-unlisted.com/faq).
 
+## Is it down?
+
+See the [Status](https://www.github-unlisted.com/status) page for ongoing maintenance or problems. 
+
+Please note the page is updated manually.
+
 ## AI use disclaimer
 
-Parts of the UI, have been built by AI - [Claude](Claude.ai) under strict manual review, guidelines and manual testing.
+Parts of the website and app have been maade with AI - [Claude](Claude.ai) under strict manual review, guidelines and manual testing.
+
+These parts include
+- UI responsive design
+- Parts of next.js development
+- Research and resource aggregation for practices for Github apps
+- Research and resource aggregation for upstash on vercel for database
+- Accessibility enhancement on web UI
+- Parts of user facing documents, texts etc for better readability
+
+**Use of AI in this project is higher than what I normally use, this is for two reasons**
+- I've been sick and unable to sit at my workstation. So I have been using ipad and RDP to remote into it. Delegating tasks under such condition was a necessity. 
+- Web apps aren't really my thing.
+
 
 ---
 
-Built by **Rév** · [www.revoconner.com](https://www.revoconner.com)
+Originally built for my personal use on my website·  [www.revoconner.com](https://www.revoconner.com)
