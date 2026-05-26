@@ -83,11 +83,6 @@ button {
 	cursor: pointer;
 }
 
-/* Lock background scroll when the drawer is open on phone. */
-body[data-drawer="open"] {
-	overflow: hidden;
-}
-
 .bloom {
 	position: fixed;
 	inset: 0;
@@ -132,30 +127,6 @@ body[data-drawer="open"] {
 	justify-content: space-between;
 	padding: 26px 44px;
 	gap: 16px;
-}
-
-.site-nav .nav-links {
-	display: flex;
-	gap: 28px;
-	font-size: var(--fs-ui);
-	color: var(--text-2);
-	letter-spacing: 0.1em;
-}
-
-.site-nav .nav-links a {
-	color: var(--text-2);
-	padding-bottom: 4px;
-	border-bottom: 1px solid transparent;
-	transition:
-		color 0.2s ease,
-		border-color 0.2s ease;
-}
-.site-nav .nav-links a:hover {
-	color: var(--text);
-}
-.site-nav .nav-links a.is-active {
-	color: var(--text);
-	border-bottom-color: var(--accent);
 }
 
 .site-nav .nav-cta {
@@ -550,7 +521,6 @@ body[data-drawer="open"] {
 	color: var(--accent);
 	border-bottom: 1px dashed rgba(255, 56, 174, 0.4);
 }
-/* biome-ignore lint/style/noDescendingSpecificity: intentional hover refinement of .faq-a__body a */
 .faq-a__body a:hover {
 	border-bottom-style: solid;
 }
@@ -611,7 +581,6 @@ body[data-drawer="open"] {
 .legal a {
 	color: var(--accent);
 }
-/* biome-ignore lint/style/noDescendingSpecificity: intentional hover refinement of .legal a */
 .legal a:hover {
 	text-decoration: underline;
 }
@@ -711,147 +680,6 @@ body[data-drawer="open"] {
 	letter-spacing: 0.08em;
 }
 
-/* Pulsing amber indicator. Reused by the desktop nav links and the
-   mobile drawer link to signal an ongoing incident on /status. */
-.status-dot {
-	display: inline-block;
-	width: 8px;
-	height: 8px;
-	margin-left: 6px;
-	border-radius: 50%;
-	background: var(--amber);
-	box-shadow: 0 0 8px 1px rgba(245, 183, 86, 0.7);
-	vertical-align: middle;
-	animation: status-dot-pulse 2.4s ease-in-out infinite;
-}
-@keyframes status-dot-pulse {
-	0%,
-	100% {
-		opacity: 1;
-		transform: scale(1);
-	}
-	50% {
-		opacity: 0.55;
-		transform: scale(0.85);
-	}
-}
-
-/* ─── Hamburger + drawer (phone only) ──────────────────────── */
-.hamburger {
-	display: none;
-	align-items: center;
-	justify-content: center;
-	width: 40px;
-	height: 40px;
-	background: transparent;
-	border: 1px solid var(--border);
-	border-radius: 10px;
-	color: var(--text);
-	cursor: pointer;
-	padding: 0;
-	transition:
-		border-color 0.15s ease,
-		background 0.15s ease;
-}
-.hamburger:hover {
-	border-color: var(--border-strong);
-	background: rgba(255, 255, 255, 0.03);
-}
-.hamburger svg {
-	width: 18px;
-	height: 18px;
-}
-
-.drawer-backdrop {
-	position: fixed;
-	inset: 0;
-	background: rgba(0, 0, 0, 0.55);
-	backdrop-filter: blur(2px);
-	-webkit-backdrop-filter: blur(2px);
-	z-index: 70;
-	border: 0;
-	padding: 0;
-	cursor: pointer;
-}
-
-.drawer-panel {
-	position: fixed;
-	top: 0;
-	right: 0;
-	bottom: 0;
-	width: 280px;
-	max-width: 86vw;
-	background: var(--surface);
-	border-left: 1px solid var(--border);
-	z-index: 71;
-	display: flex;
-	flex-direction: column;
-	transform: translateX(100%);
-	transition: transform 0.25s ease;
-}
-.drawer-panel[data-open="true"] {
-	transform: translateX(0);
-}
-
-.drawer-panel__head {
-	display: flex;
-	align-items: center;
-	justify-content: flex-end;
-	padding: 16px 18px;
-	border-bottom: 1px solid var(--border-soft);
-}
-.drawer-panel__close {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	width: 36px;
-	height: 36px;
-	background: transparent;
-	border: 1px solid var(--border);
-	border-radius: 8px;
-	color: var(--text-2);
-	cursor: pointer;
-	padding: 0;
-}
-.drawer-panel__close:hover {
-	color: var(--text);
-	border-color: var(--border-strong);
-}
-.drawer-panel__close svg {
-	width: 14px;
-	height: 14px;
-}
-
-.drawer-panel__links {
-	display: flex;
-	flex-direction: column;
-	padding: 6px 0;
-}
-.drawer-panel__links a {
-	padding: 14px 22px;
-	font-size: var(--fs-body);
-	color: var(--text-2);
-	border-bottom: 1px solid var(--border-soft);
-	letter-spacing: 0.04em;
-	transition:
-		color 0.15s ease,
-		background 0.15s ease;
-}
-/* biome-ignore lint/style/noDescendingSpecificity: targets a different DOM subtree than .site-nav .nav-links a */
-.drawer-panel__links a:hover {
-	color: var(--text);
-	background: rgba(255, 255, 255, 0.025);
-}
-/* biome-ignore lint/style/noDescendingSpecificity: targets a different DOM subtree than .site-nav .nav-links a */
-.drawer-panel__links a.is-active {
-	color: var(--accent);
-}
-.drawer-panel__links a.is-cta {
-	color: var(--accent);
-	font-weight: 500;
-	background: rgba(255, 56, 174, 0.04);
-}
-
 /* ─── Responsive overrides ─────────────────────────────────── */
 
 /* Tablet band — single layout pass for 1250 and below. */
@@ -895,14 +723,10 @@ body[data-drawer="open"] {
 		padding: 16px 22px;
 		gap: 10px;
 	}
-	.site-nav .nav-links {
-		display: none;
-	}
+	/* CTA only renders on marketing pages — hide on phone alongside the
+	   nav-links (which globals.css already handles). */
 	.site-nav .nav-cta {
 		display: none;
-	}
-	.hamburger {
-		display: inline-flex;
 	}
 
 	/* Footer pushed to the bottom of the viewport regardless of how
@@ -976,13 +800,6 @@ body[data-drawer="open"] {
 	}
 	.status-row__end {
 		text-align: left;
-	}
-}
-
-/* Keep hamburger + drawer out of layout above phone. */
-@media (min-width: 761px) {
-	.hamburger {
-		display: none;
 	}
 }
 

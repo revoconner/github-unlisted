@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import * as React from "react";
+import { SiteDrawer } from "@/components/site-drawer";
 
 interface Repo {
 	installationId: number;
@@ -277,6 +278,15 @@ export function DashboardClient({
 						<span className="post">unlisted</span>
 					</span>
 				</a>
+
+				<nav className="nav-links" aria-label="Primary">
+					<a href="/faq">FAQ</a>
+					<a href="/privacy">PRIVACY</a>
+					<a href="/status">
+						STATUS <span className="status-dot" aria-hidden="true" />
+					</a>
+				</nav>
+
 				<div className="topbar__right">
 					<a className="btn btn--ghost btn--sm" href="/api/github/logout">
 						Sign out
@@ -288,6 +298,7 @@ export function DashboardClient({
 					>
 						{login.slice(0, 2).toUpperCase()}
 					</span>
+					<SiteDrawer signedIn={true} active="dashboard" />
 				</div>
 			</header>
 

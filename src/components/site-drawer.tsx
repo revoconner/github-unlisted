@@ -4,7 +4,7 @@ import * as React from "react";
 
 interface Props {
 	signedIn: boolean;
-	active?: "faq" | "privacy" | "status" | null;
+	active?: "faq" | "privacy" | "status" | "dashboard" | null;
 }
 
 export function SiteDrawer({ signedIn, active = null }: Props) {
@@ -129,9 +129,11 @@ export function SiteDrawer({ signedIn, active = null }: Props) {
 					</a>
 					{signedIn ? (
 						<>
-							<a href="/app" className="is-cta">
-								Dashboard
-							</a>
+							{active !== "dashboard" && (
+								<a href="/app" className="is-cta">
+									Dashboard
+								</a>
+							)}
 							<a href="/api/github/logout">Sign out</a>
 						</>
 					) : (
