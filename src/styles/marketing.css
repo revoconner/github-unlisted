@@ -666,28 +666,47 @@ button {
 	overflow: hidden;
 }
 
-/* Two-column grid: time + pill | body. Collapses to a single column at
-   the same breakpoint as the dashboard repo rows (1250 and below). */
-.status-current-row,
-.status-log-row {
+/* Current status: pill column shrinks to its intrinsic width (just
+   the pill on okay, or pill stacked above the start-time mono line
+   on other states), body fills the rest. Vertically centered so a
+   short head sits next to a multi-line body cleanly. */
+.status-current-row {
 	display: grid;
-	grid-template-columns: minmax(200px, 260px) 1fr;
+	grid-template-columns: min-content 1fr;
 	gap: 22px;
-	align-items: start;
+	align-items: center;
 	padding: 20px 24px;
 	border-bottom: 1px solid var(--border-soft);
 }
-.status-current-row:last-child,
-.status-log-row:last-child {
+.status-current-row:last-child {
 	border-bottom: 0;
 }
-
-.status-current-row__head,
-.status-log-row__head {
+.status-current-row__head {
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
 	align-items: flex-start;
+}
+
+/* Historical log: single column always. Inside the head, time and the
+   two pills sit in a horizontal row on tablet/desktop, stacking on
+   phone (handled in the phone @media block). */
+.status-log-row {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 12px;
+	padding: 20px 24px;
+	border-bottom: 1px solid var(--border-soft);
+}
+.status-log-row:last-child {
+	border-bottom: 0;
+}
+.status-log-row__head {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 12px;
+	flex-wrap: wrap;
 }
 .status-log-row__pills {
 	display: flex;
@@ -748,6 +767,47 @@ button {
 	font-weight: 600;
 }
 
+/* Collapsible terminology help below the current status card. Native
+   <details>; default arrow stripped and replaced with a +/− indicator. */
+.status-help-collapsible {
+	margin-top: 18px;
+	border-top: 1px solid var(--border-soft);
+}
+.status-help-collapsible summary {
+	list-style: none;
+	cursor: pointer;
+	padding: 14px 4px;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	color: var(--text-2);
+	font-size: var(--fs-body);
+	font-weight: 500;
+	letter-spacing: 0.01em;
+	transition: color 0.15s ease;
+}
+.status-help-collapsible summary::-webkit-details-marker {
+	display: none;
+}
+.status-help-collapsible summary::after {
+	content: "+";
+	margin-left: auto;
+	font-family: var(--font-mono);
+	font-size: 1.2em;
+	color: var(--accent);
+	line-height: 1;
+}
+.status-help-collapsible[open] summary::after {
+	content: "−";
+}
+.status-help-collapsible summary:hover,
+.status-help-collapsible[open] summary {
+	color: var(--text);
+}
+.status-help-collapsible[open] .status-helpsheet {
+	padding-bottom: 18px;
+}
+
 /* ─── Responsive overrides ─────────────────────────────────── */
 
 /* Tablet band — single layout pass for 1250 and below. */
@@ -766,13 +826,6 @@ button {
 	}
 	.status-content {
 		padding: 50px 32px 70px;
-	}
-	/* Status rows: collapse the two-column grid (time+pill | body) to a
-	   single column. Matches the dashboard's tablet repo-row collapse. */
-	.status-current-row,
-	.status-log-row {
-		grid-template-columns: 1fr;
-		gap: 14px;
 	}
 	.site-footer {
 		padding: 18px 32px;
@@ -875,6 +928,11 @@ button {
 	.status-current-row,
 	.status-log-row {
 		padding: 16px 18px;
+	}
+	/* Log row head stacks vertically on phone: time on top, pills below. */
+	.status-log-row__head {
+		flex-direction: column;
+		align-items: flex-start;
 	}
 }
 
