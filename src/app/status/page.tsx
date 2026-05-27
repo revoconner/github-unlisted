@@ -43,31 +43,6 @@ const log: LogEntry[] = [
 		severity: "medium",
 		body: "UI changes for the dashboard to be more user friendly and have coherent user experience across different device types. Users on phones and tablets have experienced slight error with page navigation. Users may have had inconsistent UI experience with page refresh. Shared links were not affected.",
 	},
-	// Dummy entries (remove once you've verified the layout looks right).
-	{
-		id: "dummy-2026-04-15-maint-critical",
-		startedUtc: "2026-04-15 14:20 UTC",
-		endedUtc: "2026-04-15 18:45 UTC",
-		category: "maintenance",
-		severity: "critical",
-		body: "Planned migration of the share-link key-value store to a new Upstash region. Dashboard sign-in and link creation were unavailable for the duration. Existing share links continued to resolve from the read replica throughout the window.",
-	},
-	{
-		id: "dummy-2026-03-22-incident-medium",
-		startedUtc: "2026-03-22 09:15 UTC",
-		endedUtc: "2026-03-22 11:30 UTC",
-		category: "incident",
-		severity: "medium",
-		body: "Elevated 5xx rate from the GitHub Contents API caused intermittent failures rendering large directory listings. The viewer fell back to its current-directory list while the upstream recovered. No share-link records were affected.",
-	},
-	{
-		id: "dummy-2026-02-10-incident-critical",
-		startedUtc: "2026-02-10 22:00 UTC",
-		endedUtc: "2026-02-11 02:15 UTC",
-		category: "incident",
-		severity: "critical",
-		body: "Vercel regional incident in iad1 took the dashboard and viewer offline. Share-link resolution was unavailable for the full duration. Recovery followed Vercel's regional failover. Post-incident review confirmed no data loss.",
-	},
 ];
 
 // Body copy for each current-status type. Kept here (not in
