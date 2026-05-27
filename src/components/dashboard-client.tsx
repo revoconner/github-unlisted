@@ -3,6 +3,11 @@
 import { useRouter } from "next/navigation";
 import * as React from "react";
 import { SiteDrawer } from "@/components/site-drawer";
+import {
+	CURRENT_STATUS,
+	statusDotAriaLabel,
+	statusDotClass,
+} from "@/lib/site-status";
 
 interface Repo {
 	installationId: number;
@@ -282,7 +287,14 @@ export function DashboardClient({
 				<nav className="nav-links" aria-label="Primary">
 					<a href="/faq">FAQ</a>
 					<a href="/privacy">PRIVACY</a>
-					<a href="/status">STATUS</a>
+					<a href="/status">
+						STATUS{" "}
+						<span
+							className={`status-dot ${statusDotClass(CURRENT_STATUS)}`}
+							role="img"
+							aria-label={statusDotAriaLabel(CURRENT_STATUS)}
+						/>
+					</a>
 				</nav>
 
 				<div className="topbar__right">

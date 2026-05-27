@@ -2,6 +2,11 @@
 
 import * as React from "react";
 import { createPortal } from "react-dom";
+import {
+	CURRENT_STATUS,
+	statusDotAriaLabel,
+	statusDotClass,
+} from "@/lib/site-status";
 
 interface Props {
 	signedIn: boolean;
@@ -92,7 +97,12 @@ export function SiteDrawer({ signedIn, active = null }: Props) {
 						className={active === "status" ? "is-active" : undefined}
 						aria-current={active === "status" ? "page" : undefined}
 					>
-						Status
+						Status{" "}
+						<span
+							className={`status-dot ${statusDotClass(CURRENT_STATUS)}`}
+							role="img"
+							aria-label={statusDotAriaLabel(CURRENT_STATUS)}
+						/>
 					</a>
 					{signedIn ? (
 						<>

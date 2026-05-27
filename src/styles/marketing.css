@@ -639,45 +639,176 @@ button {
 	text-wrap: balance;
 	text-shadow: var(--shadow-hero);
 }
-.status-list {
-	border-top: 1px solid var(--border-soft);
-	list-style: none;
-	margin: 0;
-	padding: 0;
+
+/* Section wrapper. h2 lives only inside .status-section so no global
+   h2 typography is introduced for the rest of the site. */
+.status-section {
+	margin-bottom: 36px;
 }
-.status-row {
+.status-section:last-child {
+	margin-bottom: 0;
+}
+.status-section h2 {
+	margin: 0 0 14px;
+	font-family: var(--font-sans);
+	font-size: var(--fs-h2);
+	font-weight: 600;
+	letter-spacing: -0.015em;
+	color: var(--text);
+}
+
+/* Card chrome shared by the Current Status section and the Historical
+   Status Log. Mirrors the dashboard's .repo-list. */
+.status-card {
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: 12px;
+	overflow: hidden;
+}
+
+/* Current status: single-column grid; head is a horizontal flex row
+   (pill + start-time side by side) anchored on its center so pill and
+   mono text line up regardless of which is taller. */
+.status-current-row {
 	display: grid;
-	grid-template-columns: 200px 1fr auto;
-	gap: 18px;
-	align-items: start;
-	padding: 20px 4px;
+	grid-template-columns: 1fr;
+	align-items: center;
+	gap: 12px;
+	padding: 20px 24px;
 	border-bottom: 1px solid var(--border-soft);
 }
-.status-row__time {
+.status-current-row:last-child {
+	border-bottom: 0;
+}
+.status-current-row__head {
+	display: flex;
+	flex-direction: row;
+	gap: 12px;
+	align-items: anchor-center;
+	flex-wrap: wrap;
+}
+
+/* Historical log: single column always. Inside the head, time and the
+   two pills sit in a horizontal row on tablet/desktop, stacking on
+   phone (handled in the phone @media block). */
+.status-log-row {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 12px;
+	padding: 20px 24px;
+	border-bottom: 1px solid var(--border-soft);
+}
+.status-log-row:last-child {
+	border-bottom: 0;
+}
+.status-log-row__head {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 12px;
+	flex-wrap: wrap;
+}
+.status-log-row__pills {
+	display: flex;
+	gap: 6px;
+	flex-wrap: wrap;
+}
+
+.status-time {
 	font-family: var(--font-mono);
 	font-size: var(--fs-caption);
 	color: var(--text-3);
 	letter-spacing: 0.02em;
-	white-space: nowrap;
 }
-.status-row__symptoms {
+
+.status-current-row__body,
+.status-log-row__body {
 	font-size: var(--fs-body);
-	color: var(--text);
-	line-height: 1.55;
+	color: var(--text-2);
+	line-height: 1.6;
 	text-wrap: pretty;
 }
-.status-row__end {
-	font-family: var(--font-mono);
-	font-size: var(--fs-caption);
-	color: var(--text-3);
-	letter-spacing: 0.04em;
-	white-space: nowrap;
-	text-align: right;
+.status-current-row__contact {
+	color: var(--accent);
+	text-decoration: underline;
+	text-underline-offset: 3px;
+	text-decoration-thickness: 1px;
 }
-.status-row__end.is-ongoing {
-	color: var(--amber);
-	text-transform: uppercase;
-	letter-spacing: 0.08em;
+.status-current-row__contact:hover {
+	color: var(--accent);
+	opacity: 0.85;
+}
+
+/* Quick helpsheet: plain bullet list, no card. */
+.status-helpsheet {
+	margin: 0;
+	padding-left: 22px;
+	font-size: var(--fs-body);
+	color: var(--text-2);
+	line-height: 1.65;
+	list-style: disc;
+}
+.status-helpsheet > li {
+	margin: 8px 0;
+}
+.status-helpsheet > li::marker {
+	color: var(--accent);
+}
+.status-helpsheet ul {
+	margin: 8px 0 4px;
+	padding-left: 22px;
+	list-style: disc;
+}
+.status-helpsheet ul > li::marker {
+	color: var(--text-3);
+}
+.status-helpsheet strong {
+	color: var(--text);
+	font-weight: 600;
+}
+
+/* Collapsible terminology help below the current status card. Native
+   <details>; default arrow stripped and replaced with a +/− indicator.
+   Border sits below the entire collapsible so it acts as a closing
+   rule for the section regardless of open state. Summary text uses the
+   h2 type token; the +/− stays in the smaller text-2 size/color. */
+.status-help-collapsible {
+	margin-top: 18px;
+	border-bottom: 1px solid var(--border-soft);
+}
+.status-help-collapsible summary {
+	list-style: none;
+	cursor: pointer;
+	padding: 14px 4px;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	color: var(--text-2);
+	font-size: var(--fs-h2);
+	font-weight: 500;
+	letter-spacing: 0.01em;
+	transition: color 0.15s ease;
+}
+.status-help-collapsible summary::-webkit-details-marker {
+	display: none;
+}
+.status-help-collapsible summary::after {
+	content: "+";
+	margin-left: auto;
+	font-family: var(--font-mono);
+	font-size: var(--fs-body);
+	color: var(--text-2);
+	line-height: 1;
+}
+.status-help-collapsible[open] summary::after {
+	content: "−";
+}
+.status-help-collapsible summary:hover,
+.status-help-collapsible[open] summary {
+	color: var(--text);
+}
+.status-help-collapsible[open] .status-helpsheet {
+	padding-bottom: 18px;
 }
 
 /* ─── Responsive overrides ─────────────────────────────────── */
@@ -694,6 +825,9 @@ button {
 		padding: 50px 32px 70px;
 	}
 	.legal-content {
+		padding: 50px 32px 70px;
+	}
+	.status-content {
 		padding: 50px 32px 70px;
 	}
 	.site-footer {
@@ -794,12 +928,14 @@ button {
 	.status-content {
 		padding: 22px 22px 50px;
 	}
-	.status-row {
-		grid-template-columns: 1fr;
-		gap: 6px;
+	.status-current-row,
+	.status-log-row {
+		padding: 16px 18px;
 	}
-	.status-row__end {
-		text-align: left;
+	/* Log row head stacks vertically on phone: time on top, pills below. */
+	.status-log-row__head {
+		flex-direction: column;
+		align-items: flex-start;
 	}
 }
 
