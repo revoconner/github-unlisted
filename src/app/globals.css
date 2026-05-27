@@ -108,15 +108,19 @@ body[data-drawer="open"] {
 	border-color: rgba(239, 68, 68, 0.32);
 	color: #ef4444;
 }
+/* Category pills (historical log). Both share a dark transparent
+   background + neutral border so they read as "category labels" and
+   stay visually distinct from the severity pills (--medium / --critical)
+   that sit next to them on the same row. */
 .chip--incident {
-	background: rgba(239, 68, 68, 0.14);
-	border-color: rgba(239, 68, 68, 0.32);
+	background: #00000075;
+	border-color: #565656;
 	color: #ef4444;
 }
 .chip--maintenance {
-	background: rgba(255, 255, 255, 0.04);
-	border-color: rgba(255, 255, 255, 0.1);
-	color: #b4b7c0;
+	background: #00000075;
+	border-color: #565656;
+	color: #f5b756;
 }
 
 /* Hamburger button + slide-in drawer panel. Visible only on phone via

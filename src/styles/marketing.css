@@ -666,15 +666,14 @@ button {
 	overflow: hidden;
 }
 
-/* Current status: pill column shrinks to its intrinsic width (just
-   the pill on okay, or pill stacked above the start-time mono line
-   on other states), body fills the rest. Vertically centered so a
-   short head sits next to a multi-line body cleanly. */
+/* Current status: single-column grid; head is a horizontal flex row
+   (pill + start-time side by side) anchored on its center so pill and
+   mono text line up regardless of which is taller. */
 .status-current-row {
 	display: grid;
-	grid-template-columns: min-content 1fr;
-	gap: 22px;
+	grid-template-columns: 1fr;
 	align-items: center;
+	gap: 12px;
 	padding: 20px 24px;
 	border-bottom: 1px solid var(--border-soft);
 }
@@ -683,9 +682,10 @@ button {
 }
 .status-current-row__head {
 	display: flex;
-	flex-direction: column;
-	gap: 8px;
-	align-items: flex-start;
+	flex-direction: row;
+	gap: 12px;
+	align-items: anchor-center;
+	flex-wrap: wrap;
 }
 
 /* Historical log: single column always. Inside the head, time and the
@@ -768,10 +768,13 @@ button {
 }
 
 /* Collapsible terminology help below the current status card. Native
-   <details>; default arrow stripped and replaced with a +/− indicator. */
+   <details>; default arrow stripped and replaced with a +/− indicator.
+   Border sits below the entire collapsible so it acts as a closing
+   rule for the section regardless of open state. Summary text uses the
+   h2 type token; the +/− stays in the smaller text-2 size/color. */
 .status-help-collapsible {
 	margin-top: 18px;
-	border-top: 1px solid var(--border-soft);
+	border-bottom: 1px solid var(--border-soft);
 }
 .status-help-collapsible summary {
 	list-style: none;
@@ -781,7 +784,7 @@ button {
 	align-items: center;
 	gap: 12px;
 	color: var(--text-2);
-	font-size: var(--fs-body);
+	font-size: var(--fs-h2);
 	font-weight: 500;
 	letter-spacing: 0.01em;
 	transition: color 0.15s ease;
@@ -793,8 +796,8 @@ button {
 	content: "+";
 	margin-left: auto;
 	font-family: var(--font-mono);
-	font-size: 1.2em;
-	color: var(--accent);
+	font-size: var(--fs-body);
+	color: var(--text-2);
 	line-height: 1;
 }
 .status-help-collapsible[open] summary::after {

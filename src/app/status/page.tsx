@@ -173,13 +173,7 @@ export default async function StatusPage() {
 
 			<main className="status-content">
 				<div className="status-content__inner">
-					<div className="status-eyebrow">
-						<span className="rule" aria-hidden="true" />
-						<span className="label-accent">STATUS</span>
-						<span>· Operational health</span>
-					</div>
-
-					<h1 className="status-title">Status</h1>
+					<h1 className="status-title">Operational status</h1>
 
 					{/* Current status. The displayed row is driven by
 					    CURRENT_STATUS in src/lib/site-status.ts. */}
