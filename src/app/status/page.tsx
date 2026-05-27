@@ -204,7 +204,7 @@ export default async function StatusPage() {
 									</ul>
 								</li>
 								<li>
-									Uptime logs are not recorded. To get operational uptime,
+									Uptime logs are not recorded, because what would be the point.<br>To get operational uptime,
 									subtract the duration of logged events from your calculation.
 								</li>
 							</ul>
