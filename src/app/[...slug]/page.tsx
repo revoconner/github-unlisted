@@ -1,8 +1,10 @@
 import "@/styles/app.css";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { NavLinks } from "@/components/nav-links";
 import { RepoTree } from "@/components/repo-tree";
 import { SidebarTree } from "@/components/sidebar-tree";
+import { SiteDrawer } from "@/components/site-drawer";
 import { ViewerTreeToggle } from "@/components/viewer-tree-toggle";
 import { getInstallationOctokit } from "@/lib/github-app";
 import {
@@ -16,6 +18,7 @@ import { isMarkdown, renderMarkdown } from "@/lib/markdown";
 import { renderMarkdownGitHub } from "@/lib/markdown-github";
 import { buildHref, parseView } from "@/lib/repo-path";
 import { pageMetadata } from "@/lib/seo";
+import { getSession } from "@/lib/session";
 import { resolveShare } from "@/lib/share-store";
 
 export const dynamic = "force-dynamic";
@@ -190,6 +193,10 @@ export default async function ViewPage({
 		}
 	}
 
+	// Owner viewing their own share is signed in; recipients are not. Drives
+	// whether the Dashboard nav item appears.
+	const session = await getSession();
+
 	return (
 		<div className="app-shell">
 			<header className="topbar">
@@ -233,10 +240,14 @@ export default async function ViewPage({
 						<span className="post">unlisted</span>
 					</span>
 				</a>
+
+				<NavLinks signedIn={Boolean(session)} />
+
 				<div className="topbar__right">
 					<span className="topbar__meta">
 						{meta.fullName} · {ref}
 					</span>
+					<SiteDrawer signedIn={Boolean(session)} />
 				</div>
 			</header>
 

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { createPortal } from "react-dom";
+import { NAV_ITEMS, type NavActive } from "@/lib/nav";
 import {
 	CURRENT_STATUS,
 	statusDotAriaLabel,
@@ -10,7 +11,7 @@ import {
 
 interface Props {
 	signedIn: boolean;
-	active?: "faq" | "privacy" | "status" | "dashboard" | null;
+	active?: NavActive;
 }
 
 export function SiteDrawer({ signedIn, active = null }: Props) {
@@ -78,41 +79,30 @@ export function SiteDrawer({ signedIn, active = null }: Props) {
 					</button>
 				</div>
 				<nav className="drawer-panel__links" aria-label="Primary">
-					<a
-						href="/faq"
-						className={active === "faq" ? "is-active" : undefined}
-						aria-current={active === "faq" ? "page" : undefined}
-					>
-						FAQ
-					</a>
-					<a
-						href="/privacy"
-						className={active === "privacy" ? "is-active" : undefined}
-						aria-current={active === "privacy" ? "page" : undefined}
-					>
-						Privacy
-					</a>
-					<a
-						href="/status"
-						className={active === "status" ? "is-active" : undefined}
-						aria-current={active === "status" ? "page" : undefined}
-					>
-						Status{" "}
-						<span
-							className={`status-dot ${statusDotClass(CURRENT_STATUS)}`}
-							role="img"
-							aria-label={statusDotAriaLabel(CURRENT_STATUS)}
-						/>
-					</a>
+					{NAV_ITEMS.filter((item) => !item.signedInOnly || signedIn).map(
+						(item) => (
+							<a
+								key={item.key}
+								href={item.href}
+								className={active === item.key ? "is-active" : undefined}
+								aria-current={active === item.key ? "page" : undefined}
+							>
+								{item.label}
+								{item.dot && (
+									<>
+										{" "}
+										<span
+											className={`status-dot ${statusDotClass(CURRENT_STATUS)}`}
+											role="img"
+											aria-label={statusDotAriaLabel(CURRENT_STATUS)}
+										/>
+									</>
+								)}
+							</a>
+						),
+					)}
 					{signedIn ? (
-						<>
-							{active !== "dashboard" && (
-								<a href="/app" className="is-cta">
-									Dashboard
-								</a>
-							)}
-							<a href="/api/github/logout">Sign out</a>
-						</>
+						<a href="/api/github/logout">Sign out</a>
 					) : (
 						<a href="/api/github/login" className="is-cta">
 							Sign in

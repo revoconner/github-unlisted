@@ -1,13 +1,9 @@
 import "@/styles/marketing.css";
 import { JsonLd } from "@/components/json-ld";
+import { NavLinks } from "@/components/nav-links";
 import { SiteDrawer } from "@/components/site-drawer";
 import { breadcrumbLd, pageMetadata } from "@/lib/seo";
 import { getSession } from "@/lib/session";
-import {
-	CURRENT_STATUS,
-	statusDotAriaLabel,
-	statusDotClass,
-} from "@/lib/site-status";
 
 export const dynamic = "force-dynamic";
 
@@ -67,24 +63,17 @@ export default async function PrivacyPage() {
 					</span>
 				</a>
 
-				<nav className="nav-links" aria-label="Primary">
-					<a href="/faq">FAQ</a>
-					<a href="/privacy" className="is-active" aria-current="page">
-						PRIVACY
-					</a>
-					<a href="/status">
-						STATUS{" "}
-						<span
-							className={`status-dot ${statusDotClass(CURRENT_STATUS)}`}
-							role="img"
-							aria-label={statusDotAriaLabel(CURRENT_STATUS)}
-						/>
-					</a>
-				</nav>
+				<NavLinks signedIn={Boolean(session)} active="privacy" />
 
-				<a className="nav-cta" href={session ? "/app" : "/api/github/login"}>
-					{session ? "Dashboard" : "Sign In"}
-				</a>
+				{session ? (
+					<a className="nav-cta" href="/api/github/logout">
+						Sign Out
+					</a>
+				) : (
+					<a className="nav-cta" href="/api/github/login">
+						Sign In
+					</a>
+				)}
 
 				<SiteDrawer signedIn={Boolean(session)} active="privacy" />
 			</header>

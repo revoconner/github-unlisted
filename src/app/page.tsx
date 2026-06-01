@@ -1,11 +1,7 @@
 import "@/styles/marketing.css";
+import { NavLinks } from "@/components/nav-links";
 import { SiteDrawer } from "@/components/site-drawer";
 import { getSession } from "@/lib/session";
-import {
-	CURRENT_STATUS,
-	statusDotAriaLabel,
-	statusDotClass,
-} from "@/lib/site-status";
 
 export const dynamic = "force-dynamic";
 
@@ -58,18 +54,7 @@ export default async function Page() {
 					</span>
 				</a>
 
-				<nav className="nav-links" aria-label="Primary">
-					<a href="/faq">FAQ</a>
-					<a href="/privacy">PRIVACY</a>
-					<a href="/status">
-						STATUS{" "}
-						<span
-							className={`status-dot ${statusDotClass(CURRENT_STATUS)}`}
-							role="img"
-							aria-label={statusDotAriaLabel(CURRENT_STATUS)}
-						/>
-					</a>
-				</nav>
+				<NavLinks signedIn={Boolean(session)} active="home" />
 
 				{session ? (
 					<a className="nav-cta" href="/api/github/logout">
@@ -81,7 +66,7 @@ export default async function Page() {
 					</a>
 				)}
 
-				<SiteDrawer signedIn={Boolean(session)} />
+				<SiteDrawer signedIn={Boolean(session)} active="home" />
 			</header>
 
 			<main className="hero">

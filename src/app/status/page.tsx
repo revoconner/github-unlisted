@@ -1,13 +1,12 @@
 import "@/styles/marketing.css";
 import { JsonLd } from "@/components/json-ld";
+import { NavLinks } from "@/components/nav-links";
 import { SiteDrawer } from "@/components/site-drawer";
 import { breadcrumbLd, pageMetadata } from "@/lib/seo";
 import { getSession } from "@/lib/session";
 import {
 	CURRENT_STATUS,
 	type SiteStatus,
-	statusDotAriaLabel,
-	statusDotClass,
 	statusPillClass,
 	statusPillLabel,
 } from "@/lib/site-status";
@@ -126,22 +125,17 @@ export default async function StatusPage() {
 					</span>
 				</a>
 
-				<nav className="nav-links" aria-label="Primary">
-					<a href="/faq">FAQ</a>
-					<a href="/privacy">PRIVACY</a>
-					<a href="/status" className="is-active" aria-current="page">
-						STATUS{" "}
-						<span
-							className={`status-dot ${statusDotClass(status)}`}
-							role="img"
-							aria-label={statusDotAriaLabel(status)}
-						/>
-					</a>
-				</nav>
+				<NavLinks signedIn={Boolean(session)} active="status" />
 
-				<a className="nav-cta" href={session ? "/app" : "/api/github/login"}>
-					{session ? "Dashboard" : "Sign In"}
-				</a>
+				{session ? (
+					<a className="nav-cta" href="/api/github/logout">
+						Sign Out
+					</a>
+				) : (
+					<a className="nav-cta" href="/api/github/login">
+						Sign In
+					</a>
+				)}
 
 				<SiteDrawer signedIn={Boolean(session)} active="status" />
 			</header>
@@ -204,8 +198,9 @@ export default async function StatusPage() {
 									</ul>
 								</li>
 								<li>
-									Uptime logs are not recorded, because what would be the point. To get operational uptime,
-									subtract the duration of logged events from your calculation.
+									Uptime logs are not recorded, because what would be the point.
+									To get operational uptime, subtract the duration of logged
+									events from your calculation.
 								</li>
 							</ul>
 						</details>
