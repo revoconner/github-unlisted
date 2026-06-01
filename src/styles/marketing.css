@@ -818,6 +818,11 @@ button {
 	.site-nav {
 		padding: 22px 32px;
 	}
+	/* CTA folds into the drawer on tablet and below alongside the
+	   nav-links (the hamburger swap is handled in globals.css). */
+	.site-nav .nav-cta {
+		display: none;
+	}
 	.hero {
 		padding: 50px 32px;
 	}
@@ -856,11 +861,6 @@ button {
 	.site-nav {
 		padding: 16px 22px;
 		gap: 10px;
-	}
-	/* CTA only renders on marketing pages — hide on phone alongside the
-	   nav-links (which globals.css already handles). */
-	.site-nav .nav-cta {
-		display: none;
 	}
 
 	/* Footer pushed to the bottom of the viewport regardless of how

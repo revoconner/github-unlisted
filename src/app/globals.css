@@ -238,8 +238,10 @@ body[data-drawer="open"] {
 	background: rgba(255, 56, 174, 0.04);
 }
 
-/* Phone: nav links collapse into the drawer, hamburger surfaces. */
-@media (max-width: 760px) {
+/* Tablet and below: nav links collapse into the drawer, hamburger
+   surfaces. The full inline nav only fits comfortably on desktop now
+   that the menu carries Home + Dashboard + the three static pages. */
+@media (max-width: 1250px) {
 	.nav-links {
 		display: none;
 	}
@@ -248,8 +250,8 @@ body[data-drawer="open"] {
 	}
 }
 
-/* Above phone: keep hamburger out of the layout entirely. */
-@media (min-width: 761px) {
+/* Desktop only: keep the hamburger out of the layout entirely. */
+@media (min-width: 1251px) {
 	.hamburger {
 		display: none;
 	}
