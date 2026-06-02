@@ -5,6 +5,6 @@
   "installCommand": "npm install",
   "outputDirectory": ".next",
   "git": {
-    "deploymentEnabled": true
+    "deploymentEnabled": false
   }
 }

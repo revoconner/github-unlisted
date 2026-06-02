@@ -36,6 +36,14 @@ interface LogEntry {
 
 const log: LogEntry[] = [
 	{
+		id: "2026-06-02-stylesheet-consolidation",
+		startedUtc: "2026-06-02 15:09 UTC",
+		endedUtc: "2026-06-02 20:48 UTC",
+		category: "maintenance",
+		severity: "critical",
+		body: "Stylesheet consolidation (single-source design tokens, one site-wide navigation and footer, and the shared-repo viewer restructured). Major internal app refactor for clean future upgrades. Maintenance work also included touch-friendly hover handling and a page fade transition. No major usability disruption occurred, only briefly inconsistent UI (some might have made accessibility or visuals unreadable for a few minutes) during the window. Shared links and repository access, and core functionality were not affected.",
+	},
+	{
 		id: "2026-06-02-nav-and-reskin",
 		startedUtc: "2026-06-01 23:19 UTC",
 		endedUtc: "2026-06-02 02:41 UTC",
