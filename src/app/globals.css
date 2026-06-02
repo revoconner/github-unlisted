@@ -38,7 +38,7 @@
 
 	/* Fluid type scale. Site-facing font-sizes route through these;
 	   component-internal sizes (icon glyphs, chip text) stay fixed-px. */
-	--fs-display: clamp(36px, 5vw, 66px);
+	--fs-display: clamp(36px, 2.9vw, 59px);
 	--fs-h1: clamp(26px, 1.2vw + 1.2rem, 36px);
 	--fs-h2: clamp(20px, 0.3vw + 1.2rem, 26px);
 	--fs-h3: clamp(15px, 0.25vw + 0.9rem, 20px);

@@ -153,7 +153,7 @@
 .hero-cta__tagline {
 	font-family: var(--font-mono);
 	font-size: var(--fs-caption);
-	color: var(--faint);
+	color: var(--muted);
 	letter-spacing: 0.14em;
 	text-transform: uppercase;
 }
