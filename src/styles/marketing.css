@@ -19,8 +19,8 @@
 	--muted: #777b86;
 	--faint: #4e525c;
 
-	/* Brand */
-	--accent: #ff38ae;
+	/* Brand — accent value lives once in globals.css :root; these derive
+	   from it. --lavender is an unused secondary glow (left as-is). */
 	--lavender: #b39bff;
 	--accent-complimentary: hsl(from var(--accent) calc(h + 172) s 60.8%);
 	--amber: #f5b756;
@@ -234,7 +234,7 @@ button {
 	text-transform: uppercase;
 }
 .btn--outline-accent:hover {
-	background: rgba(255, 56, 174, 0.08);
+	background: rgb(from var(--accent) r g b / 0.08);
 	border-color: var(--accent);
 }
 
@@ -306,7 +306,7 @@ button {
 	color: var(--accent);
 	line-height: 1;
 	letter-spacing: -0.025em;
-	text-shadow: 0 0 40px rgba(255, 56, 174, 0.4);
+	text-shadow: 0 0 40px rgb(from var(--accent) r g b / 0.4);
 }
 
 .hero-cta {
@@ -335,7 +335,9 @@ button {
 	font-weight: 700;
 	letter-spacing: 0.18em;
 	text-transform: uppercase;
-	color: rgb(191, 42, 129);
+	/* Darker, muted accent — keeps the accent hue, drops saturation +
+	   lightness so it reads as a recessed label. Derives from --accent. */
+	color: hsl(from var(--accent) h 64% 46%);
 }
 .hero-cta__tagline {
 	font-family: var(--font-mono);
@@ -519,7 +521,7 @@ button {
 
 .faq-a__body a {
 	color: var(--accent);
-	border-bottom: 1px dashed rgba(255, 56, 174, 0.4);
+	border-bottom: 1px dashed rgb(from var(--accent) r g b / 0.4);
 }
 .faq-a__body a:hover {
 	border-bottom-style: solid;

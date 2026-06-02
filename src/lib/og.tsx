@@ -1,8 +1,10 @@
 import { ImageResponse } from "next/og";
+import { ACCENT } from "@/lib/brand";
 
 // Shared 1200×630 share card. Satori constraints: flexbox only, no CSS vars
-// (colours hardcoded to mirror app.css tokens), default font (no custom font
-// asset — Latin text only), tiny bundle.
+// (the accent comes from the ACCENT constant; the neutral bg/text are
+// hardcoded to mirror app.css), default font (no custom font asset — Latin
+// text only), tiny bundle.
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
@@ -32,7 +34,7 @@ function Slashes() {
 						width: 9,
 						height: 64,
 						borderRadius: 5,
-						background: "#ff38ae",
+						background: ACCENT,
 						opacity: b.o,
 						transform: `translate(${b.d}px, ${b.d}px) rotate(-45deg)`,
 					}}
@@ -54,8 +56,7 @@ export function ogImage(title: string, subtitle: string) {
 				padding: "76px 80px",
 				background: "#0a0b0e",
 				color: "#f1f2f5",
-				backgroundImage:
-					"radial-gradient(circle at 82% 6%, rgba(255,56,174,0.20), transparent 55%)",
+				backgroundImage: `radial-gradient(circle at 82% 6%, ${ACCENT}33, transparent 55%)`,
 			}}
 		>
 			<div style={{ display: "flex", alignItems: "center" }}>
@@ -70,7 +71,7 @@ export function ogImage(title: string, subtitle: string) {
 					}}
 				>
 					<span style={{ color: "#8f93a0" }}>github</span>
-					<span style={{ color: "#ff38ae", marginLeft: 10 }}>unlisted</span>
+					<span style={{ color: ACCENT, marginLeft: 10 }}>unlisted</span>
 				</div>
 			</div>
 

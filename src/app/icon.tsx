@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { ACCENT } from "@/lib/brand";
 
 // Brand mark: the wordmark's three fading diagonal slashes on the app bg.
 // Shapes only — no text, so Satori needs no font.
@@ -32,7 +33,7 @@ function Mark({ radius }: { radius: number }) {
 						width: 64,
 						height: 470,
 						borderRadius: 32,
-						background: "#ff38ae",
+						background: ACCENT,
 						opacity: b.o,
 						transform: `translate(${b.d}px, ${b.d}px) rotate(-45deg)`,
 					}}

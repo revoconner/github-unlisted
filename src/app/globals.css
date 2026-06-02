@@ -1,11 +1,28 @@
 @import "tailwindcss";
 
+/* Brand accent — THE single CSS source. Every pink in the browser
+   derives from this via relative color: rgb(from var(--accent) r g b / a)
+   for tints, hsl(from var(--accent) h s l) for shades. Re-theming the
+   whole site is a one-line change here. (Build-time OG/icon images can't
+   read CSS vars — their source is ACCENT in src/lib/brand.ts; keep the
+   two in sync.) Defined on :root in globals so it is available on every
+   route regardless of which page stylesheet loads. */
+:root {
+	--accent: #ff38ae;
+}
+
+/* Wordmark mark: drive the SVG slash strokes (stroke="currentColor")
+   from the accent so they retheme with everything else. */
+.wordmark .mark svg {
+	color: var(--accent);
+}
+
 /* Shared chrome that appears on both marketing pages (.site-nav) and
    the signed-in dashboard topbar (.topbar). Lives at the global level
    so a single source styles the nav links, the hamburger / drawer,
    and the ongoing-incident dot regardless of which page stylesheet is
    loaded for the route. Tokens like --text, --accent, --border are
-   guaranteed by both marketing.css and app.css. */
+   guaranteed everywhere (--accent here; the rest by marketing/app css). */
 
 /* Lock background scroll while the drawer is open. */
 body[data-drawer="open"] {
@@ -235,7 +252,7 @@ body[data-drawer="open"] {
 .drawer-panel__links a.is-cta {
 	color: var(--accent);
 	font-weight: 500;
-	background: rgba(255, 56, 174, 0.04);
+	background: rgb(from var(--accent) r g b / 0.04);
 }
 
 /* Tablet and below: nav links collapse into the drawer, hamburger

@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { ACCENT } from "@/lib/brand";
 
 // Apple touch icon: same mark, opaque, square (Apple applies its own mask).
 export const size = { width: 180, height: 180 };
@@ -30,7 +31,7 @@ export default function AppleIcon() {
 						width: 22,
 						height: 165,
 						borderRadius: 11,
-						background: "#ff38ae",
+						background: ACCENT,
 						opacity: b.o,
 						transform: `translate(${b.d}px, ${b.d}px) rotate(-45deg)`,
 					}}
