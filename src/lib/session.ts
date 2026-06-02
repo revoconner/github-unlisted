@@ -30,9 +30,7 @@ function b64url(buf: Buffer): string {
 }
 
 function sign(payload: string): string {
-	return b64url(
-		crypto.createHmac("sha256", secret()).update(payload).digest(),
-	);
+	return b64url(crypto.createHmac("sha256", secret()).update(payload).digest());
 }
 
 export function serializeSession(data: Omit<Session, "exp">): string {

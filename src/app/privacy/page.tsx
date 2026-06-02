@@ -1,4 +1,5 @@
-import "@/styles/marketing.css";
+import "@/styles/normal.css";
+import "@/styles/normal_override.css";
 import { JsonLd } from "@/components/json-ld";
 import { NavLinks } from "@/components/nav-links";
 import { SiteDrawer } from "@/components/site-drawer";
@@ -18,10 +19,10 @@ export default async function PrivacyPage() {
 	const session = await getSession();
 
 	return (
-		<div className="page-legal">
+		<div className="page-shell">
 			<div className="bloom" aria-hidden="true" />
 
-			<header className="site-nav">
+			<header className="topbar">
 				<a className="wordmark" href="/" aria-label="github unlisted home">
 					<span className="mark" aria-hidden="true">
 						<svg width="16" height="16" viewBox="0 0 16 16" fill="none">

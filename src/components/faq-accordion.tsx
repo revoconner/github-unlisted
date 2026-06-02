@@ -35,13 +35,13 @@ const ITEMS: { q: string; a: React.ReactNode }[] = [
 				>
 					github.com/settings/installations
 				</a>{" "}
-				(or, for an organization, your org's Settings →
-				Third-party Access → GitHub Apps), find <em>Unlisted Repo</em>,
-				click <strong>Configure</strong>, scroll to the <em>Danger Zone</em>,
-				and choose <strong>Uninstall</strong>. The app loses access
-				immediately, any active share links stop working, and the
-				associated share records are purged. If you also want to remove the
-				OAuth authorization, revoke it under{" "}
+				(or, for an organization, your org's Settings → Third-party Access →
+				GitHub Apps), find <em>Unlisted Repo</em>, click{" "}
+				<strong>Configure</strong>, scroll to the <em>Danger Zone</em>, and
+				choose <strong>Uninstall</strong>. The app loses access immediately, any
+				active share links stop working, and the associated share records are
+				purged. If you also want to remove the OAuth authorization, revoke it
+				under{" "}
 				<a
 					href="https://github.com/settings/apps/authorizations"
 					target="_blank"
@@ -58,11 +58,7 @@ const ITEMS: { q: string; a: React.ReactNode }[] = [
 		a: (
 			<>
 				You can read about all of my work on my website{" "}
-				<a
-					href="https://www.revoconner.com"
-					target="_blank"
-					rel="noopener"
-				>
+				<a href="https://www.revoconner.com" target="_blank" rel="noopener">
 					www.revoconner.com
 				</a>
 				.
@@ -97,17 +93,19 @@ export function FaqAccordion() {
 							</span>
 							<span className="faq-q__text">{item.q}</span>
 							<span className="faq-q__icon" aria-hidden="true">
-								<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+								<svg
+									viewBox="0 0 12 12"
+									fill="none"
+									stroke="currentColor"
+									strokeWidth="1.6"
+									strokeLinecap="round"
+								>
 									<line x1="6" y1="2" x2="6" y2="10" />
 									<line x1="2" y1="6" x2="10" y2="6" />
 								</svg>
 							</span>
 						</button>
-						<section
-							className="faq-a"
-							id={aId}
-							aria-labelledby={qId}
-						>
+						<section className="faq-a" id={aId} aria-labelledby={qId}>
 							<div className="faq-a__inner">
 								<div className="faq-a__body">{item.a}</div>
 							</div>

@@ -1,0 +1,112 @@
+/* github unlisted — breakpoint overrides for the app surfaces
+   (dashboard + viewer). Loaded right after app.css. Nav/footer/type
+   overrides are global and live in globals_override.css. */
+
+/* Tablet band — narrow the sidebar, swap the pill bar for a dropdown,
+   collapse repo rows to a single column. */
+@media (max-width: 1250px) {
+	.dashboard {
+		padding: 32px 32px 60px;
+	}
+	.viewer {
+		grid-template-columns: 240px 1fr;
+	}
+	.readme {
+		padding: 30px 32px;
+	}
+	.dashboard__pills {
+		display: none;
+	}
+	.dashboard__pills-select {
+		display: block;
+	}
+	.dashboard__searchrow {
+		padding-right: 10px;
+	}
+	/* Repo rows collapse to a single column — right-side actions stack
+	   under the main info. Solid-black divider stays visible. */
+	.repo-row {
+		grid-template-columns: 1fr;
+		border-bottom-color: #000;
+	}
+	.repo-row__main {
+		padding-top: 20px;
+	}
+	.repo-row__actions {
+		padding: 15px 0 10px 0;
+		justify-content: flex-start;
+	}
+}
+
+/* Sheet breakpoint — sidebar leaves the grid and becomes a fixed overlay
+   opened via the .viewer__tree-toggle button. Opens from the left to
+   match the toggle (which sits left in the topinfo bar). */
+@media (max-width: 900px) {
+	.viewer {
+		grid-template-columns: 1fr;
+	}
+	.viewer__sidebar {
+		position: fixed;
+		top: 0;
+		left: 0;
+		bottom: 0;
+		width: 320px;
+		max-width: 86vw;
+		z-index: 61;
+		border-right: 1px solid var(--border);
+		border-left: 0;
+		transform: translateX(-100%);
+		transition: transform 0.25s ease;
+	}
+	body[data-viewer-tree="open"] .viewer__sidebar {
+		transform: translateX(0);
+	}
+	.viewer__tree-toggle {
+		display: inline-flex;
+	}
+}
+
+/* Phone — packed topbar right side, single-column repo rows, tighter
+   gutters. (Topbar padding + type bump are global.) */
+@media (max-width: 760px) {
+	.topbar__right {
+		gap: 6px;
+	}
+
+	.dashboard {
+		padding: 22px 18px 60px;
+	}
+	.dashboard__head {
+		flex-direction: column;
+		gap: 4px;
+		align-items: flex-start;
+	}
+	/* Stack filters: search on row 1, dropdown on row 2 sized to content. */
+	.dashboard__filters {
+		grid-template-columns: 1fr;
+	}
+	.dashboard__searchrow {
+		padding-right: 0;
+	}
+	.dashboard__pills-select {
+		justify-self: start;
+	}
+	.repo-row {
+		padding: 14px 16px;
+	}
+
+	.viewer__topinfo {
+		padding: 10px 14px;
+	}
+	.readme {
+		padding: 22px 18px;
+	}
+	.filebar {
+		padding: 10px 14px;
+	}
+	.codeblock pre,
+	.codeblock pre.shiki {
+		padding: 14px 16px;
+		font-size: 12px;
+	}
+}

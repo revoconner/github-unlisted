@@ -1,0 +1,93 @@
+/* github unlisted — breakpoint overrides for the normal pages (home,
+   FAQ, privacy, status). Loaded right after normal.css. Nav/footer/type
+   overrides are global and live in globals_override.css. */
+
+/* Tablet band — tighten page gutters; the marketing sign-in pill folds
+   into the drawer alongside the nav links. */
+@media (max-width: 1250px) {
+	.topbar .nav-cta {
+		display: none;
+	}
+	.hero {
+		padding: 50px 32px;
+	}
+	.faq-content {
+		padding: 50px 32px 70px;
+	}
+	.legal-content {
+		padding: 50px 32px 70px;
+	}
+	.status-content {
+		padding: 50px 32px 70px;
+	}
+}
+
+/* Phone — shrink the hero to content, stack the CTA, tighten gutters. */
+@media (max-width: 760px) {
+	/* Phone home hero: shrink to content (no flex:1 stretch), drop the
+	   centering so the title sits near the top. */
+	.hero {
+		flex: 0 0 auto;
+		padding: 100px 22px;
+		place-items: start center;
+	}
+	.hero__sub {
+		margin-top: 18px;
+	}
+	.hero-cta {
+		padding-bottom: 40px;
+	}
+	.hero-cta__row {
+		flex-direction: column;
+		gap: 16px;
+		padding-bottom: 40px;
+	}
+	.hero-cta__divider {
+		display: none;
+	}
+	/* Geist Mono's larger x-height makes the tagline read bigger than its
+	   px on phone; scale --fs-caption down ~15% (still token-derived). */
+	.hero-cta__tagline {
+		font-size: calc(var(--fs-caption) * 0.85);
+	}
+	.btn--outline-accent {
+		padding: 13px 24px;
+	}
+
+	.faq-content {
+		padding: 22px 22px 50px;
+	}
+	.faq-q {
+		grid-template-columns: 28px 1fr 24px;
+		padding: 22px 4px;
+		gap: 12px;
+	}
+	.faq-q__icon {
+		width: 24px;
+		height: 24px;
+	}
+	.faq-a__body {
+		padding-left: 40px;
+		padding-right: 4px;
+	}
+
+	.legal-content {
+		padding: 22px 22px 50px;
+	}
+	.legal h2 {
+		margin-top: 26px;
+	}
+
+	.status-content {
+		padding: 22px 22px 50px;
+	}
+	.status-current-row,
+	.status-log-row {
+		padding: 16px 18px;
+	}
+	/* Log row head stacks: time on top, pills below. */
+	.status-log-row__head {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+}

@@ -4,6 +4,7 @@ import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
 import { JsonLd } from "@/components/json-ld";
 import { SITE, siteGraphLd } from "@/lib/seo";
 import "./globals.css";
+import "./globals_override.css";
 
 const sans = Geist({ subsets: ["latin"], variable: "--font-sans" });
 const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" });

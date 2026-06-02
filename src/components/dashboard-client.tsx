@@ -237,7 +237,8 @@ export function DashboardClient({
 	];
 
 	return (
-		<div className="app-shell">
+		<div className="page-shell">
+			<div className="bloom" aria-hidden="true" />
 			<header className="topbar">
 				<a className="wordmark" href="/" aria-label="github unlisted home">
 					<span className="mark" aria-hidden="true">
@@ -486,6 +487,28 @@ export function DashboardClient({
 					})}
 				</div>
 			</main>
+			<footer className="site-footer">
+				<span>
+					Built by <span className="name">Rév</span>
+				</span>
+				<a href="https://www.revoconner.com" target="_blank" rel="noopener">
+					Visit <span className="url">www.revoconner.com</span>
+					<svg
+						width="11"
+						height="11"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						strokeWidth="2"
+						strokeLinecap="round"
+						strokeLinejoin="round"
+						aria-hidden="true"
+					>
+						<path d="M7 17L17 7" />
+						<polyline points="7 7 17 7 17 17" />
+					</svg>
+				</a>
+			</footer>
 		</div>
 	);
 }

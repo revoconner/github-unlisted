@@ -1,30 +1,17 @@
-/* github unlisted — signed-in app stylesheet (dashboard + viewer).
-   Mirrors the marketing token system so the chrome feels coherent
-   across both surfaces. */
+/* github unlisted — app stylesheet (dashboard + viewer). Shared tokens,
+   reset, chrome (nav, footer, bloom, page shell, wordmark, chip base)
+   live in globals.css; only app-specific tokens and components are here.
+   Breakpoint overrides live in app_override.css. */
 
 :root {
-	/* Surfaces */
-	--bg: #0f0e11;
+	/* App-only surfaces */
 	--bg-2: #101218;
 	--bg-3: #0d0f14;
-	--surface: #161922;
-	--surface-2: #1c2029;
 	--surface-3: #232734;
-	--border: #262a35;
-	--border-soft: #1f222b;
-	--border-strong: #363a47;
 
-	/* Text */
-	--text: #f1f2f5;
-	--text-2: #b4b7c0;
-	--text-3: #8f93a0;
-	--muted: #777b86;
-	--faint: #4e525c;
-
-	/* Brand — accent value lives once in globals.css :root; everything
-	   below derives from it via relative color, so re-theming the accent
-	   is a single-line change there. --accent-ink is a near-black shade
-	   of the accent hue (text on the accent-filled avatar). */
+	/* Accent family — derives from --accent in globals.css via relative
+	   color. --accent-ink is a near-black shade of the accent hue (text
+	   on the accent-filled avatar). */
 	--accent-ink: hsl(from var(--accent) h 50% 12%);
 	--accent-dim: rgb(from var(--accent) r g b / 0.13);
 	--accent-border: rgb(from var(--accent) r g b / 0.32);
@@ -35,127 +22,27 @@
 	--green: #6ee5a4;
 	--green-dim: rgba(110, 229, 164, 0.14);
 	--green-border: rgba(110, 229, 164, 0.32);
-	--amber: #f5b756;
-	--amber-dim: rgba(245, 183, 86, 0.14);
-	--amber-border: rgba(245, 183, 86, 0.32);
 	--red: #f06b6b;
 	--red-dim: rgba(240, 107, 107, 0.14);
 	--red-border: rgba(240, 107, 107, 0.32);
 
-	/* Type families */
-	--font-sans:
-		"Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
-		sans-serif;
-	--font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
-	--font-serif: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+	/* Private-repo accent (lavender) — kept distinct from the amber used
+	   for status "medium" indicators so the two never read as the same
+	   thing. */
+	--private: #b39bff;
+	--private-dim: rgb(from var(--private) r g b / 0.14);
+	--private-border: rgb(from var(--private) r g b / 0.32);
 
-	/* Fluid type scale (matches marketing.css). */
-	--fs-display: clamp(36px, 5vw, 66px);
-	--fs-h1: clamp(26px, 1.2vw + 1.2rem, 36px);
-	--fs-h2: clamp(20px, 0.3vw + 1.2rem, 26px);
-	--fs-h3: clamp(15px, 0.25vw + 0.9rem, 20px);
-	--fs-body: clamp(14px, 0.28vw + 0.8125rem, 19px);
-	--fs-ui: clamp(12px, 0.19vw + 0.7rem, 15px);
-	--fs-caption: clamp(10.5px, 0.1vw + 0.7rem, 13px);
-	--fs-btn: clamp(12px, 0.19vw + 0.7rem, 15px);
+	/* Folder-icon gold — conventional folder colour, its own token so it
+	   is not confused with status amber. */
+	--folder: #f5b756;
 }
 
-*,
-*::before,
-*::after {
-	box-sizing: border-box;
-}
-html,
-body {
-	margin: 0;
-	padding: 0;
-	min-height: 100vh;
-}
-body {
-	font-family: var(--font-sans);
-	background: var(--bg);
-	color: var(--text);
-	-webkit-font-smoothing: antialiased;
-	text-rendering: optimizeLegibility;
-	letter-spacing: -0.005em;
-	font-feature-settings: "ss01", "cv11";
-	position: relative;
-}
-a {
-	color: inherit;
-	text-decoration: none;
-}
-button {
-	font-family: inherit;
-	cursor: pointer;
-}
 input {
 	font-family: inherit;
 }
 
-/* Lock background scroll when the viewer tree sheet is open. */
-body[data-viewer-tree="open"] {
-	overflow: hidden;
-}
-
-/* ─── Ambient backdrop ─────────────────────────────────────── */
-.app-shell {
-	position: relative;
-	min-height: 100vh;
-}
-.app-shell::before {
-	content: "";
-	position: fixed;
-	inset: 0;
-	pointer-events: none;
-	z-index: 0;
-}
-.app-shell > * {
-	position: relative;
-	z-index: 1;
-}
-
-/* ─── Wordmark ─────────────────────────────────────────────── */
-.wordmark {
-	display: inline-flex;
-	align-items: center;
-	gap: 9px;
-	color: var(--text);
-	font-weight: 500;
-	letter-spacing: -0.01em;
-	min-width: 0;
-}
-.wordmark .mark {
-	width: 26px;
-	height: 26px;
-	display: inline-grid;
-	place-items: center;
-	background: var(--surface);
-	border: 1px solid var(--border);
-	border-radius: 7px;
-	flex-shrink: 0;
-}
-.wordmark .word {
-	font-size: var(--fs-ui);
-}
-.wordmark .word .pre {
-	color: var(--text-3);
-}
-.wordmark .word .post {
-	color: var(--accent);
-}
-
-/* ─── Topbar ───────────────────────────────────────────────── */
-.topbar {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	padding: 16px 28px;
-	gap: 12px;
-	border-bottom: 1px solid var(--border-soft);
-	background: rgba(10, 11, 14, 0.7);
-	backdrop-filter: blur(4px) brightness(134%) grayscale(100%);
-}
+/* ─── Topbar (surface-specific children; base .topbar in globals) ─── */
 .topbar__center {
 	flex: 1;
 	display: flex;
@@ -282,17 +169,16 @@ body[data-viewer-tree="open"] {
 }
 
 /* ─── Chips (dashboard-specific variants) ──────────────────────
-   .chip base + .chip--md + status pills (--okay / --medium /
-   --critical / --incident / --maintenance) live in globals.css. */
+   .chip base + .chip--md + status pills live in globals.css. */
 .chip--public {
 	background: var(--green-dim);
 	border-color: var(--green-border);
 	color: var(--green);
 }
 .chip--private {
-	background: var(--amber-dim);
-	border-color: var(--amber-border);
-	color: var(--amber);
+	background: var(--private-dim);
+	border-color: var(--private-border);
+	color: var(--private);
 }
 .chip--shared {
 	background: var(--accent-dim);
@@ -348,6 +234,7 @@ body[data-viewer-tree="open"] {
 
 /* ─── Dashboard ────────────────────────────────────────────── */
 .dashboard {
+	flex: 1;
 	padding: 40px 60px 80px;
 }
 .dashboard__head {
@@ -426,8 +313,7 @@ body[data-viewer-tree="open"] {
 }
 
 /* Desktop pill bar: five equal-width slots so every pill shares the
-   width of the widest one. The search field height (42px) is matched
-   on each pill so the two halves of the filters row align. */
+   width of the widest one. */
 .dashboard__pills {
 	display: grid;
 	grid-template-columns: repeat(5, 1fr);
@@ -462,8 +348,8 @@ body[data-viewer-tree="open"] {
 	color: var(--text-3);
 }
 
-/* Tablet/phone filter dropdown — replaces the pill bar via media
-   query swap below. Custom chevron is encoded as a data URI so
+/* Tablet/phone filter dropdown — replaces the pill bar via media query
+   swap in app_override.css. Custom chevron encoded as a data URI so
    appearance:none doesn't strip the affordance. */
 .dashboard__pills-select {
 	display: none;
@@ -542,8 +428,8 @@ body[data-viewer-tree="open"] {
 	flex-wrap: wrap;
 }
 /* Shares with no auto-revoke read as steady-state, not time-sensitive,
-   so dim the whole line to different color — keeps accent for the rows that
-   actually have a deadline. */
+   so dim the whole line to a different colour — keeps accent for the
+   rows that actually have a deadline. */
 .repo-row__link--idle {
 	color: var(--accent-complimentary);
 }
@@ -563,11 +449,13 @@ body[data-viewer-tree="open"] {
 }
 
 /* ─── Viewer (recipient screen) ────────────────────────────── */
+/* The viewer <main> grows to fill the gap between topbar and footer;
+   min-height:0 lets the inner panes own their scroll. */
 .viewer {
+	flex: 1;
+	min-height: 0;
 	display: grid;
 	grid-template-columns: 300px 1fr;
-	/* Subtract topbar height (~65px) so panes fill the remaining viewport */
-	height: calc(100vh - 65px);
 }
 .viewer__sidebar {
 	border-right: 1px solid var(--border-soft);
@@ -650,7 +538,7 @@ body[data-viewer-tree="open"] {
 	display: flex;
 }
 .tree__row .icon-d {
-	color: var(--amber);
+	color: var(--folder);
 	display: flex;
 }
 .tree__row .icon-f {
@@ -888,8 +776,10 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 }
 
 /* ─── Signed-out / error / notice screens ──────────────────── */
+/* signin-screen is a page <main> (flex child of .page-shell), so it
+   grows to fill the gap between topbar/footer and centres its content. */
 .signin-screen {
-	min-height: calc(100vh - 65px);
+	flex: 1;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -1066,165 +956,4 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 .ttl__unit:focus {
 	outline: none;
 	border-color: var(--border-strong);
-}
-
-/* ─── Responsive overrides ─────────────────────────────────── */
-
-/* Tablet band — tighten chrome, narrow sidebar. */
-@media (max-width: 1250px) {
-	.topbar {
-		padding: 14px 24px;
-	}
-	.dashboard {
-		padding: 32px 32px 60px;
-	}
-	.viewer {
-		grid-template-columns: 240px 1fr;
-	}
-	.readme {
-		padding: 30px 32px;
-	}
-	/* Swap the pill bar for a dropdown — the bar fits poorly once the
-	   sidebar narrows. The select keeps the same filter semantics in
-	   a single compact control. */
-	.dashboard__pills {
-		display: none;
-	}
-	.dashboard__pills-select {
-		display: block;
-	}
-	.dashboard__searchrow {
-		padding-right: 10px;
-	}
-	/* Repo rows collapse to a single column on tablet and phone — the
-	   right-side actions stack under the main info. Solid-black bottom
-	   border keeps the dividers visible against the surface without
-	   leaning on the muted token. */
-	.repo-row {
-		grid-template-columns: 1fr;
-		border-bottom-color: #000;
-	}
-	.repo-row__main {
-		padding-top: 20px;
-	}
-	.repo-row__actions {
-		padding: 15px 0 10px 0;
-		justify-content: flex-start;
-	}
-}
-
-/* Sheet breakpoint — sidebar leaves the grid and becomes a fixed
-   overlay opened via the .viewer__tree-toggle button in topinfo.
-   The viewer collapses to a single column so the file content gets
-   the full width and the tree slides over from the right when
-   requested. ESC and the backdrop close it (handled in the React
-   toggle component below by clearing data-viewer-tree on body). */
-@media (max-width: 900px) {
-	.viewer {
-		grid-template-columns: 1fr;
-	}
-	.viewer__sidebar {
-		position: fixed;
-		top: 0;
-		left: 0;
-		bottom: 0;
-		width: 320px;
-		max-width: 86vw;
-		z-index: 61;
-		border-right: 1px solid var(--border);
-		border-left: 0;
-		/* Opens from the left to match the "Files" toggle, which sits on
-		   the left of the topinfo bar (the page-nav drawer is right-anchored
-		   because its hamburger is top-right). */
-		transform: translateX(-100%);
-		transition: transform 0.25s ease;
-	}
-	body[data-viewer-tree="open"] .viewer__sidebar {
-		transform: translateX(0);
-	}
-	.viewer__tree-toggle {
-		display: inline-flex;
-	}
-}
-
-/* Phone — token bump, packed topbar, single-column repo rows. */
-@media (max-width: 760px) {
-	:root {
-		--fs-body: clamp(15px, 0.28vw + 0.875rem, 20px);
-		--fs-ui: clamp(13px, 0.19vw + 0.75rem, 16px);
-		--fs-caption: clamp(11.5px, 0.1vw + 0.75rem, 14px);
-	}
-
-	.topbar {
-		padding: 12px 18px;
-		gap: 8px;
-	}
-	.topbar__right {
-		gap: 6px;
-	}
-	.topbar .wordmark .word {
-		display: none;
-	}
-
-	.dashboard {
-		padding: 22px 18px 60px;
-	}
-	.dashboard__head {
-		flex-direction: column;
-		gap: 4px;
-		align-items: flex-start;
-	}
-	/* Stack filters: search on row 1 (full width of .dashboard, since the
-	   desktop right-padding gets zeroed here), dropdown on row 2 sized to
-	   its content. */
-	.dashboard__filters {
-		grid-template-columns: 1fr;
-	}
-	.dashboard__searchrow {
-		padding-right: 0;
-	}
-	.dashboard__pills-select {
-		justify-self: start;
-	}
-
-	/* Only the horizontal padding tightens on phone — grid columns,
-	   bottom border, and actions alignment all inherit from the tablet
-	   block above. */
-	.repo-row {
-		padding: 14px 16px;
-	}
-
-	.viewer__topinfo {
-		padding: 10px 14px;
-	}
-	.readme {
-		padding: 22px 18px;
-	}
-	.filebar {
-		padding: 10px 14px;
-	}
-	.codeblock pre,
-	.codeblock pre.shiki {
-		padding: 14px 16px;
-		font-size: 12px;
-	}
-}
-
-@media (prefers-reduced-motion: reduce) {
-	*,
-	*::before,
-	*::after {
-		/* biome-ignore lint/complexity/noImportantStyles: canonical
-		   prefers-reduced-motion override pattern */
-		animation-duration: 0.01ms !important;
-		/* biome-ignore lint/complexity/noImportantStyles: canonical
-		   prefers-reduced-motion override pattern */
-		animation-iteration-count: 1 !important;
-		/* biome-ignore lint/complexity/noImportantStyles: canonical
-		   prefers-reduced-motion override pattern */
-		transition-duration: 0.01ms !important;
-		/* biome-ignore lint/complexity/noImportantStyles: canonical
-		   prefers-reduced-motion override pattern */
-		scroll-behavior: auto !important;
-	}
 }

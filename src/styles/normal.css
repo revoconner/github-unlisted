@@ -1,113 +1,16 @@
-/* github unlisted — marketing stylesheet (landing, FAQ, privacy).
-   Token-driven type so phone / tablet / desktop scale without
-   per-element font-size overrides. Two breakpoints only: 1250 and 760. */
+/* github unlisted — "normal" stylesheet (home, FAQ, privacy, status).
+   Shared tokens, reset, chrome (nav, footer, bloom, page shell, wordmark)
+   live in globals.css; only the marketing-page tokens and layouts are
+   here. Breakpoint overrides live in normal_override.css. */
 
 :root {
-	/* Surfaces */
-	--bg: #0f0e11;
-	--bg-2: #0a0b0e;
-	--surface: #161922;
-	--surface-2: #1c2029;
-	--border: #262a35;
-	--border-soft: rgba(255, 255, 255, 0.08);
-	--border-strong: #363a47;
-
-	/* Text */
-	--text: #f3f1ee;
-	--text-2: rgba(230, 228, 222, 0.72);
-	--text-3: #8f93a0;
-	--muted: #777b86;
-	--faint: #4e525c;
-
-	/* Brand — accent value lives once in globals.css :root; these derive
-	   from it. --lavender is an unused secondary glow (left as-is). */
-	--lavender: #b39bff;
-	--accent-complimentary: hsl(from var(--accent) calc(h + 172) s 60.8%);
-	--amber: #f5d556;
-
-	/* Type families */
-	--font-sans:
-		"Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
-		sans-serif;
-	--font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
-	--font-serif: "Instrument Serif", "Iowan Old Style", Georgia, serif;
-
-	/* Fluid type scale. Site-facing font-sizes route through these;
-	   component-internal sizes (icon glyphs, chip text) stay fixed-px. */
-	--fs-display: clamp(36px, 5vw, 66px);
-	--fs-h1: clamp(26px, 1.2vw + 1.2rem, 36px);
-	--fs-h2: clamp(20px, 0.3vw + 1.2rem, 26px);
-	--fs-h3: clamp(15px, 0.25vw + 0.9rem, 20px);
-	--fs-body: clamp(14px, 0.28vw + 0.8125rem, 19px);
-	--fs-ui: clamp(12px, 0.19vw + 0.7rem, 15px);
-	--fs-caption: clamp(10.5px, 0.1vw + 0.7rem, 13px);
-	--fs-btn: clamp(12px, 0.19vw + 0.7rem, 15px);
-
-	/* Misc */
 	--radius-pill: 999px;
 	--radius-md: 12px;
 	--shadow-hero: 0 4px 40px rgba(0, 0, 0, 0.6);
 }
 
-*,
-*::before,
-*::after {
-	box-sizing: border-box;
-}
-
-html,
-body {
-	margin: 0;
-	padding: 0;
-	min-height: 100vh;
-}
-
-body {
-	font-family: var(--font-sans);
-	background: var(--bg);
-	color: var(--text);
-	-webkit-font-smoothing: antialiased;
-	text-rendering: optimizeLegibility;
-	letter-spacing: -0.005em;
-	font-feature-settings: "ss01", "cv11";
-	position: relative;
-	overflow-x: hidden;
-}
-
-a {
-	color: inherit;
-	text-decoration: none;
-}
-button {
-	font-family: inherit;
-	cursor: pointer;
-}
-
-.bloom {
-	position: fixed;
-	inset: 0;
-	pointer-events: none;
-	z-index: -2;
-	/* contain = whole image fits (longest edge touches), centered on both
-	   axes so it sits vertically centred; --bg (black) shows in the margin. */
-	background: url("/bg_svg.svg");
-}
-
-/* ─── Page chrome (nav + footer) ───────────────────────────── */
-.site-nav {
-	position: relative;
-	z-index: 5;
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	padding: 26px 44px;
-	gap: 16px;
-	/* Unprefixed only — reliable on Safari 18+ (late 2024) and all current
-	   Chrome/Firefox; older Safari just renders without the blur. */
-	backdrop-filter: blur(4px) brightness(134%) grayscale(100%);
-}
-
-.site-nav .nav-cta {
+/* ─── Marketing sign-in pill (nav child, marketing-only) ───── */
+.topbar .nav-cta {
 	padding: 8px 18px;
 	border-radius: var(--radius-pill);
 	border: 1px solid var(--border);
@@ -116,73 +19,8 @@ button {
 	font-size: var(--fs-ui);
 	font-weight: 500;
 }
-.site-nav .nav-cta:hover {
+.topbar .nav-cta:hover {
 	background: rgba(255, 255, 255, 0.05);
-}
-
-.wordmark {
-	display: inline-flex;
-	align-items: center;
-	gap: 9px;
-	color: var(--text);
-	font-weight: 500;
-}
-.wordmark .mark {
-	width: 26px;
-	height: 26px;
-	display: inline-grid;
-	place-items: center;
-	background: var(--surface);
-	border: 1px solid var(--border);
-	border-radius: 7px;
-	flex-shrink: 0;
-}
-.wordmark .word {
-	font-size: var(--fs-ui);
-}
-.wordmark .word .pre {
-	color: var(--text-3);
-}
-.wordmark .word .post {
-	color: var(--accent);
-}
-
-.site-footer {
-	position: relative;
-	z-index: 5;
-	padding: 20px 44px;
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	font-family: var(--font-mono);
-	font-size: var(--fs-caption);
-	color: var(--muted);
-	letter-spacing: 0.08em;
-	text-transform: uppercase;
-	border-top: 1px solid var(--border-soft);
-	backdrop-filter: blur(4px) brightness(134%) grayscale(100%);
-}
-.site-footer .name {
-	color: var(--text-2);
-	font-family: var(--font-sans);
-	font-size: var(--fs-caption);
-	font-weight: 500;
-	letter-spacing: 0;
-	text-transform: none;
-}
-.site-footer a {
-	display: inline-flex;
-	align-items: center;
-	gap: 8px;
-	color: var(--muted);
-}
-.site-footer a .url {
-	font-family: var(--font-sans);
-	text-transform: inherit;
-	color: var(--accent);
-}
-.site-footer a:hover .url {
-	color: var(--text);
 }
 
 /* ─── Buttons ──────────────────────────────────────────────── */
@@ -217,14 +55,8 @@ button {
 }
 
 /* ─── Landing hero ─────────────────────────────────────────── */
-.page-landing {
-	position: relative;
-	z-index: 1;
-	display: flex;
-	flex-direction: column;
-	min-height: 100vh;
-}
-
+/* The home hero is the one <main> that stays transparent so the bloom
+   shows through here only (every other main carries var(--bg)). */
 .hero {
 	flex: 1;
 	display: grid;
@@ -232,6 +64,7 @@ button {
 	padding: 60px;
 	position: relative;
 	z-index: 2;
+	background: transparent;
 }
 
 .hero__inner {
@@ -313,28 +146,19 @@ button {
 	font-weight: 700;
 	letter-spacing: 0.18em;
 	text-transform: uppercase;
-	/* Darker, muted accent — keeps the accent hue, drops saturation +
-	   lightness so it reads as a recessed label. Derives from --accent. */
+	/* Darker, muted accent — keeps the hue, drops saturation + lightness
+	   so it reads as a recessed label. Derives from --accent. */
 	color: hsl(from var(--accent) h 64% 46%);
 }
 .hero-cta__tagline {
 	font-family: var(--font-mono);
 	font-size: var(--fs-caption);
-	color: var(--muted);
+	color: var(--faint);
 	letter-spacing: 0.14em;
 	text-transform: uppercase;
-	text-shadow: 0 0 25px rgba(255, 255, 255, 0.46);
 }
 
 /* ─── FAQ page ─────────────────────────────────────────────── */
-.page-faq {
-	position: relative;
-	z-index: 1;
-	display: flex;
-	flex-direction: column;
-	min-height: 100vh;
-}
-
 .faq-content {
 	flex: 1;
 	display: flex;
@@ -342,7 +166,6 @@ button {
 	padding: 60px 60px 80px;
 	position: relative;
 	z-index: 2;
-	background: var(--bg);
 }
 .faq-content__inner {
 	width: 100%;
@@ -508,19 +331,11 @@ button {
 }
 
 /* ─── Legal pages (privacy) ────────────────────────────────── */
-.page-legal {
-	position: relative;
-	z-index: 1;
-	display: flex;
-	flex-direction: column;
-	min-height: 100vh;
-}
 .legal-content {
 	flex: 1;
 	display: flex;
 	justify-content: center;
 	padding: 60px 60px 80px;
-	background: var(--bg);
 }
 .legal-content__inner {
 	width: 100%;
@@ -573,13 +388,6 @@ button {
 }
 
 /* ─── Status page ──────────────────────────────────────────── */
-.page-status {
-	position: relative;
-	z-index: 1;
-	display: flex;
-	flex-direction: column;
-	min-height: 100vh;
-}
 .status-content {
 	flex: 1;
 	display: flex;
@@ -587,7 +395,6 @@ button {
 	padding: 60px 60px 80px;
 	position: relative;
 	z-index: 2;
-	background: var(--bg);
 }
 .status-content__inner {
 	width: 100%;
@@ -651,8 +458,8 @@ button {
 }
 
 /* Current status: single-column grid; head is a horizontal flex row
-   (pill + start-time side by side) anchored on its center so pill and
-   mono text line up regardless of which is taller. */
+   (pill + start-time) anchored on its center so pill and mono text line
+   up regardless of which is taller. */
 .status-current-row {
 	display: grid;
 	grid-template-columns: 1fr;
@@ -672,9 +479,8 @@ button {
 	flex-wrap: wrap;
 }
 
-/* Historical log: single column always. Inside the head, time and the
-   two pills sit in a horizontal row on tablet/desktop, stacking on
-   phone (handled in the phone @media block). */
+/* Historical log: single column always. Time + the two pills sit in a
+   horizontal row on tablet/desktop, stacking on phone (phone @media). */
 .status-log-row {
 	display: grid;
 	grid-template-columns: 1fr;
@@ -752,10 +558,7 @@ button {
 }
 
 /* Collapsible terminology help below the current status card. Native
-   <details>; default arrow stripped and replaced with a +/− indicator.
-   Border sits below the entire collapsible so it acts as a closing
-   rule for the section regardless of open state. Summary text uses the
-   h2 type token; the +/− stays in the smaller text-2 size/color. */
+   <details>; default arrow stripped, replaced with a +/− indicator. */
 .status-help-collapsible {
 	margin-top: 18px;
 	border-bottom: 1px solid var(--border-soft);
@@ -793,158 +596,4 @@ button {
 }
 .status-help-collapsible[open] .status-helpsheet {
 	padding-bottom: 18px;
-}
-
-/* ─── Responsive overrides ─────────────────────────────────── */
-
-/* Tablet band — single layout pass for 1250 and below. */
-@media (max-width: 1250px) {
-	.site-nav {
-		padding: 22px 32px;
-	}
-	/* CTA folds into the drawer on tablet and below alongside the
-	   nav-links (the hamburger swap is handled in globals.css). */
-	.site-nav .nav-cta {
-		display: none;
-	}
-	.hero {
-		padding: 50px 32px;
-	}
-	.faq-content {
-		padding: 50px 32px 70px;
-	}
-	.legal-content {
-		padding: 50px 32px 70px;
-	}
-	.status-content {
-		padding: 50px 32px 70px;
-	}
-	.site-footer {
-		padding: 18px 32px;
-	}
-}
-
-/* Tablet-strict: tighten display heading so the 761–1250 range
-   doesn't render oversized. Same approach as personal-website. */
-@media (min-width: 761px) and (max-width: 1250px) {
-	:root {
-		--fs-display: clamp(46px, 4.4vw, 56px);
-	}
-}
-
-/* Phone: +1px bump on body/ui/caption for readability, swap nav
-   for hamburger, stack the CTA row, tighten gutters. Headers and
-   buttons deliberately don't bump (tap targets stay normal). */
-@media (max-width: 760px) {
-	:root {
-		--fs-body: clamp(15px, 0.28vw + 0.875rem, 20px);
-		--fs-ui: clamp(13px, 0.19vw + 0.75rem, 16px);
-		--fs-caption: clamp(11.5px, 0.1vw + 0.75rem, 14px);
-	}
-
-	.site-nav {
-		padding: 16px 22px;
-		gap: 10px;
-	}
-
-	/* Footer pushed to the bottom of the viewport regardless of how
-	   little content the page has — every marketing-shell page wrapper
-	   is flex column with min-height: 100vh, so margin-top: auto on the
-	   last child does the right thing. */
-	.site-footer {
-		padding: 16px 22px;
-		flex-direction: column;
-		align-items: flex-start;
-		gap: 10px;
-		margin-top: auto;
-	}
-
-	/* Phone home hero: shrink to content (no flex:1 stretching), drop
-	   the place-items centering so the title sits near the top instead
-	   of floating in the vertical middle. */
-	.hero {
-		flex: 0 0 auto;
-		padding: 100px 22px;
-		place-items: start center;
-	}
-	.hero__sub {
-		margin-top: 18px;
-	}
-	.hero-cta {
-		padding-bottom: 40px;
-	}
-	.hero-cta__row {
-		flex-direction: column;
-		gap: 16px;
-		padding-bottom: 40px;
-	}
-	.hero-cta__divider {
-		display: none;
-	}
-	/* Geist Mono has a larger x-height than the sans description, so the
-	   tagline reads bigger than its px on phone. Scale --fs-caption down
-	   ~15% (still derived from the token, so it tracks the same resizing)
-	   to offset that and keep it visibly smaller than .hero__sub. */
-	.hero-cta__tagline {
-		font-size: calc(var(--fs-caption) * 0.85);
-	}
-	.btn--outline-accent {
-		padding: 13px 24px;
-	}
-
-	.faq-content {
-		padding: 22px 22px 50px;
-	}
-	.faq-q {
-		grid-template-columns: 28px 1fr 24px;
-		padding: 22px 4px;
-		gap: 12px;
-	}
-	.faq-q__icon {
-		width: 24px;
-		height: 24px;
-	}
-	.faq-a__body {
-		padding-left: 40px;
-		padding-right: 4px;
-	}
-
-	.legal-content {
-		padding: 22px 22px 50px;
-	}
-	.legal h2 {
-		margin-top: 26px;
-	}
-
-	.status-content {
-		padding: 22px 22px 50px;
-	}
-	.status-current-row,
-	.status-log-row {
-		padding: 16px 18px;
-	}
-	/* Log row head stacks vertically on phone: time on top, pills below. */
-	.status-log-row__head {
-		flex-direction: column;
-		align-items: flex-start;
-	}
-}
-
-@media (prefers-reduced-motion: reduce) {
-	*,
-	*::before,
-	*::after {
-		/* biome-ignore lint/complexity/noImportantStyles: canonical
-		   prefers-reduced-motion override pattern */
-		animation-duration: 0.01ms !important;
-		/* biome-ignore lint/complexity/noImportantStyles: canonical
-		   prefers-reduced-motion override pattern */
-		animation-iteration-count: 1 !important;
-		/* biome-ignore lint/complexity/noImportantStyles: canonical
-		   prefers-reduced-motion override pattern */
-		transition-duration: 0.01ms !important;
-		/* biome-ignore lint/complexity/noImportantStyles: canonical
-		   prefers-reduced-motion override pattern */
-		scroll-behavior: auto !important;
-	}
 }

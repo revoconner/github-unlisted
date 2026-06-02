@@ -1,0 +1,60 @@
+/* github unlisted — breakpoint overrides for the global (site-wide)
+   elements: the nav collapse, fluid-type adjustments, and nav/footer
+   chrome padding. Loaded right after globals.css on every route. */
+
+/* Tablet and below: inline nav collapses into the drawer, hamburger
+   surfaces, chrome padding tightens. */
+@media (max-width: 1250px) {
+	.nav-links {
+		display: none;
+	}
+	.hamburger {
+		display: inline-flex;
+	}
+	.topbar {
+		padding: 14px 24px;
+	}
+	.site-footer {
+		padding: 18px 32px;
+	}
+}
+
+/* Desktop only: keep the hamburger out of the layout entirely. */
+@media (min-width: 1251px) {
+	.hamburger {
+		display: none;
+	}
+}
+
+/* Tablet-strict: tighten the display heading so 761–1250 isn't oversized. */
+@media (min-width: 761px) and (max-width: 1250px) {
+	:root {
+		--fs-display: clamp(46px, 4.4vw, 56px);
+	}
+}
+
+/* Phone: +1px bump on body/ui/caption for readability, pack the nav,
+   stack the footer. */
+@media (max-width: 760px) {
+	:root {
+		--fs-body: clamp(15px, 0.28vw + 0.875rem, 20px);
+		--fs-ui: clamp(13px, 0.19vw + 0.75rem, 16px);
+		--fs-caption: clamp(11.5px, 0.1vw + 0.75rem, 14px);
+	}
+	.topbar {
+		padding: 12px 18px;
+		gap: 10px;
+	}
+	/* The mark icon alone carries the brand on phone; drop the wordmark
+	   text so the packed nav fits. */
+	.topbar .wordmark .word {
+		display: none;
+	}
+	.site-footer {
+		padding: 16px 22px;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 10px;
+		margin-top: auto;
+	}
+}

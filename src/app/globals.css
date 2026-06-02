@@ -1,34 +1,172 @@
 @import "tailwindcss";
 
-/* Brand accent — THE single CSS source. Every pink in the browser
-   derives from this via relative color: rgb(from var(--accent) r g b / a)
-   for tints, hsl(from var(--accent) h s l) for shades. Re-theming the
-   whole site is a one-line change here. (Build-time OG/icon images can't
-   read CSS vars — their source is ACCENT in src/lib/brand.ts; keep the
-   two in sync.) Defined on :root in globals so it is available on every
-   route regardless of which page stylesheet loads. */
+/* github unlisted — global stylesheet. THE single source for site-wide
+   tokens, the reset, and every element shared across marketing + app
+   (page shell, bloom, top navigation, footer, wordmark, nav links,
+   drawer, chips, status dot). Loaded on every route via layout.tsx.
+   Breakpoint overrides for these live in globals_override.css. */
+
 :root {
+	/* Brand accent — THE single CSS source. Every pink/orange in the
+	   browser derives from this via relative color: rgb(from var(--accent)
+	   r g b / a) for tints, hsl(from var(--accent) h s l) for shades.
+	   Build-time OG/icon images can't read CSS vars — their source is
+	   ACCENT in src/lib/brand.ts; keep the two in sync. */
 	--accent: #ff960f;
+
+	/* Surfaces (shared site-wide) */
+	--bg: #0f0e11;
+	--surface: #161922;
+	--surface-2: #1c2029;
+	--border: #262a35;
+	--border-soft: #1f222b;
+	--border-strong: #363a47;
+
+	/* Text — desaturated greyscale neutral scale */
+	--text: #f3f3f3;
+	--text-2: #bababa;
+	--text-3: #989898;
+	--muted: #7f7f7f;
+	--faint: #555555;
+
+	/* Type families */
+	--font-sans:
+		"Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
+		sans-serif;
+	--font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+	--font-serif: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+
+	/* Fluid type scale. Site-facing font-sizes route through these;
+	   component-internal sizes (icon glyphs, chip text) stay fixed-px. */
+	--fs-display: clamp(36px, 5vw, 66px);
+	--fs-h1: clamp(26px, 1.2vw + 1.2rem, 36px);
+	--fs-h2: clamp(20px, 0.3vw + 1.2rem, 26px);
+	--fs-h3: clamp(15px, 0.25vw + 0.9rem, 20px);
+	--fs-body: clamp(14px, 0.28vw + 0.8125rem, 19px);
+	--fs-ui: clamp(12px, 0.19vw + 0.7rem, 15px);
+	--fs-caption: clamp(10.5px, 0.1vw + 0.7rem, 13px);
+	--fs-btn: clamp(12px, 0.19vw + 0.7rem, 15px);
+
+	/* Frosted chrome backdrop shared by the nav + footer. */
+	--chrome-backdrop: blur(4px) brightness(134%) grayscale(100%);
 }
 
-/* Wordmark mark: drive the SVG slash strokes (stroke="currentColor")
-   from the accent so they retheme with everything else. The svg inherits
-   this color; set on .mark (not .mark svg) to avoid a bare-svg selector
-   clashing with the hamburger / drawer svg rules. */
+/* ─── Reset ────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+html,
+body {
+	margin: 0;
+	padding: 0;
+	min-height: 100vh;
+}
+body {
+	font-family: var(--font-sans);
+	background: var(--bg);
+	color: var(--text);
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
+	letter-spacing: -0.005em;
+	font-feature-settings: "ss01", "cv11";
+	position: relative;
+	overflow-x: hidden;
+}
+a {
+	color: inherit;
+	text-decoration: none;
+}
+button {
+	font-family: inherit;
+	cursor: pointer;
+}
+input {
+	font-family: inherit;
+}
+
+/* Lock background scroll while the nav drawer or the viewer tree sheet
+   is open. */
+body[data-drawer="open"],
+body[data-viewer-tree="open"] {
+	overflow: hidden;
+}
+
+/* ─── Page shell + main + bloom ────────────────────────────── */
+/* Every page (marketing + app) is a flex column so <main> fills the
+   gap between the nav and footer and the footer pins to the bottom. */
+.page-shell {
+	position: relative;
+	z-index: 1;
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+
+/* Every page <main> carries the base background; the home hero opts
+   out (normal.css) so the bloom only shows through there. */
+main {
+	background: var(--bg);
+}
+
+/* Ambient backdrop image, behind everything, on every page. */
+.bloom {
+	position: fixed;
+	inset: 0;
+	pointer-events: none;
+	z-index: -2;
+	background: url("/bg_svg.svg");
+}
+
+/* ─── Wordmark (shared) ────────────────────────────────────── */
+.wordmark {
+	display: inline-flex;
+	align-items: center;
+	gap: 9px;
+	color: var(--text);
+	font-weight: 500;
+	min-width: 0;
+}
+/* .mark also drives the SVG slash strokes (stroke="currentColor"); the
+   svg inherits this color so we avoid a bare-svg selector clashing with
+   the hamburger / drawer svg rules. */
 .wordmark .mark {
+	width: 26px;
+	height: 26px;
+	display: inline-grid;
+	place-items: center;
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: 7px;
+	flex-shrink: 0;
+	color: var(--accent);
+}
+.wordmark .word {
+	font-size: var(--fs-ui);
+}
+.wordmark .word .pre {
+	color: var(--text-3);
+}
+.wordmark .word .post {
 	color: var(--accent);
 }
 
-/* Shared chrome that appears on both marketing pages (.site-nav) and
-   the signed-in dashboard topbar (.topbar). Lives at the global level
-   so a single source styles the nav links, the hamburger / drawer,
-   and the ongoing-incident dot regardless of which page stylesheet is
-   loaded for the route. Tokens like --text, --accent, --border are
-   guaranteed everywhere (--accent here; the rest by marketing/app css). */
-
-/* Lock background scroll while the drawer is open. */
-body[data-drawer="open"] {
-	overflow: hidden;
+/* ─── Unified top navigation (site-wide) ───────────────────── */
+/* Padding + border-bottom adopted from the old app topbar; layout and
+   the frosted backdrop from the old marketing nav. Surface-specific
+   children (.topbar__center / __right / __meta) live in app.css; the
+   marketing sign-in pill (.nav-cta) lives in normal.css. */
+.topbar {
+	position: relative;
+	z-index: 5;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 16px 28px;
+	gap: 16px;
+	border-bottom: 1px solid var(--border-soft);
+	backdrop-filter: var(--chrome-backdrop);
 }
 
 /* Inline desktop / tablet navigation links. */
@@ -55,9 +193,48 @@ body[data-drawer="open"] {
 	border-bottom-color: var(--accent);
 }
 
-/* Pulsing status indicator next to STATUS nav links and inside the
-   drawer. Always visible; color modifier (.status-dot--okay / --medium
-   / --critical) is driven by CURRENT_STATUS in src/lib/site-status.ts. */
+/* ─── Footer (shared) ──────────────────────────────────────── */
+.site-footer {
+	position: relative;
+	z-index: 5;
+	padding: 20px 44px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	font-family: var(--font-mono);
+	font-size: var(--fs-caption);
+	color: var(--muted);
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	border-top: 1px solid var(--border-soft);
+	backdrop-filter: var(--chrome-backdrop);
+}
+.site-footer .name {
+	color: var(--text-2);
+	font-family: var(--font-sans);
+	font-size: var(--fs-caption);
+	font-weight: 500;
+	letter-spacing: 0;
+	text-transform: none;
+}
+.site-footer a {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	color: var(--muted);
+}
+.site-footer a .url {
+	font-family: var(--font-sans);
+	text-transform: inherit;
+	color: var(--accent);
+}
+.site-footer a:hover .url {
+	color: var(--text);
+}
+
+/* ─── Status indicator dot ─────────────────────────────────── */
+/* Pulsing dot next to STATUS nav links and inside the drawer. Color
+   modifier driven by CURRENT_STATUS in src/lib/site-status.ts. */
 .status-dot {
 	display: inline-block;
 	width: 8px;
@@ -91,10 +268,9 @@ body[data-drawer="open"] {
 	}
 }
 
-/* Chip / pill primitive. Base lives here so it works on every page;
-   color variants split between this file (status-page pills) and
-   app.css (dashboard-specific variants: --public / --private /
-   --shared / --neutral / --danger). */
+/* ─── Chip / pill primitive ────────────────────────────────── */
+/* Base + status-page variants here; dashboard variants (--public /
+   --private / --shared / --neutral / --danger) live in app.css. */
 .chip {
 	display: inline-flex;
 	align-items: center;
@@ -127,10 +303,9 @@ body[data-drawer="open"] {
 	border-color: rgba(239, 68, 68, 0.32);
 	color: #ef4444;
 }
-/* Category pills (historical log). Both share a dark transparent
-   background + neutral border so they read as "category labels" and
-   stay visually distinct from the severity pills (--medium / --critical)
-   that sit next to them on the same row. */
+/* Category pills (historical log): dark transparent background + neutral
+   border so they read as category labels, distinct from the severity
+   pills (--medium / --critical) beside them. */
 .chip--incident {
 	background: #00000075;
 	border-color: #565656;
@@ -142,8 +317,7 @@ body[data-drawer="open"] {
 	color: #f5b756;
 }
 
-/* Hamburger button + slide-in drawer panel. Visible only on phone via
-   the media queries at the bottom of this file. */
+/* ─── Hamburger + slide-in drawer ──────────────────────────── */
 .hamburger {
 	display: none;
 	align-items: center;
@@ -256,21 +430,22 @@ body[data-drawer="open"] {
 	background: rgb(from var(--accent) r g b / 0.04);
 }
 
-/* Tablet and below: nav links collapse into the drawer, hamburger
-   surfaces. The full inline nav only fits comfortably on desktop now
-   that the menu carries Home + Dashboard + the three static pages. */
-@media (max-width: 1250px) {
-	.nav-links {
-		display: none;
-	}
-	.hamburger {
-		display: inline-flex;
-	}
-}
-
-/* Desktop only: keep the hamburger out of the layout entirely. */
-@media (min-width: 1251px) {
-	.hamburger {
-		display: none;
+/* ─── Reduced motion ───────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		/* biome-ignore lint/complexity/noImportantStyles: canonical
+		   prefers-reduced-motion override pattern */
+		animation-duration: 0.01ms !important;
+		/* biome-ignore lint/complexity/noImportantStyles: canonical
+		   prefers-reduced-motion override pattern */
+		animation-iteration-count: 1 !important;
+		/* biome-ignore lint/complexity/noImportantStyles: canonical
+		   prefers-reduced-motion override pattern */
+		transition-duration: 0.01ms !important;
+		/* biome-ignore lint/complexity/noImportantStyles: canonical
+		   prefers-reduced-motion override pattern */
+		scroll-behavior: auto !important;
 	}
 }

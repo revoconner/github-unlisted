@@ -1,16 +1,11 @@
-import { createElement } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
+import { createElement } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 // next/link → plain anchor so the tree renders without the Next runtime.
 vi.mock("next/link", () => ({
-	default: ({
-		children,
-		href,
-	}: {
-		children: React.ReactNode;
-		href: string;
-	}) => createElement("a", { href }, children),
+	default: ({ children, href }: { children: React.ReactNode; href: string }) =>
+		createElement("a", { href }, children),
 }));
 
 import { RepoTree } from "./repo-tree";
@@ -56,10 +51,7 @@ describe("RepoTree", () => {
 		renderTree("src/util/b.ts");
 		const file = screen.getByText("b.ts");
 		expect(file).toBeInTheDocument();
-		expect(file.closest(".tree__row")).toHaveAttribute(
-			"aria-current",
-			"true",
-		);
+		expect(file.closest(".tree__row")).toHaveAttribute("aria-current", "true");
 	});
 
 	it("filters to matching files while searching", () => {

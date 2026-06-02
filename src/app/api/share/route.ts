@@ -46,9 +46,7 @@ export async function POST(request: Request) {
 		return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 	}
 	const repos = await listInstallationRepos(installationId);
-	const match = repos.find(
-		(r) => r.owner === owner && r.name === repo,
-	);
+	const match = repos.find((r) => r.owner === owner && r.name === repo);
 	if (!match) {
 		return NextResponse.json(
 			{ error: "Repo not in this installation" },

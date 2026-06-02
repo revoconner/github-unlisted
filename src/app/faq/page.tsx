@@ -1,4 +1,5 @@
-import "@/styles/marketing.css";
+import "@/styles/normal.css";
+import "@/styles/normal_override.css";
 import { FaqAccordion } from "@/components/faq-accordion";
 import { JsonLd } from "@/components/json-ld";
 import { NavLinks } from "@/components/nav-links";
@@ -19,10 +20,10 @@ export default async function FaqPage() {
 	const session = await getSession();
 
 	return (
-		<div className="page-faq">
+		<div className="page-shell">
 			<div className="bloom" aria-hidden="true" />
 
-			<header className="site-nav">
+			<header className="topbar">
 				<a className="wordmark" href="/" aria-label="github unlisted home">
 					<span className="mark" aria-hidden="true">
 						<svg width="16" height="16" viewBox="0 0 16 16" fill="none">

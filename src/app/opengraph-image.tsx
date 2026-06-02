@@ -1,7 +1,7 @@
 import { ogImage } from "@/lib/og";
 import { SITE } from "@/lib/seo";
 
-export { size, contentType } from "@/lib/og";
+export { contentType, size } from "@/lib/og";
 export const alt = SITE.defaultTitle;
 
 export default function Image() {

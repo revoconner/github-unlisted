@@ -18,7 +18,10 @@ function getAppCredentials() {
 // App-level auth (JWT): list installations, exchange for installation tokens.
 export function getAppOctokit(): Octokit {
 	const { appId, privateKey } = getAppCredentials();
-	return new Octokit({ authStrategy: createAppAuth, auth: { appId, privateKey } });
+	return new Octokit({
+		authStrategy: createAppAuth,
+		auth: { appId, privateKey },
+	});
 }
 
 // Installation-level auth: read the repos that installation granted.
@@ -42,10 +45,9 @@ export async function listInstallationRepos(
 	installationId: number,
 ): Promise<InstallationRepo[]> {
 	const octokit = getInstallationOctokit(installationId);
-	const repos = await octokit.paginate(
-		"GET /installation/repositories",
-		{ per_page: 100 },
-	);
+	const repos = await octokit.paginate("GET /installation/repositories", {
+		per_page: 100,
+	});
 	return repos.map((r) => ({
 		owner: r.owner.login,
 		name: r.name,
