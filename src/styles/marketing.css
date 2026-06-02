@@ -4,7 +4,7 @@
 
 :root {
 	/* Surfaces */
-	--bg: #06070a;
+	--bg: #000;
 	--bg-2: #0a0b0e;
 	--surface: #161922;
 	--surface-2: #1c2029;
@@ -88,22 +88,7 @@ button {
 	inset: 0;
 	pointer-events: none;
 	z-index: 0;
-	background:
-		radial-gradient(
-			54vw 34vw at 0% -5% in oklch,
-			rgb(from var(--accent-complimentary) r g b / 0.05),
-			rgb(from var(--accent-complimentary) r g b / 0) 90%
-		),
-		radial-gradient(
-			44vw 44vw at 90% 100% in oklch,
-			rgb(from var(--accent-complimentary) r g b / 0.125),
-			rgb(from var(--accent-complimentary) r g b / 0) 60%
-		),
-		radial-gradient(
-			59vw 74vw at 70% 120% in oklch,
-			rgb(from var(--accent-complimentary) r g b / 0.01),
-			rgb(from var(--accent-complimentary) r g b / 0) 65%
-		);
+	background: url("/bg_svg.svg") center / cover no-repeat;
 }
 
 .bloom::after {
@@ -127,6 +112,9 @@ button {
 	justify-content: space-between;
 	padding: 26px 44px;
 	gap: 16px;
+	/* Unprefixed only — reliable on Safari 18+ (late 2024) and all current
+	   Chrome/Firefox; older Safari just renders without the blur. */
+	backdrop-filter: blur(48px);
 }
 
 .site-nav .nav-cta {

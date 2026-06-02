@@ -8,7 +8,7 @@
    two in sync.) Defined on :root in globals so it is available on every
    route regardless of which page stylesheet loads. */
 :root {
-	--accent: #ff38ae;
+	--accent: #ff960f;
 }
 
 /* Wordmark mark: drive the SVG slash strokes (stroke="currentColor")

@@ -3,4 +3,4 @@
 // CSS custom properties. Keep this in sync with the `--accent` token in
 // src/app/globals.css; that token is the source for everything rendered
 // in the browser, this constant is the source for the OG/icon images.
-export const ACCENT = "#ff38ae";
+export const ACCENT = "#ff960f";
