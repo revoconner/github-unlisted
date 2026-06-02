@@ -120,9 +120,11 @@ input {
 	color: var(--text-2);
 	border-color: var(--color-neutral-500);
 }
-.btn--ghost:hover {
-	color: var(--text);
-	background: var(--surface);
+@media (hover: hover) {
+	.btn--ghost:hover {
+		color: var(--text);
+		background: var(--surface);
+	}
 }
 
 .btn--secondary {
@@ -130,8 +132,10 @@ input {
 	color: var(--text);
 	border-color: var(--border);
 }
-.btn--secondary:hover {
-	border-color: var(--border-strong);
+@media (hover: hover) {
+	.btn--secondary:hover {
+		border-color: var(--border-strong);
+	}
 }
 
 .btn--danger {
@@ -139,8 +143,10 @@ input {
 	color: var(--red);
 	border-color: var(--red-border);
 }
-.btn--danger:hover {
-	background: var(--red-dim);
+@media (hover: hover) {
+	.btn--danger:hover {
+		background: var(--red-dim);
+	}
 }
 
 .btn--accent {
@@ -148,8 +154,10 @@ input {
 	color: var(--accent);
 	border-color: var(--accent-border);
 }
-.btn--accent:hover {
-	background: rgb(from var(--accent) r g b / 0.2);
+@media (hover: hover) {
+	.btn--accent:hover {
+		background: rgb(from var(--accent) r g b / 0.2);
+	}
 }
 
 /* ─── Avatar ───────────────────────────────────────────────── */
@@ -499,8 +507,10 @@ input {
 	border-left: 2px solid transparent;
 	cursor: pointer;
 }
-.tree__row:hover {
-	background: rgba(255, 255, 255, 0.025);
+@media (hover: hover) {
+	.tree__row:hover {
+		background: rgba(255, 255, 255, 0.025);
+	}
 }
 .tree__row[aria-current="true"] {
 	background: var(--accent-dim);
@@ -561,9 +571,11 @@ input {
 	font-size: var(--fs-caption);
 	cursor: pointer;
 }
-.viewer__tree-toggle:hover {
-	color: var(--text);
-	border-color: var(--border-strong);
+@media (hover: hover) {
+	.viewer__tree-toggle:hover {
+		color: var(--text);
+		border-color: var(--border-strong);
+	}
 }
 .viewer__tree-toggle svg {
 	width: 12px;
@@ -669,8 +681,10 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	color: var(--accent);
 	text-decoration: none;
 }
-.readme a:hover {
-	text-decoration: underline;
+@media (hover: hover) {
+	.readme a:hover {
+		text-decoration: underline;
+	}
 }
 
 .readme h3 {
@@ -828,8 +842,10 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 .viewer__topinfo a {
 	color: var(--text-2);
 }
-.viewer__topinfo a:hover {
-	color: var(--accent);
+@media (hover: hover) {
+	.viewer__topinfo a:hover {
+		color: var(--accent);
+	}
 }
 .viewer__topinfo .sep {
 	color: var(--faint);
@@ -912,8 +928,10 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	font-size: var(--fs-ui);
 	text-decoration: none;
 }
-.notice-screen a:hover {
-	text-decoration: underline;
+@media (hover: hover) {
+	.notice-screen a:hover {
+		text-decoration: underline;
+	}
 }
 
 /* ─── TTL control (auto-revoke) ────────────────────────────── */

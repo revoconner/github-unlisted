@@ -119,6 +119,21 @@ main {
 	background: url("/bg_svg.svg");
 }
 
+/* Page fade-in. template.tsx remounts this wrapper on every navigation,
+   replaying the animation (reduced-motion users get it near-instant via
+   the prefers-reduced-motion block below). */
+.page-fade {
+	animation: page-fade-in 0.28s ease;
+}
+@keyframes page-fade-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
 /* ─── Wordmark (shared) ────────────────────────────────────── */
 .wordmark {
 	display: inline-flex;
@@ -185,8 +200,10 @@ main {
 		color 0.2s ease,
 		border-color 0.2s ease;
 }
-.nav-links a:hover {
-	color: var(--text);
+@media (hover: hover) {
+	.nav-links a:hover {
+		color: var(--text);
+	}
 }
 .nav-links a.is-active {
 	color: var(--text);
@@ -228,8 +245,10 @@ main {
 	text-transform: inherit;
 	color: var(--accent);
 }
-.site-footer a:hover .url {
-	color: var(--text);
+@media (hover: hover) {
+	.site-footer a:hover .url {
+		color: var(--text);
+	}
 }
 
 /* ─── Status indicator dot ─────────────────────────────────── */
@@ -334,9 +353,11 @@ main {
 		border-color 0.15s ease,
 		background 0.15s ease;
 }
-.hamburger:hover {
-	border-color: var(--border-strong);
-	background: rgba(255, 255, 255, 0.03);
+@media (hover: hover) {
+	.hamburger:hover {
+		border-color: var(--border-strong);
+		background: rgba(255, 255, 255, 0.03);
+	}
 }
 .hamburger svg {
 	width: 18px;
@@ -393,9 +414,11 @@ main {
 	cursor: pointer;
 	padding: 0;
 }
-.drawer-panel__close:hover {
-	color: var(--text);
-	border-color: var(--border-strong);
+@media (hover: hover) {
+	.drawer-panel__close:hover {
+		color: var(--text);
+		border-color: var(--border-strong);
+	}
 }
 .drawer-panel__close svg {
 	width: 14px;
@@ -417,9 +440,11 @@ main {
 		color 0.15s ease,
 		background 0.15s ease;
 }
-.drawer-panel__links a:hover {
-	color: var(--text);
-	background: rgba(255, 255, 255, 0.025);
+@media (hover: hover) {
+	.drawer-panel__links a:hover {
+		color: var(--text);
+		background: rgba(255, 255, 255, 0.025);
+	}
 }
 .drawer-panel__links a.is-active {
 	color: var(--accent);

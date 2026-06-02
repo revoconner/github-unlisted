@@ -19,8 +19,10 @@
 	font-size: var(--fs-ui);
 	font-weight: 500;
 }
-.topbar .nav-cta:hover {
-	background: rgba(255, 255, 255, 0.05);
+@media (hover: hover) {
+	.topbar .nav-cta:hover {
+		background: rgba(255, 255, 255, 0.05);
+	}
 }
 
 /* ─── Buttons ──────────────────────────────────────────────── */
@@ -49,9 +51,11 @@
 	letter-spacing: 0.15em;
 	text-transform: uppercase;
 }
-.btn--outline-accent:hover {
-	background: rgb(from var(--accent) r g b / 0.08);
-	border-color: var(--accent);
+@media (hover: hover) {
+	.btn--outline-accent:hover {
+		background: rgb(from var(--accent) r g b / 0.08);
+		border-color: var(--accent);
+	}
 }
 
 /* ─── Landing hero ─────────────────────────────────────────── */
@@ -326,8 +330,10 @@
 	color: var(--accent);
 	border-bottom: 1px dashed rgb(from var(--accent) r g b / 0.4);
 }
-.faq-a__body a:hover {
-	border-bottom-style: solid;
+@media (hover: hover) {
+	.faq-a__body a:hover {
+		border-bottom-style: solid;
+	}
 }
 
 /* ─── Legal pages (privacy) ────────────────────────────────── */
@@ -379,8 +385,10 @@
 .legal a {
 	color: var(--accent);
 }
-.legal a:hover {
-	text-decoration: underline;
+@media (hover: hover) {
+	.legal a:hover {
+		text-decoration: underline;
+	}
 }
 .legal strong {
 	color: var(--text);
@@ -524,9 +532,11 @@
 	text-underline-offset: 3px;
 	text-decoration-thickness: 1px;
 }
-.status-current-row__contact:hover {
-	color: var(--accent);
-	opacity: 0.85;
+@media (hover: hover) {
+	.status-current-row__contact:hover {
+		color: var(--accent);
+		opacity: 0.85;
+	}
 }
 
 /* Quick helpsheet: plain bullet list, no card. */
@@ -590,9 +600,13 @@
 .status-help-collapsible[open] summary::after {
 	content: "−";
 }
-.status-help-collapsible summary:hover,
 .status-help-collapsible[open] summary {
 	color: var(--text);
+}
+@media (hover: hover) {
+	.status-help-collapsible summary:hover {
+		color: var(--text);
+	}
 }
 .status-help-collapsible[open] .status-helpsheet {
 	padding-bottom: 18px;
