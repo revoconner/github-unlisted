@@ -877,6 +877,13 @@ button {
 	.hero-cta__divider {
 		display: none;
 	}
+	/* Geist Mono has a larger x-height than the sans description, so the
+	   tagline reads bigger than its px on phone. Scale --fs-caption down
+	   ~15% (still derived from the token, so it tracks the same resizing)
+	   to offset that and keep it visibly smaller than .hero__sub. */
+	.hero-cta__tagline {
+		font-size: calc(var(--fs-caption) * 0.85);
+	}
 	.btn--outline-accent {
 		padding: 13px 24px;
 	}
