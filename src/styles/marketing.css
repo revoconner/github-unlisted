@@ -284,7 +284,7 @@ button {
 	color: var(--accent);
 	line-height: 1;
 	letter-spacing: -0.025em;
-	text-shadow: 0 0 40px rgb(from var(--accent) r g b / 0.4);
+	text-shadow: 0 0 10px rgb(from var(--accent) r g b / 0.4);
 }
 
 .hero-cta {

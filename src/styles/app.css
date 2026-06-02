@@ -108,28 +108,7 @@ body[data-viewer-tree="open"] {
 	inset: 0;
 	pointer-events: none;
 	z-index: 0;
-	background-image:
-		radial-gradient(
-			ellipse 70% 45% at 50% -8%,
-			var(--accent-dim),
-			transparent 60%
-		),
-		linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
-		linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
-	background-size:
-		auto,
-		56px 56px,
-		56px 56px;
-	-webkit-mask-image: radial-gradient(
-		ellipse 90% 80% at 50% 30%,
-		black,
-		transparent 90%
-	);
-	mask-image: radial-gradient(
-		ellipse 90% 80% at 50% 30%,
-		black,
-		transparent 90%
-	);
+	background: #060606;
 }
 .app-shell > * {
 	position: relative;
