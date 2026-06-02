@@ -4,7 +4,7 @@
 
 :root {
 	/* Surfaces */
-	--bg: #060606;
+	--bg: #0f0e11;
 	--bg-2: #101218;
 	--bg-3: #0d0f14;
 	--surface: #161922;
@@ -108,7 +108,6 @@ body[data-viewer-tree="open"] {
 	inset: 0;
 	pointer-events: none;
 	z-index: 0;
-	background: #060606;
 }
 .app-shell > * {
 	position: relative;

@@ -4,7 +4,7 @@
 
 :root {
 	/* Surfaces */
-	--bg: #060606;
+	--bg: #0f0e11;
 	--bg-2: #0a0b0e;
 	--surface: #161922;
 	--surface-2: #1c2029;
@@ -23,7 +23,7 @@
 	   from it. --lavender is an unused secondary glow (left as-is). */
 	--lavender: #b39bff;
 	--accent-complimentary: hsl(from var(--accent) calc(h + 172) s 60.8%);
-	--amber: #f5b756;
+	--amber: #f5d556;
 
 	/* Type families */
 	--font-sans:
