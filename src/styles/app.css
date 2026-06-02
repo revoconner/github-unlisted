@@ -5,8 +5,8 @@
 
 :root {
 	/* App-only surfaces */
-	--bg-2: #101218;
-	--bg-3: #0d0f14;
+	--bg-2: #101010;
+	--bg-3: #0d0d0d;
 	--surface-3: #232734;
 
 	/* Accent family — derives from --accent in globals.css via relative

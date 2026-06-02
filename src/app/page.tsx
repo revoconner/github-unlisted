@@ -73,7 +73,7 @@ export default async function Page() {
 			<main className="hero">
 				<div className="hero__inner">
 					<h1 className="hero__title">
-						Share a private repo as
+						Share Github private repository as
 						<br />
 						<span className="bracket-word">
 							<span className="word">unlisted</span>
