@@ -12,8 +12,10 @@
 }
 
 /* Wordmark mark: drive the SVG slash strokes (stroke="currentColor")
-   from the accent so they retheme with everything else. */
-.wordmark .mark svg {
+   from the accent so they retheme with everything else. The svg inherits
+   this color; set on .mark (not .mark svg) to avoid a bare-svg selector
+   clashing with the hamburger / drawer svg rules. */
+.wordmark .mark {
 	color: var(--accent);
 }
 

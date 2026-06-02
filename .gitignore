@@ -3,8 +3,9 @@ node_modules/*
 .next/
 .next/*
 next-env.d.ts
+*.tsbuildinfo
 .vercel/
-vercel/*
+.vercel/*
 .env*
 !.env.example
 *.log
