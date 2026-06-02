@@ -29,6 +29,7 @@
 	--accent-dim: rgb(from var(--accent) r g b / 0.13);
 	--accent-border: rgb(from var(--accent) r g b / 0.32);
 	--accent-glow: rgb(from var(--accent) r g b / 0.4);
+	--accent-complimentary: hsl(from var(--accent) calc(h + 172) s 60.8%);
 
 	/* Semantic */
 	--green: #6ee5a4;
@@ -153,8 +154,7 @@ body[data-viewer-tree="open"] {
 	gap: 12px;
 	border-bottom: 1px solid var(--border-soft);
 	background: rgba(10, 11, 14, 0.7);
-	backdrop-filter: blur(8px);
-	-webkit-backdrop-filter: blur(8px);
+	backdrop-filter: blur(4px) brightness(134%) grayscale(100%);
 }
 .topbar__center {
 	flex: 1;
@@ -545,7 +545,7 @@ body[data-viewer-tree="open"] {
    so dim the whole line to different color — keeps accent for the rows that
    actually have a deadline. */
 .repo-row__link--idle {
-	color: var(--amber);
+	color: var(--accent-complimentary);
 }
 
 .repo-row__empty {
@@ -687,8 +687,7 @@ body[data-viewer-tree="open"] {
 	position: fixed;
 	inset: 0;
 	background: rgba(0, 0, 0, 0.55);
-	backdrop-filter: blur(2px);
-	-webkit-backdrop-filter: blur(2px);
+	backdrop-filter: blur(4px);
 	z-index: 60;
 	border: 0;
 	padding: 0;

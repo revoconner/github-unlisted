@@ -90,7 +90,7 @@ button {
 	z-index: 0;
 	/* contain = whole image fits (longest edge touches), centered on both
 	   axes so it sits vertically centred; --bg (black) shows in the margin. */
-	background: url("/bg_svg.svg") center / contain no-repeat;
+	background: url("/bg_svg.svg");
 }
 
 /* ─── Page chrome (nav + footer) ───────────────────────────── */
@@ -104,7 +104,7 @@ button {
 	gap: 16px;
 	/* Unprefixed only — reliable on Safari 18+ (late 2024) and all current
 	   Chrome/Firefox; older Safari just renders without the blur. */
-	backdrop-filter: blur(48px);
+	backdrop-filter: blur(4px) brightness(134%) grayscale(100%);
 }
 
 .site-nav .nav-cta {
@@ -160,7 +160,7 @@ button {
 	letter-spacing: 0.08em;
 	text-transform: uppercase;
 	border-top: 1px solid var(--border-soft);
-	backdrop-filter: blur(6px);
+	backdrop-filter: blur(4px) brightness(134%) grayscale(100%);
 }
 .site-footer .name {
 	color: var(--text-2);
