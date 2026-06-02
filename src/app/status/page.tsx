@@ -35,6 +35,14 @@ interface LogEntry {
 
 const log: LogEntry[] = [
 	{
+		id: "2026-06-02-nav-and-reskin",
+		startedUtc: "2026-06-01 23:19 UTC",
+		endedUtc: "2026-06-02 02:41 UTC",
+		category: "maintenance",
+		severity: "medium",
+		body: "Navigation overhaul, better UX of navigation on every platform, plus a site-wide visual refresh (new accent colour, background artwork, and increased contrast) and some mobile layout fixes. UI experience may have been inconsistent during the maintenance. Shared links, core functionality and repository access were not affected.",
+	},
+	{
 		id: "2026-05-26-dashboard-ui",
 		startedUtc: "2026-05-26 00:30 UTC",
 		endedUtc: "2026-05-26 03:57 UTC",
