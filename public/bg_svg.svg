@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" preserveAspectRatio="xMidYMid slice" fill="none">
-  <g stroke="#202020" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 514" preserveAspectRatio="xMidYMid slice" fill="none">
+  <g stroke="#232426" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" transform="scale(1,1.168)">
 
     <g opacity="0.9">
       <path d="M0 60 H170 l40 -30 H320"/>
@@ -9,8 +9,6 @@
       <path d="M0 270 H120 l30 30 H230 l30 -25 H310 l30 30 H400"/>
       <path d="M0 300 H90 l35 25 H260"/>
       <path d="M0 360 H230"/>
-      <path d="M0 470 H140 l40 30 H320"/>
-      <path d="M0 560 H100 l35 -25 H230 l30 25 H360"/>
     </g>
 
     <g opacity="0.55">
@@ -21,18 +19,14 @@
       <path d="M0 320 H110 l40 25 H290"/>
       <path d="M0 385 H100 l30 -25 H220"/>
       <path d="M0 410 H160 l30 -20 H280"/>
-      <path d="M0 510 H120 l30 -20 H250"/>
-      <path d="M0 620 H170 l30 30 H290"/>
     </g>
 
     <g opacity="0.35">
       <path d="M0 135 H60 l30 20 H190"/>
       <path d="M0 245 H140 l25 -20 H250"/>
       <path d="M0 340 H80"/>
-      <path d="M0 600 H80 l25 -20 H200"/>
       <path d="M320 90 H410"/>
       <path d="M360 240 H450"/>
-      <path d="M320 540 H410"/>
     </g>
 
     <g opacity="0.9">
@@ -43,8 +37,6 @@
       <path d="M1200 260 H1080 l-30 30 H970 l-30 -25 H890 l-30 30 H800"/>
       <path d="M1200 295 H1110 l-35 25 H940"/>
       <path d="M1200 370 H970"/>
-      <path d="M1200 480 H1060 l-40 30 H880"/>
-      <path d="M1200 565 H1100 l-35 -25 H970 l-30 25 H840"/>
     </g>
 
     <g opacity="0.55">
@@ -55,67 +47,51 @@
       <path d="M1200 300 H1090 l-40 30 H910"/>
       <path d="M1200 385 H1100 l-30 -25 H980"/>
       <path d="M1200 400 H1040 l-30 -20 H880"/>
-      <path d="M1200 520 H1080 l-30 -20 H950"/>
-      <path d="M1200 630 H1130 l-30 30 H990"/>
     </g>
 
     <g opacity="0.35">
       <path d="M1200 140 H1140 l-30 20 H1010"/>
       <path d="M1200 250 H1060 l-25 -20 H950"/>
       <path d="M1200 340 H1120"/>
-      <path d="M1200 610 H1120 l-25 -20 H1000"/>
       <path d="M880 95 H790"/>
       <path d="M840 245 H750"/>
-      <path d="M880 545 H790"/>
     </g>
 
   </g>
 
-  <g fill="#131313">
-    <circle cx="320" cy="30" r="4" opacity="0.9"/>
-    <circle cx="400" cy="140" r="4" opacity="0.9"/>
-    <circle cx="340" cy="170" r="4" opacity="0.9"/>
-    <circle cx="280" cy="165" r="4" opacity="0.9"/>
-    <circle cx="400" cy="305" r="4" opacity="0.9"/>
-    <circle cx="260" cy="325" r="4" opacity="0.9"/>
-    <circle cx="230" cy="360" r="4" opacity="0.9"/>
-    <circle cx="320" cy="500" r="4" opacity="0.9"/>
-    <circle cx="360" cy="560" r="4" opacity="0.9"/>
-    <circle cx="410" cy="90" r="3" opacity="0.35"/>
-    <circle cx="450" cy="240" r="3" opacity="0.35"/>
-    <circle cx="200" cy="580" r="3" opacity="0.35"/>
-    <circle cx="410" cy="540" r="3" opacity="0.35"/>
-    <circle cx="250" cy="60" r="3" opacity="0.55"/>
-    <circle cx="240" cy="65" r="3" opacity="0.55"/>
-    <circle cx="300" cy="160" r="3" opacity="0.55"/>
-    <circle cx="210" cy="265" r="3" opacity="0.55"/>
-    <circle cx="290" cy="345" r="3" opacity="0.55"/>
-    <circle cx="220" cy="360" r="3" opacity="0.55"/>
-    <circle cx="280" cy="390" r="3" opacity="0.55"/>
-    <circle cx="250" cy="490" r="3" opacity="0.55"/>
-    <circle cx="290" cy="650" r="3" opacity="0.55"/>
+  <g fill="#232426">
+    <circle cx="320" cy="35" r="4" opacity="0.9"/>
+    <circle cx="400" cy="163" r="4" opacity="0.9"/>
+    <circle cx="340" cy="199" r="4" opacity="0.9"/>
+    <circle cx="280" cy="193" r="4" opacity="0.9"/>
+    <circle cx="400" cy="356" r="4" opacity="0.9"/>
+    <circle cx="260" cy="380" r="4" opacity="0.9"/>
+    <circle cx="230" cy="420" r="4" opacity="0.9"/>
+    <circle cx="410" cy="105" r="3" opacity="0.35"/>
+    <circle cx="450" cy="280" r="3" opacity="0.35"/>
+    <circle cx="250" cy="70" r="3" opacity="0.55"/>
+    <circle cx="240" cy="76" r="3" opacity="0.55"/>
+    <circle cx="300" cy="187" r="3" opacity="0.55"/>
+    <circle cx="210" cy="309" r="3" opacity="0.55"/>
+    <circle cx="290" cy="403" r="3" opacity="0.55"/>
+    <circle cx="220" cy="420" r="3" opacity="0.55"/>
+    <circle cx="280" cy="455" r="3" opacity="0.55"/>
 
-    <circle cx="880" cy="40" r="4" opacity="0.9"/>
-    <circle cx="800" cy="150" r="4" opacity="0.9"/>
-    <circle cx="860" cy="165" r="4" opacity="0.9"/>
-    <circle cx="920" cy="160" r="4" opacity="0.9"/>
-    <circle cx="800" cy="295" r="4" opacity="0.9"/>
-    <circle cx="940" cy="320" r="4" opacity="0.9"/>
-    <circle cx="970" cy="370" r="4" opacity="0.9"/>
-    <circle cx="880" cy="510" r="4" opacity="0.9"/>
-    <circle cx="840" cy="565" r="4" opacity="0.9"/>
-    <circle cx="790" cy="95" r="3" opacity="0.35"/>
-    <circle cx="750" cy="245" r="3" opacity="0.35"/>
-    <circle cx="1000" cy="590" r="3" opacity="0.35"/>
-    <circle cx="790" cy="545" r="3" opacity="0.35"/>
-    <circle cx="950" cy="70" r="3" opacity="0.55"/>
-    <circle cx="960" cy="70" r="3" opacity="0.55"/>
-    <circle cx="900" cy="150" r="3" opacity="0.55"/>
-    <circle cx="990" cy="260" r="3" opacity="0.55"/>
-    <circle cx="910" cy="330" r="3" opacity="0.55"/>
-    <circle cx="980" cy="360" r="3" opacity="0.55"/>
-    <circle cx="880" cy="380" r="3" opacity="0.55"/>
-    <circle cx="950" cy="500" r="3" opacity="0.55"/>
-    <circle cx="990" cy="660" r="3" opacity="0.55"/>
+    <circle cx="880" cy="47" r="4" opacity="0.9"/>
+    <circle cx="800" cy="175" r="4" opacity="0.9"/>
+    <circle cx="860" cy="193" r="4" opacity="0.9"/>
+    <circle cx="920" cy="187" r="4" opacity="0.9"/>
+    <circle cx="800" cy="345" r="4" opacity="0.9"/>
+    <circle cx="940" cy="374" r="4" opacity="0.9"/>
+    <circle cx="970" cy="432" r="4" opacity="0.9"/>
+    <circle cx="790" cy="111" r="3" opacity="0.35"/>
+    <circle cx="750" cy="286" r="3" opacity="0.35"/>
+    <circle cx="950" cy="82" r="3" opacity="0.55"/>
+    <circle cx="960" cy="82" r="3" opacity="0.55"/>
+    <circle cx="900" cy="175" r="3" opacity="0.55"/>
+    <circle cx="990" cy="304" r="3" opacity="0.55"/>
+    <circle cx="910" cy="385" r="3" opacity="0.55"/>
+    <circle cx="980" cy="420" r="3" opacity="0.55"/>
+    <circle cx="880" cy="444" r="3" opacity="0.55"/>
   </g>
 </svg>

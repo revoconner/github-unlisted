@@ -4,7 +4,7 @@
 
 :root {
 	/* Surfaces */
-	--bg: #000;
+	--bg: #060606;
 	--bg-2: #0a0b0e;
 	--surface: #161922;
 	--surface-2: #1c2029;
@@ -88,19 +88,9 @@ button {
 	inset: 0;
 	pointer-events: none;
 	z-index: 0;
-	background: url("/bg_svg.svg") center / cover no-repeat;
-}
-
-.bloom::after {
-	content: "";
-	position: absolute;
-	inset: 0;
-	pointer-events: none;
-	background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.55'/></svg>");
-	background-size: 160px 160px;
-	background-repeat: repeat;
-	opacity: 0.035;
-	mix-blend-mode: overlay;
+	/* contain = whole image fits (longest edge touches), centered on both
+	   axes so it sits vertically centred; --bg (black) shows in the margin. */
+	background: url("/bg_svg.svg") center / contain no-repeat;
 }
 
 /* ─── Page chrome (nav + footer) ───────────────────────────── */
