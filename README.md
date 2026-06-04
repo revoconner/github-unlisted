@@ -6,16 +6,14 @@
 
 Live at **[github-unlisted.com](https://github-unlisted.com)**. 
 
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/2218d468-4858-4b59-ad39-8331281c1bf9" />
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/31baed6c-16bf-40d4-9d92-122f1c7e50a5" />
-<img width="1920" height="auto" alt="image" src="https://github.com/user-attachments/assets/d23db581-b3cd-49e7-a9d0-9072f897d5cc" />
-<img width="33%" height="auto" alt="image" src="https://github.com/user-attachments/assets/0c021683-90ab-4b0d-8ee1-752a244e535f" />
-<img width="33%" height="auto" alt="image" src="https://github.com/user-attachments/assets/af679024-26ff-40e5-8100-de629582878e" />
-<img width="33%" height="auto" alt="image" src="https://github.com/user-attachments/assets/e3cfcf42-af5d-4c33-8448-27863c7164e3" />
-
-
-
-
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/2218d468-4858-4b59-ad39-8331281c1bf9" /><br>
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/31baed6c-16bf-40d4-9d92-122f1c7e50a5" /><br>
+<img width="1920" height="auto" alt="image" src="https://github.com/user-attachments/assets/d23db581-b3cd-49e7-a9d0-9072f897d5cc" /><br>
+<div align="center">
+<img width="230" height="auto" alt="image" src="https://github.com/user-attachments/assets/0c021683-90ab-4b0d-8ee1-752a244e535f" />
+<img width="230" height="auto" alt="image" src="https://github.com/user-attachments/assets/af679024-26ff-40e5-8100-de629582878e" />
+<img width="230" height="auto" alt="image" src="https://github.com/user-attachments/assets/e3cfcf42-af5d-4c33-8448-27863c7164e3" />
+</div>
 
 ## What it is
 
