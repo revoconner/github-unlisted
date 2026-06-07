@@ -1,6 +1,7 @@
 import "@/styles/app.css";
 import "@/styles/app_override.css";
 import { DashboardClient } from "@/components/dashboard-client";
+import { SiteFooter } from "@/components/site-footer";
 import { listInstallationRepos } from "@/lib/github-app";
 import { pageMetadata } from "@/lib/seo";
 import { getSession } from "@/lib/session";
@@ -49,28 +50,7 @@ export default async function AppPage({
 						</a>
 					)}
 				</main>
-				<footer className="site-footer">
-					<span>
-						Built by <span className="name">Rév</span>
-					</span>
-					<a href="https://www.revoconner.com" target="_blank" rel="noopener">
-						Visit <span className="url">www.revoconner.com</span>
-						<svg
-							width="11"
-							height="11"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							strokeWidth="2"
-							strokeLinecap="round"
-							strokeLinejoin="round"
-							aria-hidden="true"
-						>
-							<path d="M7 17L17 7" />
-							<polyline points="7 7 17 7 17 17" />
-						</svg>
-					</a>
-				</footer>
+				<SiteFooter />
 			</div>
 		);
 	}
@@ -138,28 +118,7 @@ export default async function AppPage({
 						Sign out
 					</a>
 				</main>
-				<footer className="site-footer">
-					<span>
-						Built by <span className="name">Rév</span>
-					</span>
-					<a href="https://www.revoconner.com" target="_blank" rel="noopener">
-						Visit <span className="url">www.revoconner.com</span>
-						<svg
-							width="11"
-							height="11"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							strokeWidth="2"
-							strokeLinecap="round"
-							strokeLinejoin="round"
-							aria-hidden="true"
-						>
-							<path d="M7 17L17 7" />
-							<polyline points="7 7 17 7 17 17" />
-						</svg>
-					</a>
-				</footer>
+				<SiteFooter />
 			</div>
 		);
 	}

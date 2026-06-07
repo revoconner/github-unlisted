@@ -23,6 +23,7 @@
     "octokit": "^5.0.5",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
+    "resend": "^6.12.4",
     "shiki": "^4.0.2"
   },
   "devDependencies": {

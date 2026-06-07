@@ -2,6 +2,7 @@ import "@/styles/normal.css";
 import "@/styles/normal_override.css";
 import { NavLinks } from "@/components/nav-links";
 import { SiteDrawer } from "@/components/site-drawer";
+import { SiteFooter } from "@/components/site-footer";
 import { getSession } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
@@ -122,28 +123,7 @@ export default async function Page() {
 				</div>
 			</div>
 
-			<footer className="site-footer">
-				<span>
-					Built by <span className="name">Rév</span>
-				</span>
-				<a href="https://www.revoconner.com" target="_blank" rel="noopener">
-					Visit <span className="url">www.revoconner.com</span>
-					<svg
-						width="11"
-						height="11"
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						strokeWidth="2"
-						strokeLinecap="round"
-						strokeLinejoin="round"
-						aria-hidden="true"
-					>
-						<path d="M7 17L17 7" />
-						<polyline points="7 7 17 7 17 17" />
-					</svg>
-				</a>
-			</footer>
+			<SiteFooter />
 		</div>
 	);
 }

@@ -89,7 +89,8 @@ input {
 /* Lock background scroll while the nav drawer or the viewer tree sheet
    is open. */
 body[data-drawer="open"],
-body[data-viewer-tree="open"] {
+body[data-viewer-tree="open"],
+body[data-contact="open"] {
 	overflow: hidden;
 }
 
@@ -226,14 +227,6 @@ main {
 	border-top: 1px solid var(--border-soft);
 	backdrop-filter: var(--chrome-backdrop);
 }
-.site-footer .name {
-	color: var(--text-2);
-	font-family: var(--font-sans);
-	font-size: var(--fs-caption);
-	font-weight: 500;
-	letter-spacing: 0;
-	text-transform: none;
-}
 .site-footer a {
 	display: inline-flex;
 	align-items: center;
@@ -248,6 +241,199 @@ main {
 @media (hover: hover) {
 	.site-footer a:hover .url {
 		color: var(--text);
+	}
+}
+
+/* ─── Contact (footer button + modal form) ─────────────────── */
+/* Matches the landing hero CTA (.btn--outline-accent in normal.css), but
+   restyled here since the footer is site-wide and normal.css isn't loaded
+   on app pages. */
+.site-footer__contact {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	padding: 2px 15px;
+	border-radius: 9px;
+	background: transparent;
+	border: 1.5px solid rgb(159, 159, 159);
+	color: var(--accent);
+	font-family: var(--font-sans);
+	font-weight: 500;
+	font-size: var(--fs-btn);
+	letter-spacing: 0.15em;
+	text-transform: uppercase;
+	cursor: pointer;
+	transition:
+		background 0.15s ease,
+		border-color 0.15s ease,
+		color 0.15s ease;
+}
+
+.contact-backdrop {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.55);
+	backdrop-filter: blur(2px);
+	z-index: 80;
+	border: 0;
+	padding: 0;
+	cursor: pointer;
+}
+.contact-modal {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: min(92vw, 460px);
+	max-height: 88vh;
+	overflow-y: auto;
+	z-index: 81;
+	padding: 22px;
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: 14px;
+	animation: contact-in 0.18s ease;
+}
+@keyframes contact-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+.contact-modal__head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 16px;
+}
+.contact-modal__title {
+	margin: 0;
+	font-size: var(--fs-h3);
+	font-weight: 600;
+	color: var(--text);
+}
+.contact-modal__close {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	background: transparent;
+	border: 1px solid var(--border);
+	border-radius: 8px;
+	color: var(--text-2);
+	cursor: pointer;
+	padding: 0;
+}
+.contact-modal__close svg {
+	width: 14px;
+	height: 14px;
+}
+
+.contact-form {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+}
+.contact-field {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+.contact-label {
+	font-size: var(--fs-caption);
+	color: var(--text-3);
+	letter-spacing: 0.02em;
+}
+.contact-input {
+	width: 100%;
+	background: var(--bg);
+	border: 1px solid var(--border);
+	border-radius: 8px;
+	padding: 9px 11px;
+	color: var(--text);
+	font-family: var(--font-sans);
+	font-size: var(--fs-ui);
+	outline: 0;
+}
+.contact-input::placeholder {
+	color: var(--muted);
+}
+.contact-input:focus {
+	border-color: var(--border-strong);
+}
+.contact-textarea {
+	resize: vertical;
+	min-height: 96px;
+	line-height: 1.5;
+}
+.contact-select {
+	appearance: none;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	padding-right: 34px;
+	cursor: pointer;
+	background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23bababa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right 11px center;
+	background-size: 12px;
+}
+.contact-hp {
+	position: absolute;
+	left: -9999px;
+	width: 1px;
+	height: 1px;
+	opacity: 0;
+	pointer-events: none;
+}
+.contact-error {
+	margin: 0;
+	font-size: var(--fs-caption);
+	color: #ef4444;
+}
+.contact-submit {
+	margin-top: 2px;
+	height: 40px;
+	border-radius: 8px;
+	background: rgb(from var(--accent) r g b / 0.14);
+	border: 1px solid rgb(from var(--accent) r g b / 0.4);
+	color: var(--accent);
+	font-family: var(--font-sans);
+	font-weight: 500;
+	font-size: var(--fs-ui);
+	cursor: pointer;
+	transition: background 0.15s ease;
+}
+.contact-submit:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+.contact-sent {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+.contact-sent p {
+	margin: 0;
+	font-size: var(--fs-body);
+	line-height: 1.6;
+	color: var(--text-2);
+}
+
+@media (hover: hover) {
+	.site-footer__contact:hover {
+		background: rgb(from var(--accent) r g b / 0.08);
+		border-color: var(--accent);
+	}
+	.contact-modal__close:hover {
+		color: var(--text);
+		border-color: var(--border-strong);
+	}
+	.contact-submit:not(:disabled):hover {
+		background: rgb(from var(--accent) r g b / 0.2);
 	}
 }
 
