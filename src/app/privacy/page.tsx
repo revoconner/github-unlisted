@@ -101,7 +101,7 @@ export default async function PrivacyPage() {
 						The data controller for the purposes of the EU and UK General Data
 						Protection Regulation (GDPR) is the Operator. For any privacy
 						enquiry, or to exercise the rights set out in this policy, contact:{" "}
-						<a href="mailto:oconnerrev@gmail.com">oconnerrev@gmail.com</a>. The
+						<a href="mailto:github-unlisted@revoconner.com">github-unlisted@revoconner.com</a>. The
 						source code is publicly available at the{" "}
 						<a
 							href="https://github.com/revoconner/github-unlisted"
@@ -279,7 +279,7 @@ export default async function PrivacyPage() {
 						repository access, or uninstall the GitHub App, from your GitHub
 						settings. Revocation takes effect at once. For any other request,
 						contact{" "}
-						<a href="mailto:oconnerrev@gmail.com">oconnerrev@gmail.com</a>.
+						<a href="mailto:github-unlisted@revoconner.com">github-unlisted@revoconner.com</a>.
 					</p>
 
 					<h2>11. Security</h2>
@@ -310,7 +310,7 @@ export default async function PrivacyPage() {
 					<p>
 						Questions about this policy or our handling of your information can
 						be sent to{" "}
-						<a href="mailto:oconnerrev@gmail.com">oconnerrev@gmail.com</a>, or
+						<a href="mailto:github-unlisted@revoconner.com">github-unlisted@revoconner.com</a>, or
 						raised on the{" "}
 						<a
 							href="https://github.com/revoconner/github-unlisted"
