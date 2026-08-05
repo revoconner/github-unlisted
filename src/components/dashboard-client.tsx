@@ -19,6 +19,7 @@ interface Share {
 	repo: string;
 	createdAt?: number;
 	expiresAt?: number;
+	ref?: string;
 }
 
 type Filter = "all" | "shared" | "notshared" | "public" | "private";
@@ -102,6 +103,69 @@ function ExpiryControl({
 	);
 }
 
+// Empty value means "any branch": the link is not locked and the recipient can reach every branch by URL, which is how every share behaved before locking existed.
+function BranchControl({
+	repo,
+	value,
+	disabled,
+	onChange,
+}: {
+	repo: Repo;
+	value: string;
+	disabled?: boolean;
+	onChange: (ref: string) => void;
+}) {
+	const [branches, setBranches] = React.useState<string[] | null>(null);
+	const [loading, setLoading] = React.useState(false);
+
+	// Loaded on first interaction instead of for every row up front, which would be one GitHub call per repo on every dashboard render.
+	const load = async () => {
+		if (branches || loading) return;
+		setLoading(true);
+		try {
+			const qs = new URLSearchParams({
+				installationId: String(repo.installationId),
+				owner: repo.owner,
+				repo: repo.name,
+			});
+			const res = await fetch(`/api/repo/branches?${qs}`);
+			if (!res.ok) throw new Error();
+			const data = (await res.json()) as { branches: string[] };
+			setBranches(data.branches);
+		} catch {
+			setBranches([]);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	// A locked branch that has since been deleted would otherwise vanish from the list and silently reset the row to "any branch".
+	const options = React.useMemo(() => {
+		const base = branches ?? [];
+		return value && !base.includes(value) ? [value, ...base] : base;
+	}, [branches, value]);
+
+	return (
+		<select
+			className="branch__sel"
+			aria-label="Branch to share"
+			value={value}
+			disabled={disabled}
+			onFocus={load}
+			onPointerDown={load}
+			onChange={(e) => onChange(e.target.value)}
+		>
+			<option value="">any branch</option>
+			{options.map((b) => (
+				<option key={b} value={b}>
+					{b}
+				</option>
+			))}
+			{loading && <option disabled>loading branches</option>}
+		</select>
+	);
+}
+
 function ago(ts?: number): string {
 	if (!ts) return "";
 	const s = Math.max(1, Math.floor((Date.now() - ts) / 1000));
@@ -131,11 +195,19 @@ export function DashboardClient({
 	const [busy, setBusy] = React.useState<string | null>(null);
 	const [copied, setCopied] = React.useState<string | null>(null);
 	const [ttlSel, setTtlSel] = React.useState<Record<string, TtlSel>>({});
+	const [refSel, setRefSel] = React.useState<Record<string, string>>({});
+	const [error, setError] = React.useState<string | null>(null);
 
 	const getSel = (key: string): TtlSel =>
 		ttlSel[key] ?? { amount: 1, unit: "never" };
 	const setSel = (key: string, s: TtlSel) =>
 		setTtlSel((prev) => ({ ...prev, [key]: s }));
+
+	// Falls back to what is already stored on the share so an existing lock shows up without the user touching the control.
+	const getRef = (key: string, share?: Share): string =>
+		refSel[key] ?? share?.ref ?? "";
+	const setRef = (key: string, v: string) =>
+		setRefSel((prev) => ({ ...prev, [key]: v }));
 
 	const shareByRepo = React.useMemo(() => {
 		const m = new Map<string, Share>();
@@ -170,8 +242,16 @@ export function DashboardClient({
 		return true;
 	});
 
+	const failure = async (res: Response, fallback: string) => {
+		const data = (await res.json().catch(() => null)) as {
+			error?: string;
+		} | null;
+		setError(data?.error ?? fallback);
+	};
+
 	const create = async (r: Repo) => {
 		setBusy(r.fullName);
+		setError(null);
 		try {
 			const res = await fetch("/api/share", {
 				method: "POST",
@@ -181,17 +261,25 @@ export function DashboardClient({
 					owner: r.owner,
 					repo: r.name,
 					ttlSeconds: ttlFor(getSel(r.fullName)),
+					ref: getRef(r.fullName) || null,
 				}),
 			});
-			if (!res.ok) throw new Error();
+			if (!res.ok) {
+				await failure(res, "Could not create the link");
+				return;
+			}
 			router.refresh();
+		} catch {
+			setError("Could not create the link");
 		} finally {
 			setBusy(null);
 		}
 	};
 
-	const applyTtl = async (r: Repo, s: Share) => {
+	// One "Set" applies both controls. ttlSeconds is always sent, so pressing Set restarts the auto-revoke window even when only the branch changed.
+	const applySettings = async (r: Repo, s: Share) => {
 		setBusy(r.fullName);
+		setError(null);
 		try {
 			const res = await fetch("/api/share", {
 				method: "PATCH",
@@ -199,10 +287,16 @@ export function DashboardClient({
 				body: JSON.stringify({
 					id: s.id,
 					ttlSeconds: ttlFor(getSel(r.fullName)),
+					ref: getRef(r.fullName, s) || null,
 				}),
 			});
-			if (!res.ok) throw new Error();
+			if (!res.ok) {
+				await failure(res, "Could not update the link");
+				return;
+			}
 			router.refresh();
+		} catch {
+			setError("Could not update the link");
 		} finally {
 			setBusy(null);
 		}
@@ -379,6 +473,12 @@ export function DashboardClient({
 					</select>
 				</div>
 
+				{error && (
+					<div className="signin-error" role="alert">
+						{error}
+					</div>
+				)}
+
 				<div className="repo-list">
 					{visible.length === 0 && (
 						<div className="repo-row__empty" style={{ padding: "20px" }}>
@@ -420,6 +520,10 @@ export function DashboardClient({
 													? `revokes ${until(share.expiresAt)}`
 													: "no auto-revoke"}
 											</span>
+											<span className="sep">·</span>
+											<span className="created">
+												{share.ref ? `locked to ${share.ref}` : "any branch"}
+											</span>
 										</div>
 									) : (
 										<div className="repo-row__empty">not shared</div>
@@ -443,6 +547,12 @@ export function DashboardClient({
 											>
 												{copied === share.id ? "Copied" : "Copy"}
 											</button>
+											<BranchControl
+												repo={r}
+												value={getRef(r.fullName, share)}
+												disabled={rowBusy}
+												onChange={(v) => setRef(r.fullName, v)}
+											/>
 											<ExpiryControl
 												sel={getSel(r.fullName)}
 												disabled={rowBusy}
@@ -452,7 +562,7 @@ export function DashboardClient({
 												type="button"
 												className="btn btn--secondary btn--sm"
 												disabled={rowBusy}
-												onClick={() => applyTtl(r, share)}
+												onClick={() => applySettings(r, share)}
 											>
 												{rowBusy ? "…" : "Set"}
 											</button>
@@ -467,6 +577,12 @@ export function DashboardClient({
 										</>
 									) : (
 										<>
+											<BranchControl
+												repo={r}
+												value={getRef(r.fullName)}
+												disabled={rowBusy}
+												onChange={(v) => setRef(r.fullName, v)}
+											/>
 											<ExpiryControl
 												sel={getSel(r.fullName)}
 												disabled={rowBusy}

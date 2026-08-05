@@ -91,6 +91,7 @@ export default async function AppPage({
 		repo: string;
 		createdAt?: number;
 		expiresAt?: number;
+		ref?: string;
 	}[] = [];
 	try {
 		const lists = await Promise.all(
@@ -102,6 +103,7 @@ export default async function AppPage({
 			repo: s.repo,
 			createdAt: s.createdAt,
 			expiresAt: s.expiresAt,
+			ref: s.ref,
 		}));
 	} catch {
 		// Non-fatal.

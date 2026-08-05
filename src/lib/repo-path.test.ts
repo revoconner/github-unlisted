@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildHref, parseView } from "./repo-path";
+import { buildHref, parseView, resolveRef } from "./repo-path";
 
 describe("parseView", () => {
 	it("returns null with fewer than two segments", () => {
@@ -54,6 +54,106 @@ describe("parseView", () => {
 			viewType: "tree",
 			ref: "",
 			path: "",
+		});
+	});
+});
+
+describe("resolveRef", () => {
+	it("falls back to the default branch when nothing is locked or in the URL", () => {
+		expect(resolveRef(undefined, "", "", "main")).toEqual({
+			ref: "main",
+			path: "",
+			redirectRef: null,
+		});
+	});
+
+	it("lets the URL ref and path win when the share is not locked", () => {
+		expect(resolveRef(undefined, "dev", "src/a.ts", "main")).toEqual({
+			ref: "dev",
+			path: "src/a.ts",
+			redirectRef: null,
+		});
+	});
+
+	it("uses the locked branch for a bare link with no ref", () => {
+		expect(resolveRef("release", "", "", "main")).toEqual({
+			ref: "release",
+			path: "",
+			redirectRef: null,
+		});
+	});
+
+	it("does not redirect when the URL already names the locked branch", () => {
+		expect(resolveRef("release", "release", "", "main")).toEqual({
+			ref: "release",
+			path: "",
+			redirectRef: null,
+		});
+	});
+
+	it("keeps the path when the URL is already on the locked branch", () => {
+		expect(resolveRef("release", "release", "src/a.ts", "main")).toEqual({
+			ref: "release",
+			path: "src/a.ts",
+			redirectRef: null,
+		});
+	});
+
+	it("redirects a URL that names any other branch back to the locked one", () => {
+		expect(resolveRef("release", "secret-wip", "", "main")).toEqual({
+			ref: "release",
+			path: "",
+			redirectRef: "release",
+		});
+	});
+
+	it("redirects even when the URL names the repo default branch", () => {
+		expect(resolveRef("release", "main", "", "main")).toEqual({
+			ref: "release",
+			path: "",
+			redirectRef: "release",
+		});
+	});
+
+	// A slashed branch is split across segments by parseView, so the ref/path boundary has to be recovered from the locked name or the viewer redirects forever.
+	it("recombines a slashed locked branch that parseView split", () => {
+		expect(
+			resolveRef("ft/initialCommit", "ft", "initialCommit", "main"),
+		).toEqual({ ref: "ft/initialCommit", path: "", redirectRef: null });
+	});
+
+	it("recovers the path that follows a slashed locked branch", () => {
+		expect(
+			resolveRef("ft/initialCommit", "ft", "initialCommit/src/a.ts", "main"),
+		).toEqual({
+			ref: "ft/initialCommit",
+			path: "src/a.ts",
+			redirectRef: null,
+		});
+	});
+
+	it("settles in one hop when a slashed lock is reached from another branch", () => {
+		const first = resolveRef("ft/initialCommit", "main", "src/a.ts", "main");
+		expect(first).toEqual({
+			ref: "ft/initialCommit",
+			path: "src/a.ts",
+			redirectRef: "ft/initialCommit",
+		});
+		// The redirect target is /{owner}/{repo}/blob/ft/initialCommit/src/a.ts, which parseView reports as ref "ft" plus the rest.
+		expect(
+			resolveRef("ft/initialCommit", "ft", "initialCommit/src/a.ts", "main"),
+		).toEqual({
+			ref: "ft/initialCommit",
+			path: "src/a.ts",
+			redirectRef: null,
+		});
+	});
+
+	it("does not treat a branch that merely shares a prefix as the locked one", () => {
+		expect(resolveRef("ft/init", "ft", "initial", "main")).toEqual({
+			ref: "ft/init",
+			path: "initial",
+			redirectRef: "ft/init",
 		});
 	});
 });

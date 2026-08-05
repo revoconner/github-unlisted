@@ -9,6 +9,8 @@ export interface ShareTarget {
 	repo: string;
 	createdAt?: number;
 	expiresAt?: number;
+	// Branch this link is locked to. Undefined (every share created before branch locking existed) means "not locked": the viewer resolves the ref from the URL and falls back to the repo default, exactly as before.
+	ref?: string;
 }
 
 const KEY_PREFIX = "share:";
@@ -85,6 +87,25 @@ export async function updateShareTtl(
 	};
 	if (ttlSeconds) {
 		await redis.set(key, next, { ex: ttlSeconds });
+	} else {
+		await redis.set(key, next);
+	}
+	return next;
+}
+
+// Change (or clear) the locked branch. Unlike updateShareTtl this must NOT restart the auto-revoke window, so the remaining TTL is read back and re-applied. redis.ttl returns -1 for a key with no expiry and -2 for a missing key.
+export async function updateShareRef(
+	id: string,
+	ref: string | null,
+): Promise<ShareTarget | null> {
+	const redis = getRedis();
+	const key = `${KEY_PREFIX}${id}`;
+	const current = await redis.get<ShareTarget>(key);
+	if (!current) return null;
+	const remaining = await redis.ttl(key);
+	const next: ShareTarget = { ...current, ref: ref ?? undefined };
+	if (remaining > 0) {
+		await redis.set(key, next, { ex: remaining });
 	} else {
 		await redis.set(key, next);
 	}

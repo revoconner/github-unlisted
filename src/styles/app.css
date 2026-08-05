@@ -941,7 +941,8 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	gap: 4px;
 }
 .ttl__num,
-.ttl__unit {
+.ttl__unit,
+.branch__sel {
 	height: 30px;
 	background: var(--surface);
 	color: var(--text);
@@ -971,7 +972,12 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	cursor: not-allowed;
 }
 .ttl__num:focus,
-.ttl__unit:focus {
+.ttl__unit:focus,
+.branch__sel:focus {
 	outline: none;
 	border-color: var(--border-strong);
+}
+/* Long branch names must not stretch the row; the full name stays readable in the native dropdown. */
+.branch__sel {
+	max-width: 150px;
 }

@@ -18,7 +18,7 @@ import {
 import { highlight } from "@/lib/highlight";
 import { isMarkdown, renderMarkdown } from "@/lib/markdown";
 import { renderMarkdownGitHub } from "@/lib/markdown-github";
-import { buildHref, parseView } from "@/lib/repo-path";
+import { buildHref, parseView, resolveRef } from "@/lib/repo-path";
 import { pageMetadata } from "@/lib/seo";
 import { getSession } from "@/lib/session";
 import { resolveShare } from "@/lib/share-store";
@@ -129,17 +129,36 @@ export default async function ViewPage({
 		);
 	}
 
-	const ref = parsed.ref || meta.defaultBranch;
+	// A locked share pins one branch. Redirect (rather than error) so deep links that predate the lock, or point at another branch, still land somewhere useful. path is re-split here because a slashed branch name occupies more than one URL segment.
+	const { ref, path, redirectRef } = resolveRef(
+		target.ref,
+		parsed.ref,
+		parsed.path,
+		meta.defaultBranch,
+	);
+	if (redirectRef) {
+		redirect(
+			buildHref(
+				target.owner,
+				target.repo,
+				parsed.viewType,
+				redirectRef,
+				path,
+				shareId,
+			),
+		);
+	}
+
 	const contents = await getContents(
 		octokit,
 		target.owner,
 		target.repo,
-		parsed.path,
+		path,
 		ref,
 	);
 
 	// The bare repo link opens the README as a file (not a directory listing).
-	if (contents.kind === "dir" && parsed.path === "") {
+	if (contents.kind === "dir" && path === "") {
 		const readme = contents.entries.find(
 			(e) =>
 				e.type === "file" && /^readme\./i.test(e.name) && isMarkdown(e.name),
@@ -151,7 +170,7 @@ export default async function ViewPage({
 		}
 	}
 
-	const crumbs = parsed.path ? parsed.path.split("/") : [];
+	const crumbs = path ? path.split("/") : [];
 
 	// Whole-repo tree for the sidebar (one recursive call). Falls back to the
 	// current directory's listing if the ref can't be read or the tree is too
@@ -166,8 +185,8 @@ export default async function ViewPage({
 	if (contents.kind === "dir") {
 		sidebarEntries = contents.entries;
 	} else if (contents.kind === "file") {
-		const parentPath = parsed.path.includes("/")
-			? parsed.path.slice(0, parsed.path.lastIndexOf("/"))
+		const parentPath = path.includes("/")
+			? path.slice(0, path.lastIndexOf("/"))
 			: "";
 		const parent = await getContents(
 			octokit,
@@ -263,7 +282,7 @@ export default async function ViewPage({
 							repo={target.repo}
 							refName={ref}
 							shareId={shareId}
-							activePath={parsed.path}
+							activePath={path}
 						/>
 					) : (
 						<SidebarTree
@@ -273,7 +292,7 @@ export default async function ViewPage({
 							refName={ref}
 							shareId={shareId}
 							parentPath={crumbs.slice(0, -1).join("/")}
-							showParent={Boolean(parsed.path)}
+							showParent={Boolean(path)}
 						/>
 					)}
 				</aside>
@@ -355,7 +374,7 @@ export default async function ViewPage({
 									{contents.name} · {contents.size} bytes
 								</span>
 								<a
-									href={`https://github.com/${meta.fullName}/blob/${ref}/${parsed.path}`}
+									href={`https://github.com/${meta.fullName}/blob/${ref}/${path}`}
 									target="_blank"
 									rel="noopener noreferrer"
 								>
