@@ -981,3 +981,50 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 .branch__sel {
 	max-width: 150px;
 }
+.swtoggle {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	font-size: var(--fs-caption);
+	color: var(--text-2);
+	cursor: pointer;
+	user-select: none;
+}
+.swtoggle input {
+	accent-color: var(--accent);
+	cursor: pointer;
+}
+.swtoggle:has(input:disabled) {
+	opacity: 0.45;
+	cursor: not-allowed;
+}
+.swtoggle:has(input:disabled) input {
+	cursor: not-allowed;
+}
+
+/* Recipient-facing branch picker in the viewer toolbar. */
+.branchsw {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-size: var(--fs-caption);
+	color: var(--text-2);
+}
+.branchsw__label {
+	white-space: nowrap;
+}
+.branchsw__sel {
+	height: 28px;
+	max-width: 180px;
+	background: var(--surface);
+	color: var(--text);
+	border: 1px solid var(--border);
+	border-radius: 6px;
+	font-family: var(--font-mono);
+	font-size: var(--fs-caption);
+	padding: 0 6px;
+}
+.branchsw__sel:focus {
+	outline: none;
+	border-color: var(--border-strong);
+}

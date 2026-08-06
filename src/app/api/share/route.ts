@@ -9,7 +9,8 @@ import {
 	createShare,
 	deleteShare,
 	resolveShare,
-	updateShareRef,
+	type ShareSettings,
+	updateShareSettings,
 	updateShareTtl,
 } from "@/lib/share-store";
 
@@ -49,6 +50,7 @@ export async function POST(request: Request) {
 		repo?: unknown;
 		ttlSeconds?: unknown;
 		ref?: unknown;
+		showBranches?: unknown;
 	};
 	try {
 		body = await request.json();
@@ -82,9 +84,18 @@ export async function POST(request: Request) {
 		return NextResponse.json({ error: parsedRef.error }, { status: 400 });
 	}
 
+	// Only meaningful without a lock; a locked share must never enumerate branches.
+	const showBranches = body.showBranches === true && !parsedRef.ref;
+
 	const ttlSeconds = parseTtl(body.ttlSeconds);
 	const id = await createShare(
-		{ installationId, owner, repo, ref: parsedRef.ref ?? undefined },
+		{
+			installationId,
+			owner,
+			repo,
+			ref: parsedRef.ref ?? undefined,
+			showBranches: showBranches || undefined,
+		},
 		ttlSeconds,
 	);
 	const origin = new URL(request.url).origin;
@@ -100,7 +111,12 @@ export async function PATCH(request: Request) {
 		return NextResponse.json({ error: "Not signed in" }, { status: 401 });
 	}
 
-	let body: { id?: unknown; ttlSeconds?: unknown; ref?: unknown };
+	let body: {
+		id?: unknown;
+		ttlSeconds?: unknown;
+		ref?: unknown;
+		showBranches?: unknown;
+	};
 	try {
 		body = await request.json();
 	} catch {
@@ -120,8 +136,8 @@ export async function PATCH(request: Request) {
 		return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 	}
 
-	// Each field is only touched when the caller actually sent it, so an older client posting just ttlSeconds cannot silently clear a branch lock.
-	let updated = target;
+	// Each field is only touched when the caller actually sent it, so an older client posting just ttlSeconds cannot silently clear a branch lock or a switcher setting.
+	const patch: Partial<ShareSettings> = {};
 	if ("ref" in body) {
 		const parsedRef = await parseRef(
 			body.ref,
@@ -132,9 +148,23 @@ export async function PATCH(request: Request) {
 		if ("error" in parsedRef) {
 			return NextResponse.json({ error: parsedRef.error }, { status: 400 });
 		}
-		updated = (await updateShareRef(id, parsedRef.ref)) ?? updated;
+		patch.ref = parsedRef.ref ?? undefined;
 	}
-	// Applied after the ref so the caller-supplied window wins; updateShareRef deliberately preserves whatever window was already running.
+	if ("showBranches" in body) {
+		patch.showBranches = body.showBranches === true || undefined;
+	}
+
+	// Locking wins regardless of the order the two fields arrived in, including when a lock is added to a share that already had the switcher on.
+	const effectiveRef = "ref" in patch ? patch.ref : target.ref;
+	if (effectiveRef) {
+		patch.showBranches = undefined;
+	}
+
+	let updated = target;
+	if (Object.keys(patch).length > 0) {
+		updated = (await updateShareSettings(id, patch)) ?? updated;
+	}
+	// Applied last so the caller-supplied window wins; updateShareSettings deliberately preserves whatever window was already running.
 	if ("ttlSeconds" in body) {
 		updated = (await updateShareTtl(id, parseTtl(body.ttlSeconds))) ?? updated;
 	}
@@ -143,6 +173,7 @@ export async function PATCH(request: Request) {
 		ok: true,
 		expiresAt: updated.expiresAt ?? null,
 		ref: updated.ref ?? null,
+		showBranches: updated.showBranches === true,
 	});
 }
 

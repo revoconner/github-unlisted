@@ -20,6 +20,7 @@ interface Share {
 	createdAt?: number;
 	expiresAt?: number;
 	ref?: string;
+	showBranches?: boolean;
 }
 
 type Filter = "all" | "shared" | "notshared" | "public" | "private";
@@ -166,6 +167,36 @@ function BranchControl({
 	);
 }
 
+// Opt-in, and disabled while a branch is pinned: a locked share must never enumerate branches. Off by default so no existing link starts listing branch names on its own.
+function SwitcherToggle({
+	checked,
+	disabled,
+	onChange,
+}: {
+	checked: boolean;
+	disabled?: boolean;
+	onChange: (v: boolean) => void;
+}) {
+	return (
+		<label
+			className="swtoggle"
+			title={
+				disabled
+					? "Not available while the link is locked to a branch"
+					: "Let the recipient switch branches. This lists every branch name to them."
+			}
+		>
+			<input
+				type="checkbox"
+				checked={checked}
+				disabled={disabled}
+				onChange={(e) => onChange(e.target.checked)}
+			/>
+			<span>switcher</span>
+		</label>
+	);
+}
+
 function ago(ts?: number): string {
 	if (!ts) return "";
 	const s = Math.max(1, Math.floor((Date.now() - ts) / 1000));
@@ -196,6 +227,7 @@ export function DashboardClient({
 	const [copied, setCopied] = React.useState<string | null>(null);
 	const [ttlSel, setTtlSel] = React.useState<Record<string, TtlSel>>({});
 	const [refSel, setRefSel] = React.useState<Record<string, string>>({});
+	const [swSel, setSwSel] = React.useState<Record<string, boolean>>({});
 	const [error, setError] = React.useState<string | null>(null);
 
 	const getSel = (key: string): TtlSel =>
@@ -208,6 +240,12 @@ export function DashboardClient({
 		refSel[key] ?? share?.ref ?? "";
 	const setRef = (key: string, v: string) =>
 		setRefSel((prev) => ({ ...prev, [key]: v }));
+
+	// Only meaningful without a lock, so a pinned branch forces this back off.
+	const getShow = (key: string, share?: Share): boolean =>
+		!getRef(key, share) && (swSel[key] ?? share?.showBranches ?? false);
+	const setShow = (key: string, v: boolean) =>
+		setSwSel((prev) => ({ ...prev, [key]: v }));
 
 	const shareByRepo = React.useMemo(() => {
 		const m = new Map<string, Share>();
@@ -262,6 +300,7 @@ export function DashboardClient({
 					repo: r.name,
 					ttlSeconds: ttlFor(getSel(r.fullName)),
 					ref: getRef(r.fullName) || null,
+					showBranches: getShow(r.fullName),
 				}),
 			});
 			if (!res.ok) {
@@ -288,6 +327,7 @@ export function DashboardClient({
 					id: s.id,
 					ttlSeconds: ttlFor(getSel(r.fullName)),
 					ref: getRef(r.fullName, s) || null,
+					showBranches: getShow(r.fullName, s),
 				}),
 			});
 			if (!res.ok) {
@@ -522,7 +562,11 @@ export function DashboardClient({
 											</span>
 											<span className="sep">·</span>
 											<span className="created">
-												{share.ref ? `locked to ${share.ref}` : "any branch"}
+												{share.ref
+													? `locked to ${share.ref}`
+													: share.showBranches
+														? "any branch, switcher shown"
+														: "any branch"}
 											</span>
 										</div>
 									) : (
@@ -553,6 +597,11 @@ export function DashboardClient({
 												disabled={rowBusy}
 												onChange={(v) => setRef(r.fullName, v)}
 											/>
+											<SwitcherToggle
+												checked={getShow(r.fullName, share)}
+												disabled={rowBusy || Boolean(getRef(r.fullName, share))}
+												onChange={(v) => setShow(r.fullName, v)}
+											/>
 											<ExpiryControl
 												sel={getSel(r.fullName)}
 												disabled={rowBusy}
@@ -582,6 +631,11 @@ export function DashboardClient({
 												value={getRef(r.fullName)}
 												disabled={rowBusy}
 												onChange={(v) => setRef(r.fullName, v)}
+											/>
+											<SwitcherToggle
+												checked={getShow(r.fullName)}
+												disabled={rowBusy || Boolean(getRef(r.fullName))}
+												onChange={(v) => setShow(r.fullName, v)}
 											/>
 											<ExpiryControl
 												sel={getSel(r.fullName)}

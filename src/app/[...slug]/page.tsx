@@ -2,6 +2,7 @@ import "@/styles/app.css";
 import "@/styles/app_override.css";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { BranchSwitcher } from "@/components/branch-switcher";
 import { NavLinks } from "@/components/nav-links";
 import { RepoTree } from "@/components/repo-tree";
 import { SidebarTree } from "@/components/sidebar-tree";
@@ -14,11 +15,17 @@ import {
 	getContents,
 	getRepoMeta,
 	getRepoTree,
+	listBranches,
 } from "@/lib/github-repo";
 import { highlight } from "@/lib/highlight";
 import { isMarkdown, renderMarkdown } from "@/lib/markdown";
 import { renderMarkdownGitHub } from "@/lib/markdown-github";
-import { buildHref, parseView, resolveRef } from "@/lib/repo-path";
+import {
+	buildHref,
+	parseView,
+	resolveRef,
+	splitRefFromBranches,
+} from "@/lib/repo-path";
 import { pageMetadata } from "@/lib/seo";
 import { getSession } from "@/lib/session";
 import { resolveShare } from "@/lib/share-store";
@@ -129,13 +136,30 @@ export default async function ViewPage({
 		);
 	}
 
+	// Only for an unlocked share whose owner opted in. A locked share must never enumerate branches, which is the point of locking.
+	const switcherOn = !target.ref && target.showBranches === true;
+	const branches = switcherOn
+		? await listBranches(octokit, target.owner, target.repo)
+		: null;
+
 	// A locked share pins one branch. Redirect (rather than error) so deep links that predate the lock, or point at another branch, still land somewhere useful. path is re-split here because a slashed branch name occupies more than one URL segment.
-	const { ref, path, redirectRef } = resolveRef(
+	const resolved = resolveRef(
 		target.ref,
 		parsed.ref,
 		parsed.path,
 		meta.defaultBranch,
 	);
+	const { redirectRef } = resolved;
+	let { ref, path } = resolved;
+
+	// With the real branch list in hand, an unlocked share can address a slashed branch too, which is otherwise impossible because parseView can only treat the first segment as the ref.
+	if (branches) {
+		const split = splitRefFromBranches(parsed.ref, parsed.path, branches);
+		if (split) {
+			ref = split.ref;
+			path = split.path;
+		}
+	}
 	if (redirectRef) {
 		redirect(
 			buildHref(
@@ -300,6 +324,15 @@ export default async function ViewPage({
 				<section className="viewer__main">
 					<div className="viewer__topinfo">
 						<ViewerTreeToggle />
+						{branches && branches.length > 1 && (
+							<BranchSwitcher
+								owner={target.owner}
+								repo={target.repo}
+								branches={branches}
+								current={ref}
+								shareId={shareId}
+							/>
+						)}
 						<div className="viewer__crumbs">
 							<Link
 								href={buildHref(

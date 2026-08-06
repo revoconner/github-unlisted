@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { buildHref, parseView, resolveRef } from "./repo-path";
+import {
+	buildHref,
+	parseView,
+	resolveRef,
+	splitRefFromBranches,
+} from "./repo-path";
 
 describe("parseView", () => {
 	it("returns null with fewer than two segments", () => {
@@ -155,6 +160,62 @@ describe("resolveRef", () => {
 			path: "initial",
 			redirectRef: "ft/init",
 		});
+	});
+});
+
+describe("splitRefFromBranches", () => {
+	const branches = ["main", "ft/init", "ft/init/deep", "unstable"];
+
+	it("returns null when nothing matches", () => {
+		expect(splitRefFromBranches("nope", "", branches)).toBeNull();
+	});
+
+	it("returns null for an empty url", () => {
+		expect(splitRefFromBranches("", "", branches)).toBeNull();
+	});
+
+	it("matches a plain branch with no path", () => {
+		expect(splitRefFromBranches("main", "", branches)).toEqual({
+			ref: "main",
+			path: "",
+		});
+	});
+
+	it("splits a plain branch from its path", () => {
+		expect(splitRefFromBranches("main", "src/a.ts", branches)).toEqual({
+			ref: "main",
+			path: "src/a.ts",
+		});
+	});
+
+	it("recombines a slashed branch that parseView split", () => {
+		expect(splitRefFromBranches("ft", "init", branches)).toEqual({
+			ref: "ft/init",
+			path: "",
+		});
+	});
+
+	it("splits a slashed branch from its path", () => {
+		expect(splitRefFromBranches("ft", "init/src/a.ts", branches)).toEqual({
+			ref: "ft/init",
+			path: "src/a.ts",
+		});
+	});
+
+	// "ft/init" also matches, so the longest wins or the deeper branch becomes unreachable.
+	it("prefers the longest matching branch", () => {
+		expect(splitRefFromBranches("ft", "init/deep", branches)).toEqual({
+			ref: "ft/init/deep",
+			path: "",
+		});
+		expect(splitRefFromBranches("ft", "init/deep/src/a.ts", branches)).toEqual({
+			ref: "ft/init/deep",
+			path: "src/a.ts",
+		});
+	});
+
+	it("does not match a branch that is only a string prefix", () => {
+		expect(splitRefFromBranches("mainline", "", branches)).toBeNull();
 	});
 });
 

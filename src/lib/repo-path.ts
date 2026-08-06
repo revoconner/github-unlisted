@@ -62,6 +62,29 @@ export function resolveRef(
 	return { ref: lockedRef, path: urlPath, redirectRef: lockedRef };
 }
 
+// The unlocked counterpart to the recombination inside resolveRef. With no locked branch there is nothing to match against, so a slashed branch name cannot be addressed by URL at all. Given the real branch list the boundary is recoverable: prefer the longest branch that matches the leading segments, so "ft/init" never swallows a URL that is really on "ft/init/deep". Returns null when no branch matches, leaving the caller on its existing fallback.
+export function splitRefFromBranches(
+	urlRef: string,
+	urlPath: string,
+	branches: string[],
+): { ref: string; path: string } | null {
+	const combined = urlPath ? `${urlRef}/${urlPath}` : urlRef;
+	if (!combined) return null;
+
+	let best: string | null = null;
+	for (const b of branches) {
+		if (combined === b || combined.startsWith(`${b}/`)) {
+			if (best === null || b.length > best.length) best = b;
+		}
+	}
+	if (best === null) return null;
+
+	return {
+		ref: best,
+		path: combined === best ? "" : combined.slice(best.length + 1),
+	};
+}
+
 export function buildHref(
 	owner: string,
 	repo: string,

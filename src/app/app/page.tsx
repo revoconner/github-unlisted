@@ -92,6 +92,7 @@ export default async function AppPage({
 		createdAt?: number;
 		expiresAt?: number;
 		ref?: string;
+		showBranches?: boolean;
 	}[] = [];
 	try {
 		const lists = await Promise.all(
@@ -104,6 +105,7 @@ export default async function AppPage({
 			createdAt: s.createdAt,
 			expiresAt: s.expiresAt,
 			ref: s.ref,
+			showBranches: s.showBranches,
 		}));
 	} catch {
 		// Non-fatal.
