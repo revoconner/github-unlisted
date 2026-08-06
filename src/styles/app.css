@@ -941,7 +941,8 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	gap: 4px;
 }
 .ttl__num,
-.ttl__unit {
+.ttl__unit,
+.branch__sel {
 	height: 30px;
 	background: var(--surface);
 	color: var(--text);
@@ -971,7 +972,157 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	cursor: not-allowed;
 }
 .ttl__num:focus,
-.ttl__unit:focus {
+.ttl__unit:focus,
+.branch__sel:focus {
 	outline: none;
 	border-color: var(--border-strong);
+}
+/* Long branch names must not stretch the row; the full name stays readable in the native dropdown. */
+.branch__sel {
+	max-width: 150px;
+}
+.rowtoggle {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	font-size: var(--fs-caption);
+	color: var(--text-2);
+	cursor: pointer;
+	user-select: none;
+}
+.rowtoggle input {
+	accent-color: var(--accent);
+	cursor: pointer;
+}
+.rowtoggle:has(input:disabled) {
+	opacity: 0.45;
+	cursor: not-allowed;
+}
+.rowtoggle:has(input:disabled) input {
+	cursor: not-allowed;
+}
+
+/* Recipient-facing branch picker in the viewer toolbar. */
+.branchsw {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-size: var(--fs-caption);
+	color: var(--text-2);
+}
+.branchsw__label {
+	white-space: nowrap;
+}
+.branchsw__sel {
+	height: 28px;
+	max-width: 180px;
+	background: var(--surface);
+	color: var(--text);
+	border: 1px solid var(--border);
+	border-radius: 6px;
+	font-family: var(--font-mono);
+	font-size: var(--fs-caption);
+	padding: 0 6px;
+}
+.branchsw__sel:focus {
+	outline: none;
+	border-color: var(--border-strong);
+}
+.viewer__dl,
+.viewer__tab {
+	display: inline-flex;
+	align-items: center;
+	height: 28px;
+	padding: 0 10px;
+	border: 1px solid var(--border);
+	border-radius: 6px;
+	background: var(--surface);
+	color: var(--text-2);
+	font-size: var(--fs-caption);
+	white-space: nowrap;
+}
+@media (hover: hover) {
+	.viewer__dl:hover,
+	.viewer__tab:hover {
+		color: var(--text);
+		border-color: var(--border-strong);
+	}
+}
+
+/* The releases view has no file tree, so it drops the sidebar column. */
+.viewer--wide {
+	grid-template-columns: 1fr;
+}
+
+.releases {
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+	padding: 18px 0;
+}
+.release {
+	border: 1px solid var(--border);
+	border-radius: 10px;
+	background: var(--surface);
+	padding: 16px 18px;
+}
+.release__head {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-bottom: 10px;
+}
+.release__name {
+	font-size: var(--fs-h3);
+	margin: 0 4px 0 0;
+}
+.release__tag {
+	font-family: var(--font-mono);
+}
+.release__date {
+	margin-left: auto;
+	font-family: var(--font-mono);
+	font-size: var(--fs-caption);
+	color: var(--text-3);
+}
+.release__body {
+	margin-bottom: 14px;
+}
+.release__empty {
+	color: var(--text-3);
+	font-size: var(--fs-caption);
+	margin: 0 0 14px 0;
+}
+.release__assets {
+	display: flex;
+	flex-direction: column;
+	border-top: 1px solid var(--border);
+}
+.release__asset {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 9px 2px;
+	border-bottom: 1px solid var(--border);
+	color: var(--text-2);
+	font-size: var(--fs-ui);
+}
+.release__asset:last-child {
+	border-bottom: none;
+}
+.release__asset-name {
+	font-family: var(--font-mono);
+	overflow-wrap: anywhere;
+}
+.release__asset-size {
+	color: var(--text-3);
+	font-size: var(--fs-caption);
+	white-space: nowrap;
+}
+@media (hover: hover) {
+	.release__asset:hover {
+		color: var(--accent);
+	}
 }

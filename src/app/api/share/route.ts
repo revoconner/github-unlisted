@@ -1,10 +1,16 @@
 import { NextResponse } from "next/server";
-import { listInstallationRepos } from "@/lib/github-app";
+import {
+	getInstallationOctokit,
+	listInstallationRepos,
+} from "@/lib/github-app";
+import { listBranches } from "@/lib/github-repo";
 import { getSession } from "@/lib/session";
 import {
 	createShare,
 	deleteShare,
 	resolveShare,
+	type ShareSettings,
+	updateShareSettings,
 	updateShareTtl,
 } from "@/lib/share-store";
 
@@ -13,6 +19,23 @@ function parseTtl(v: unknown): number | null {
 	if (v === null || v === undefined) return null;
 	const n = Number(v);
 	return Number.isFinite(n) && n > 0 ? Math.floor(n) : null;
+}
+
+// A share locks to one branch or to none. Empty string and null both mean "no lock" (the pre-existing behaviour). Anything else must name a real branch, checked against the live list so a typo can't produce a link that 404s for the recipient.
+async function parseRef(
+	v: unknown,
+	installationId: number,
+	owner: string,
+	repo: string,
+): Promise<{ ref: string | null } | { error: string }> {
+	if (v === null || v === undefined) return { ref: null };
+	if (typeof v !== "string") return { error: "Invalid branch" };
+	const wanted = v.trim();
+	if (!wanted) return { ref: null };
+	const octokit = getInstallationOctokit(installationId);
+	const branches = await listBranches(octokit, owner, repo);
+	if (!branches.includes(wanted)) return { error: "Unknown branch" };
+	return { ref: wanted };
 }
 
 export async function POST(request: Request) {
@@ -26,6 +49,10 @@ export async function POST(request: Request) {
 		owner?: unknown;
 		repo?: unknown;
 		ttlSeconds?: unknown;
+		ref?: unknown;
+		showBranches?: unknown;
+		allowDownload?: unknown;
+		showReleases?: unknown;
 	};
 	try {
 		body = await request.json();
@@ -54,8 +81,27 @@ export async function POST(request: Request) {
 		);
 	}
 
+	const parsedRef = await parseRef(body.ref, installationId, owner, repo);
+	if ("error" in parsedRef) {
+		return NextResponse.json({ error: parsedRef.error }, { status: 400 });
+	}
+
+	// Only meaningful without a lock; a locked share must never enumerate branches.
+	const showBranches = body.showBranches === true && !parsedRef.ref;
+
 	const ttlSeconds = parseTtl(body.ttlSeconds);
-	const id = await createShare({ installationId, owner, repo }, ttlSeconds);
+	const id = await createShare(
+		{
+			installationId,
+			owner,
+			repo,
+			ref: parsedRef.ref ?? undefined,
+			showBranches: showBranches || undefined,
+			allowDownload: body.allowDownload === true || undefined,
+			showReleases: body.showReleases === true || undefined,
+		},
+		ttlSeconds,
+	);
 	const origin = new URL(request.url).origin;
 	return NextResponse.json({
 		id,
@@ -69,7 +115,14 @@ export async function PATCH(request: Request) {
 		return NextResponse.json({ error: "Not signed in" }, { status: 401 });
 	}
 
-	let body: { id?: unknown; ttlSeconds?: unknown };
+	let body: {
+		id?: unknown;
+		ttlSeconds?: unknown;
+		ref?: unknown;
+		showBranches?: unknown;
+		allowDownload?: unknown;
+		showReleases?: unknown;
+	};
 	try {
 		body = await request.json();
 	} catch {
@@ -89,10 +142,52 @@ export async function PATCH(request: Request) {
 		return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 	}
 
-	const updated = await updateShareTtl(id, parseTtl(body.ttlSeconds));
+	// Each field is only touched when the caller actually sent it, so an older client posting just ttlSeconds cannot silently clear a branch lock or a switcher setting.
+	const patch: Partial<ShareSettings> = {};
+	if ("ref" in body) {
+		const parsedRef = await parseRef(
+			body.ref,
+			target.installationId,
+			target.owner,
+			target.repo,
+		);
+		if ("error" in parsedRef) {
+			return NextResponse.json({ error: parsedRef.error }, { status: 400 });
+		}
+		patch.ref = parsedRef.ref ?? undefined;
+	}
+	if ("showBranches" in body) {
+		patch.showBranches = body.showBranches === true || undefined;
+	}
+	if ("allowDownload" in body) {
+		patch.allowDownload = body.allowDownload === true || undefined;
+	}
+	if ("showReleases" in body) {
+		patch.showReleases = body.showReleases === true || undefined;
+	}
+
+	// Locking wins regardless of the order the two fields arrived in, including when a lock is added to a share that already had the switcher on.
+	const effectiveRef = "ref" in patch ? patch.ref : target.ref;
+	if (effectiveRef) {
+		patch.showBranches = undefined;
+	}
+
+	let updated = target;
+	if (Object.keys(patch).length > 0) {
+		updated = (await updateShareSettings(id, patch)) ?? updated;
+	}
+	// Applied last so the caller-supplied window wins; updateShareSettings deliberately preserves whatever window was already running.
+	if ("ttlSeconds" in body) {
+		updated = (await updateShareTtl(id, parseTtl(body.ttlSeconds))) ?? updated;
+	}
+
 	return NextResponse.json({
 		ok: true,
-		expiresAt: updated?.expiresAt ?? null,
+		expiresAt: updated.expiresAt ?? null,
+		ref: updated.ref ?? null,
+		showBranches: updated.showBranches === true,
+		allowDownload: updated.allowDownload === true,
+		showReleases: updated.showReleases === true,
 	});
 }
 

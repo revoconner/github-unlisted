@@ -9,7 +9,21 @@ export interface ShareTarget {
 	repo: string;
 	createdAt?: number;
 	expiresAt?: number;
+	// Branch this link is locked to. Undefined (every share created before branch locking existed) means "not locked": the viewer resolves the ref from the URL and falls back to the repo default, exactly as before.
+	ref?: string;
+	// Opt-in branch switcher for an unlocked share. Undefined/false keeps every existing link exactly as it was: other branches stay reachable by URL but are never enumerated to the recipient, because branch names themselves leak information.
+	showBranches?: boolean;
+	// Opt-in whole-branch zip download. Undefined/false keeps every existing link as it was. The recipient can already read each file, so this grants no new access, but it turns reading into one-click bulk retrieval and that is the owner's call to make.
+	allowDownload?: boolean;
+	// Opt-in releases tab. Undefined/false keeps every existing link as it was. Releases are genuinely new surface: tags, publish dates, notes and uploaded binaries are not reachable through the file viewer at all.
+	showReleases?: boolean;
 }
+
+// The per-share settings an owner can change after creation. Deliberately excludes the TTL, which has its own updater with different semantics.
+export type ShareSettings = Pick<
+	ShareTarget,
+	"ref" | "showBranches" | "allowDownload" | "showReleases"
+>;
 
 const KEY_PREFIX = "share:";
 
@@ -85,6 +99,25 @@ export async function updateShareTtl(
 	};
 	if (ttlSeconds) {
 		await redis.set(key, next, { ex: ttlSeconds });
+	} else {
+		await redis.set(key, next);
+	}
+	return next;
+}
+
+// Change stored settings. Unlike updateShareTtl this must NOT restart the auto-revoke window, so the remaining TTL is read back and re-applied. redis.ttl returns -1 for a key with no expiry and -2 for a missing key. Keys absent from the patch keep their current value; an explicit undefined clears (JSON drops it).
+export async function updateShareSettings(
+	id: string,
+	patch: Partial<ShareSettings>,
+): Promise<ShareTarget | null> {
+	const redis = getRedis();
+	const key = `${KEY_PREFIX}${id}`;
+	const current = await redis.get<ShareTarget>(key);
+	if (!current) return null;
+	const remaining = await redis.ttl(key);
+	const next: ShareTarget = { ...current, ...patch };
+	if (remaining > 0) {
+		await redis.set(key, next, { ex: remaining });
 	} else {
 		await redis.set(key, next);
 	}

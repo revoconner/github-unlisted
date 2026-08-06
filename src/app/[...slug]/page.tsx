@@ -2,7 +2,10 @@ import "@/styles/app.css";
 import "@/styles/app_override.css";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import type { ReactNode } from "react";
+import { BranchSwitcher } from "@/components/branch-switcher";
 import { NavLinks } from "@/components/nav-links";
+import { ReleasesList, type RenderedRelease } from "@/components/releases-list";
 import { RepoTree } from "@/components/repo-tree";
 import { SidebarTree } from "@/components/sidebar-tree";
 import { SiteDrawer } from "@/components/site-drawer";
@@ -14,11 +17,19 @@ import {
 	getContents,
 	getRepoMeta,
 	getRepoTree,
+	listBranches,
+	listReleases,
 } from "@/lib/github-repo";
 import { highlight } from "@/lib/highlight";
 import { isMarkdown, renderMarkdown } from "@/lib/markdown";
 import { renderMarkdownGitHub } from "@/lib/markdown-github";
-import { buildHref, parseView } from "@/lib/repo-path";
+import {
+	buildHref,
+	buildReleasesHref,
+	parseView,
+	resolveRef,
+	splitRefFromBranches,
+} from "@/lib/repo-path";
 import { pageMetadata } from "@/lib/seo";
 import { getSession } from "@/lib/session";
 import { resolveShare } from "@/lib/share-store";
@@ -80,6 +91,79 @@ function FileIcon() {
 	);
 }
 
+// Chrome shared by the file view and the releases view: wordmark, primary nav, the repo/ref readout, and the footer.
+function ViewerShell({
+	fullName,
+	refName,
+	signedIn,
+	children,
+}: {
+	fullName: string;
+	refName: string;
+	signedIn: boolean;
+	children: ReactNode;
+}) {
+	return (
+		<div className="page-shell">
+			<div className="bloom" aria-hidden="true" />
+			<header className="topbar">
+				<a className="wordmark" href="/" aria-label="github unlisted home">
+					<span className="mark" aria-hidden="true">
+						<svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+							<title>unlisted</title>
+							<line
+								x1="2"
+								y1="11"
+								x2="11"
+								y2="2"
+								stroke="currentColor"
+								strokeWidth="1.6"
+								strokeLinecap="round"
+							/>
+							<line
+								x1="5"
+								y1="14"
+								x2="14"
+								y2="5"
+								stroke="currentColor"
+								strokeWidth="1.6"
+								strokeLinecap="round"
+								opacity="0.55"
+							/>
+							<line
+								x1="8"
+								y1="17"
+								x2="17"
+								y2="8"
+								stroke="currentColor"
+								strokeWidth="1.6"
+								strokeLinecap="round"
+								opacity="0.25"
+							/>
+						</svg>
+					</span>
+					<span className="word">
+						<span className="pre">github</span>{" "}
+						<span className="post">unlisted</span>
+					</span>
+				</a>
+
+				<NavLinks signedIn={signedIn} />
+
+				<div className="topbar__right">
+					<span className="topbar__meta">
+						{fullName} · {refName}
+					</span>
+					<SiteDrawer signedIn={signedIn} />
+				</div>
+			</header>
+
+			{children}
+			<SiteFooter />
+		</div>
+	);
+}
+
 export default async function ViewPage({
 	params,
 	searchParams,
@@ -129,17 +213,111 @@ export default async function ViewPage({
 		);
 	}
 
-	const ref = parsed.ref || meta.defaultBranch;
+	const isReleases = parsed.viewType === "releases";
+	if (isReleases && target.showReleases !== true) {
+		return (
+			<Notice
+				title="Releases are not available for this link"
+				detail="The owner has not turned on the releases view for this share."
+			/>
+		);
+	}
+
+	// Only for an unlocked share whose owner opted in. A locked share must never enumerate branches, which is the point of locking. The releases view addresses no ref, so it never shows the switcher.
+	const switcherOn = !isReleases && !target.ref && target.showBranches === true;
+	const branches = switcherOn
+		? await listBranches(octokit, target.owner, target.repo)
+		: null;
+
+	// A locked share pins one branch. Redirect (rather than error) so deep links that predate the lock, or point at another branch, still land somewhere useful. path is re-split here because a slashed branch name occupies more than one URL segment.
+	const resolved = resolveRef(
+		target.ref,
+		parsed.ref,
+		parsed.path,
+		meta.defaultBranch,
+	);
+	const { redirectRef } = resolved;
+	let { ref, path } = resolved;
+
+	// With the real branch list in hand, an unlocked share can address a slashed branch too, which is otherwise impossible because parseView can only treat the first segment as the ref.
+	if (branches) {
+		const split = splitRefFromBranches(parsed.ref, parsed.path, branches);
+		if (split) {
+			ref = split.ref;
+			path = split.path;
+		}
+	}
+	// The releases view addresses no ref, so it is never the target of a lock redirect. Checking the view type here (rather than isReleases) also narrows it to the file views buildHref accepts.
+	if (redirectRef && parsed.viewType !== "releases") {
+		redirect(
+			buildHref(
+				target.owner,
+				target.repo,
+				parsed.viewType,
+				redirectRef,
+				path,
+				shareId,
+			),
+		);
+	}
+
+	// Owner viewing their own share is signed in; recipients are not. Drives whether the Dashboard nav item appears.
+	const session = await getSession();
+
+	if (isReleases) {
+		// Release notes go through markdown-it (html:false) rather than GitHub's renderer: one API call per release would be dozens per page, and the notes do not need issue/@user linking to read correctly.
+		const releases: RenderedRelease[] = (
+			await listReleases(octokit, target.owner, target.repo)
+		).map((r) => ({
+			...r,
+			bodyHtml: r.body.trim() ? renderMarkdown(r.body) : null,
+		}));
+
+		return (
+			<ViewerShell
+				fullName={meta.fullName}
+				refName={ref}
+				signedIn={Boolean(session)}
+			>
+				<main className="viewer viewer--wide">
+					<section className="viewer__main">
+						<div className="viewer__topinfo">
+							<Link
+								className="viewer__tab"
+								href={buildHref(
+									target.owner,
+									target.repo,
+									"tree",
+									ref,
+									"",
+									shareId,
+								)}
+							>
+								Files
+							</Link>
+							<div className="viewer__crumbs">
+								<span>{target.repo}</span>
+								<span className="sep"> / </span>
+								releases
+							</div>
+						</div>
+						<ReleasesList releases={releases} shareId={shareId} />
+					</section>
+				</main>
+			</ViewerShell>
+		);
+	}
+
 	const contents = await getContents(
 		octokit,
 		target.owner,
 		target.repo,
-		parsed.path,
+		path,
 		ref,
 	);
 
 	// The bare repo link opens the README as a file (not a directory listing).
-	if (contents.kind === "dir" && parsed.path === "") {
+	if (contents.kind === "dir" && path === "") {
 		const readme = contents.entries.find(
 			(e) =>
 				e.type === "file" && /^readme\./i.test(e.name) && isMarkdown(e.name),
@@ -151,7 +329,7 @@ export default async function ViewPage({
 		}
 	}
 
-	const crumbs = parsed.path ? parsed.path.split("/") : [];
+	const crumbs = path ? path.split("/") : [];
 
 	// Whole-repo tree for the sidebar (one recursive call). Falls back to the
 	// current directory's listing if the ref can't be read or the tree is too
@@ -166,8 +344,8 @@ export default async function ViewPage({
 	if (contents.kind === "dir") {
 		sidebarEntries = contents.entries;
 	} else if (contents.kind === "file") {
-		const parentPath = parsed.path.includes("/")
-			? parsed.path.slice(0, parsed.path.lastIndexOf("/"))
+		const parentPath = path.includes("/")
+			? path.slice(0, path.lastIndexOf("/"))
 			: "";
 		const parent = await getContents(
 			octokit,
@@ -195,65 +373,12 @@ export default async function ViewPage({
 		}
 	}
 
-	// Owner viewing their own share is signed in; recipients are not. Drives
-	// whether the Dashboard nav item appears.
-	const session = await getSession();
-
 	return (
-		<div className="page-shell">
-			<div className="bloom" aria-hidden="true" />
-			<header className="topbar">
-				<a className="wordmark" href="/" aria-label="github unlisted home">
-					<span className="mark" aria-hidden="true">
-						<svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-							<title>unlisted</title>
-							<line
-								x1="2"
-								y1="11"
-								x2="11"
-								y2="2"
-								stroke="currentColor"
-								strokeWidth="1.6"
-								strokeLinecap="round"
-							/>
-							<line
-								x1="5"
-								y1="14"
-								x2="14"
-								y2="5"
-								stroke="currentColor"
-								strokeWidth="1.6"
-								strokeLinecap="round"
-								opacity="0.55"
-							/>
-							<line
-								x1="8"
-								y1="17"
-								x2="17"
-								y2="8"
-								stroke="currentColor"
-								strokeWidth="1.6"
-								strokeLinecap="round"
-								opacity="0.25"
-							/>
-						</svg>
-					</span>
-					<span className="word">
-						<span className="pre">github</span>{" "}
-						<span className="post">unlisted</span>
-					</span>
-				</a>
-
-				<NavLinks signedIn={Boolean(session)} />
-
-				<div className="topbar__right">
-					<span className="topbar__meta">
-						{meta.fullName} · {ref}
-					</span>
-					<SiteDrawer signedIn={Boolean(session)} />
-				</div>
-			</header>
-
+		<ViewerShell
+			fullName={meta.fullName}
+			refName={ref}
+			signedIn={Boolean(session)}
+		>
 			<main className="viewer">
 				<aside className="viewer__sidebar">
 					{fullTree ? (
@@ -263,7 +388,7 @@ export default async function ViewPage({
 							repo={target.repo}
 							refName={ref}
 							shareId={shareId}
-							activePath={parsed.path}
+							activePath={path}
 						/>
 					) : (
 						<SidebarTree
@@ -273,7 +398,7 @@ export default async function ViewPage({
 							refName={ref}
 							shareId={shareId}
 							parentPath={crumbs.slice(0, -1).join("/")}
-							showParent={Boolean(parsed.path)}
+							showParent={Boolean(path)}
 						/>
 					)}
 				</aside>
@@ -281,6 +406,31 @@ export default async function ViewPage({
 				<section className="viewer__main">
 					<div className="viewer__topinfo">
 						<ViewerTreeToggle />
+						{branches && branches.length > 1 && (
+							<BranchSwitcher
+								owner={target.owner}
+								repo={target.repo}
+								branches={branches}
+								current={ref}
+								shareId={shareId}
+							/>
+						)}
+						{target.showReleases && (
+							<Link
+								className="viewer__tab"
+								href={buildReleasesHref(target.owner, target.repo, shareId)}
+							>
+								Releases
+							</Link>
+						)}
+						{target.allowDownload && (
+							<a
+								className="viewer__dl"
+								href={`/api/download?s=${encodeURIComponent(shareId)}&ref=${encodeURIComponent(ref)}`}
+							>
+								Download ZIP
+							</a>
+						)}
 						<div className="viewer__crumbs">
 							<Link
 								href={buildHref(
@@ -355,7 +505,7 @@ export default async function ViewPage({
 									{contents.name} · {contents.size} bytes
 								</span>
 								<a
-									href={`https://github.com/${meta.fullName}/blob/${ref}/${parsed.path}`}
+									href={`https://github.com/${meta.fullName}/blob/${ref}/${path}`}
 									target="_blank"
 									rel="noopener noreferrer"
 								>
@@ -385,7 +535,6 @@ export default async function ViewPage({
 					)}
 				</section>
 			</main>
-			<SiteFooter />
-		</div>
+		</ViewerShell>
 	);
 }

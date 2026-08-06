@@ -34,6 +34,55 @@ export async function listBranches(
 	return branches.map((b) => b.name);
 }
 
+export interface ReleaseAsset {
+	id: number;
+	name: string;
+	size: number;
+	contentType: string;
+}
+
+export interface Release {
+	id: number;
+	tag: string;
+	name: string;
+	body: string;
+	prerelease: boolean;
+	publishedUtc: string | null;
+	assets: ReleaseAsset[];
+}
+
+// Bounded rather than paginated: a release page is a summary, and some repos have hundreds of tags.
+const RELEASE_LIMIT = 50;
+
+// Drafts are unpublished by definition and are never exposed to a recipient. Prereleases are returned and flagged, matching what GitHub shows.
+export async function listReleases(
+	octokit: Octokit,
+	owner: string,
+	repo: string,
+): Promise<Release[]> {
+	const { data } = await octokit.rest.repos.listReleases({
+		owner,
+		repo,
+		per_page: RELEASE_LIMIT,
+	});
+	return data
+		.filter((r) => !r.draft)
+		.map((r) => ({
+			id: r.id,
+			tag: r.tag_name,
+			name: r.name?.trim() || r.tag_name,
+			body: r.body ?? "",
+			prerelease: Boolean(r.prerelease),
+			publishedUtc: r.published_at ?? null,
+			assets: (r.assets ?? []).map((a) => ({
+				id: a.id,
+				name: a.name,
+				size: a.size,
+				contentType: a.content_type,
+			})),
+		}));
+}
+
 export interface DirEntry {
 	name: string;
 	path: string;

@@ -91,6 +91,10 @@ export default async function AppPage({
 		repo: string;
 		createdAt?: number;
 		expiresAt?: number;
+		ref?: string;
+		showBranches?: boolean;
+		allowDownload?: boolean;
+		showReleases?: boolean;
 	}[] = [];
 	try {
 		const lists = await Promise.all(
@@ -102,6 +106,10 @@ export default async function AppPage({
 			repo: s.repo,
 			createdAt: s.createdAt,
 			expiresAt: s.expiresAt,
+			ref: s.ref,
+			showBranches: s.showBranches,
+			allowDownload: s.allowDownload,
+			showReleases: s.showReleases,
 		}));
 	} catch {
 		// Non-fatal.
