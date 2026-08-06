@@ -1028,7 +1028,8 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	outline: none;
 	border-color: var(--border-strong);
 }
-.viewer__dl {
+.viewer__dl,
+.viewer__tab {
 	display: inline-flex;
 	align-items: center;
 	height: 28px;
@@ -1041,8 +1042,87 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	white-space: nowrap;
 }
 @media (hover: hover) {
-	.viewer__dl:hover {
+	.viewer__dl:hover,
+	.viewer__tab:hover {
 		color: var(--text);
 		border-color: var(--border-strong);
+	}
+}
+
+/* The releases view has no file tree, so it drops the sidebar column. */
+.viewer--wide {
+	grid-template-columns: 1fr;
+}
+
+.releases {
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+	padding: 18px 0;
+}
+.release {
+	border: 1px solid var(--border);
+	border-radius: 10px;
+	background: var(--surface);
+	padding: 16px 18px;
+}
+.release__head {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-bottom: 10px;
+}
+.release__name {
+	font-size: var(--fs-h3);
+	margin: 0 4px 0 0;
+}
+.release__tag {
+	font-family: var(--font-mono);
+}
+.release__date {
+	margin-left: auto;
+	font-family: var(--font-mono);
+	font-size: var(--fs-caption);
+	color: var(--text-3);
+}
+.release__body {
+	margin-bottom: 14px;
+}
+.release__empty {
+	color: var(--text-3);
+	font-size: var(--fs-caption);
+	margin: 0 0 14px 0;
+}
+.release__assets {
+	display: flex;
+	flex-direction: column;
+	border-top: 1px solid var(--border);
+}
+.release__asset {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 9px 2px;
+	border-bottom: 1px solid var(--border);
+	color: var(--text-2);
+	font-size: var(--fs-ui);
+}
+.release__asset:last-child {
+	border-bottom: none;
+}
+.release__asset-name {
+	font-family: var(--font-mono);
+	overflow-wrap: anywhere;
+}
+.release__asset-size {
+	color: var(--text-3);
+	font-size: var(--fs-caption);
+	white-space: nowrap;
+}
+@media (hover: hover) {
+	.release__asset:hover {
+		color: var(--accent);
 	}
 }

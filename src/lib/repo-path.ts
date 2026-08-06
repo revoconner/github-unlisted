@@ -1,4 +1,6 @@
-export type ViewType = "tree" | "blob";
+// The views that address a ref and a path. Kept separate from ViewType so buildHref cannot be handed a view that has neither.
+export type FileViewType = "tree" | "blob";
+export type ViewType = FileViewType | "releases";
 
 export interface ParsedView {
 	owner: string;
@@ -8,21 +10,34 @@ export interface ParsedView {
 	path: string;
 }
 
-// URL shape: /{owner}/{repo}[/{tree|blob}/{ref}/{...path}]
+// URL shape: /{owner}/{repo}[/{tree|blob}/{ref}/{...path}] or /{owner}/{repo}/releases
 export function parseView(slug: string[]): ParsedView | null {
 	const seg = slug.filter(Boolean);
 	if (seg.length < 2) return null;
 
 	const [owner, repo, viewType, ref, ...rest] = seg;
-	const isView = viewType === "tree" || viewType === "blob";
+	const isFileView = viewType === "tree" || viewType === "blob";
 
 	return {
 		owner,
 		repo,
-		viewType: viewType === "blob" ? "blob" : "tree",
-		ref: isView ? (ref ?? "") : "",
-		path: isView ? rest.join("/") : "",
+		viewType:
+			viewType === "releases"
+				? "releases"
+				: viewType === "blob"
+					? "blob"
+					: "tree",
+		ref: isFileView ? (ref ?? "") : "",
+		path: isFileView ? rest.join("/") : "",
 	};
+}
+
+export function buildReleasesHref(
+	owner: string,
+	repo: string,
+	shareId: string,
+): string {
+	return `/${owner}/${repo}/releases?s=${encodeURIComponent(shareId)}`;
 }
 
 export interface RefResolution {
@@ -88,7 +103,7 @@ export function splitRefFromBranches(
 export function buildHref(
 	owner: string,
 	repo: string,
-	viewType: ViewType,
+	viewType: FileViewType,
 	ref: string,
 	path: string,
 	shareId: string,

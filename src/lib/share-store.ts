@@ -15,12 +15,14 @@ export interface ShareTarget {
 	showBranches?: boolean;
 	// Opt-in whole-branch zip download. Undefined/false keeps every existing link as it was. The recipient can already read each file, so this grants no new access, but it turns reading into one-click bulk retrieval and that is the owner's call to make.
 	allowDownload?: boolean;
+	// Opt-in releases tab. Undefined/false keeps every existing link as it was. Releases are genuinely new surface: tags, publish dates, notes and uploaded binaries are not reachable through the file viewer at all.
+	showReleases?: boolean;
 }
 
 // The per-share settings an owner can change after creation. Deliberately excludes the TTL, which has its own updater with different semantics.
 export type ShareSettings = Pick<
 	ShareTarget,
-	"ref" | "showBranches" | "allowDownload"
+	"ref" | "showBranches" | "allowDownload" | "showReleases"
 >;
 
 const KEY_PREFIX = "share:";

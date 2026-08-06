@@ -42,6 +42,26 @@ describe("parseView", () => {
 		});
 	});
 
+	it("parses the releases view, which carries no ref or path", () => {
+		expect(parseView(["o", "r", "releases"])).toEqual({
+			owner: "o",
+			repo: "r",
+			viewType: "releases",
+			ref: "",
+			path: "",
+		});
+	});
+
+	it("ignores trailing segments on the releases view", () => {
+		expect(parseView(["o", "r", "releases", "v1.0", "x"])).toEqual({
+			owner: "o",
+			repo: "r",
+			viewType: "releases",
+			ref: "",
+			path: "",
+		});
+	});
+
 	it("treats an unknown view type as a tree with no ref/path", () => {
 		expect(parseView(["o", "r", "wat", "x"])).toEqual({
 			owner: "o",

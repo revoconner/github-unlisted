@@ -52,6 +52,7 @@ export async function POST(request: Request) {
 		ref?: unknown;
 		showBranches?: unknown;
 		allowDownload?: unknown;
+		showReleases?: unknown;
 	};
 	try {
 		body = await request.json();
@@ -97,6 +98,7 @@ export async function POST(request: Request) {
 			ref: parsedRef.ref ?? undefined,
 			showBranches: showBranches || undefined,
 			allowDownload: body.allowDownload === true || undefined,
+			showReleases: body.showReleases === true || undefined,
 		},
 		ttlSeconds,
 	);
@@ -119,6 +121,7 @@ export async function PATCH(request: Request) {
 		ref?: unknown;
 		showBranches?: unknown;
 		allowDownload?: unknown;
+		showReleases?: unknown;
 	};
 	try {
 		body = await request.json();
@@ -159,6 +162,9 @@ export async function PATCH(request: Request) {
 	if ("allowDownload" in body) {
 		patch.allowDownload = body.allowDownload === true || undefined;
 	}
+	if ("showReleases" in body) {
+		patch.showReleases = body.showReleases === true || undefined;
+	}
 
 	// Locking wins regardless of the order the two fields arrived in, including when a lock is added to a share that already had the switcher on.
 	const effectiveRef = "ref" in patch ? patch.ref : target.ref;
@@ -181,6 +187,7 @@ export async function PATCH(request: Request) {
 		ref: updated.ref ?? null,
 		showBranches: updated.showBranches === true,
 		allowDownload: updated.allowDownload === true,
+		showReleases: updated.showReleases === true,
 	});
 }
 

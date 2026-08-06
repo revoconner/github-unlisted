@@ -94,6 +94,7 @@ export default async function AppPage({
 		ref?: string;
 		showBranches?: boolean;
 		allowDownload?: boolean;
+		showReleases?: boolean;
 	}[] = [];
 	try {
 		const lists = await Promise.all(
@@ -108,6 +109,7 @@ export default async function AppPage({
 			ref: s.ref,
 			showBranches: s.showBranches,
 			allowDownload: s.allowDownload,
+			showReleases: s.showReleases,
 		}));
 	} catch {
 		// Non-fatal.

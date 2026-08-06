@@ -22,6 +22,7 @@ interface Share {
 	ref?: string;
 	showBranches?: boolean;
 	allowDownload?: boolean;
+	showReleases?: boolean;
 }
 
 type Filter = "all" | "shared" | "notshared" | "public" | "private";
@@ -227,6 +228,7 @@ export function DashboardClient({
 	const [refSel, setRefSel] = React.useState<Record<string, string>>({});
 	const [swSel, setSwSel] = React.useState<Record<string, boolean>>({});
 	const [dlSel, setDlSel] = React.useState<Record<string, boolean>>({});
+	const [relSel, setRelSel] = React.useState<Record<string, boolean>>({});
 	const [error, setError] = React.useState<string | null>(null);
 
 	const getSel = (key: string): TtlSel =>
@@ -250,6 +252,11 @@ export function DashboardClient({
 		dlSel[key] ?? share?.allowDownload ?? false;
 	const setDl = (key: string, v: boolean) =>
 		setDlSel((prev) => ({ ...prev, [key]: v }));
+
+	const getRel = (key: string, share?: Share): boolean =>
+		relSel[key] ?? share?.showReleases ?? false;
+	const setRel = (key: string, v: boolean) =>
+		setRelSel((prev) => ({ ...prev, [key]: v }));
 
 	const shareByRepo = React.useMemo(() => {
 		const m = new Map<string, Share>();
@@ -306,6 +313,7 @@ export function DashboardClient({
 					ref: getRef(r.fullName) || null,
 					showBranches: getShow(r.fullName),
 					allowDownload: getDl(r.fullName),
+					showReleases: getRel(r.fullName),
 				}),
 			});
 			if (!res.ok) {
@@ -334,6 +342,7 @@ export function DashboardClient({
 					ref: getRef(r.fullName, s) || null,
 					showBranches: getShow(r.fullName, s),
 					allowDownload: getDl(r.fullName, s),
+					showReleases: getRel(r.fullName, s),
 				}),
 			});
 			if (!res.ok) {
@@ -580,6 +589,12 @@ export function DashboardClient({
 													<span className="created">zip enabled</span>
 												</>
 											)}
+											{share.showReleases && (
+												<>
+													<span className="sep">·</span>
+													<span className="created">releases shown</span>
+												</>
+											)}
 										</div>
 									) : (
 										<div className="repo-row__empty">not shared</div>
@@ -626,6 +641,13 @@ export function DashboardClient({
 												checked={getDl(r.fullName, share)}
 												disabled={rowBusy}
 												onChange={(v) => setDl(r.fullName, v)}
+											/>
+											<RowToggle
+												label="releases"
+												title="Show a releases tab with notes and downloadable assets."
+												checked={getRel(r.fullName, share)}
+												disabled={rowBusy}
+												onChange={(v) => setRel(r.fullName, v)}
 											/>
 											<ExpiryControl
 												sel={getSel(r.fullName)}
@@ -674,6 +696,13 @@ export function DashboardClient({
 												checked={getDl(r.fullName)}
 												disabled={rowBusy}
 												onChange={(v) => setDl(r.fullName, v)}
+											/>
+											<RowToggle
+												label="releases"
+												title="Show a releases tab with notes and downloadable assets."
+												checked={getRel(r.fullName)}
+												disabled={rowBusy}
+												onChange={(v) => setRel(r.fullName, v)}
 											/>
 											<ExpiryControl
 												sel={getSel(r.fullName)}
