@@ -1,0 +1,2756 @@
+:root {
+	/* Design tokens (Phase 0). Dark values == the original hardcoded colors, so
+               this refactor is visually a no-op. Themes (Phase 3) swap these: the light
+               theme inverts the neutral greys; accent comes from the swatch table;
+               danger stays red across themes. */
+	/* On :root rather than body so the root element itself resolves to the app stack
+	   (it otherwise reports the UA serif default in font tooling). */
+	font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+	--base-weight: 350;
+	/* dark mode background etc */
+	--bg: hsl(0, 0%, 5%);
+	--surface: hsl(0, 0%, 8%);
+	--surface-2: hsl(0 0% 6.2%);
+	--surface-3: hsl(0, 0%, 18%);
+	--surface-deep: hsl(0, 0%, 10%);
+	--surface-deep-hover: hsl(0, 0%, 9%);
+	--text: hsl(0, 0%, 90%);
+	/* Muted tiers derive from --text toward --bg, so the custom text slider (which
+	   rewrites only --text) re-derives the whole hierarchy. The percentages reproduce
+	   the previous hand-tuned values exactly: 78 / 74 / 60 at text 90 on bg 5. */
+	--text-2: color-mix(in hsl, var(--text), var(--bg) 14%);
+	--text-muted: color-mix(in hsl, var(--text), var(--bg) 19%);
+	--text-dimmer: color-mix(in hsl, var(--text), var(--bg) 35%);
+	--border: hsla(0, 0%, 100%, 0.05);
+	--contrast-border: hsla(0, 0%, 100%, 0.9);
+	--input-bg: hsl(0, 0%, 3%);
+	/* Make native form controls (number input, select popups, scrollbars) follow
+               the app theme instead of the OS scheme. */
+	color-scheme: dark;
+	/* Static defaults = the first-run dark accent (the 'auto' default resolves to cyan
+	   rgb(102, 178, 212) in dark), so first paint matches what applyAccent() will set.
+	   Black on this cyan is 8.88:1. */
+	--accent: hsl(199, 56%, 62%);
+	--accent-hover: hsl(199, 36%, 51%);
+	--accent-on: hsl(0, 0%, 0%);
+	--danger: hsl(0, 57%, 40%);
+	--danger-hover: hsl(0, 74%, 42%);
+	--danger-2: hsl(0, 84%, 60%);
+	--danger-deep: hsl(0, 57%, 27%);
+	/* Text on red fills: white in BOTH themes. These buttons used var(--text), which is
+	   black in light mode and fell below AA there (4.38 vs 4.80 for white). The one-use
+	   --danger-strong near-duplicate of --danger was merged away in the same pass. */
+	--danger-on: hsl(0, 0%, 100%);
+	/* Effect tokens (see css_audit.md): shared scrims, shadows, glass fills, the avatar
+	   gradient and the scrollbar pair, formerly scattered literals. */
+	--scrim: hsla(0, 0%, 0%, 0.6);
+	--scrim-heavy: hsla(0, 0%, 0%, 0.9);
+	--shadow-dialog: 0px 0px 45px #000000;
+	--shadow-menu: 0 8px 24px hsla(0, 0%, 0%, 0.5);
+	--shadow-card: 0 4px 12px hsla(0, 0%, 0%, 0.5);
+	/* Alias for rules ported from the website, whose page-background token is named
+	   --background. Keeps ports working verbatim. */
+	--background: var(--bg);
+	--glass: hsla(0, 0%, 100%, 0.5);
+	--glass-hover: hsla(0, 0%, 100%, 0.8);
+	--avatar-grad-a: hsl(229, 76%, 66%);
+	--avatar-grad-b: hsl(270, 37%, 46%);
+	--scrollbar: var(--surface) transparent;
+}
+/* Light theme (Phase 3): the neutral greys are inverted from the dark values
+           (255 - each channel), so surfaces/text flip while accent + danger keep their
+           own values. Borders flip to a dark alpha so they stay visible on light. The
+           accent variables are set at runtime by applyAccent() from the swatch table. */
+:root[data-theme="light"] {
+	--bg: hsl(0, 0%, 100%);
+	--surface: hsl(0, 0%, 82%);
+	--surface-2: hsl(0, 0%, 77%);
+	--surface-3: hsl(0, 0%, 71%);
+	--surface-deep: hsl(0, 0%, 85%);
+	--surface-deep-hover: hsl(0, 0%, 95%);
+	--text: hsl(0, 0%, 0%);
+	/* Derived like the dark block, but with light's OWN percentages, not mirrored:
+	   inverted greys measure LOWER contrast on a light ground (css_audit.md 2.1).
+	   Reproduces the previous 12 / 28 / 32. */
+	--text-2: color-mix(in hsl, var(--text), var(--bg) 12%);
+	--text-muted: color-mix(in hsl, var(--text), var(--bg) 28%);
+	--text-dimmer: color-mix(in hsl, var(--text), var(--bg) 32%);
+	--border: hsla(0, 0%, 0%, 0.12);
+	--contrast-border: hsla(0, 0%, 0%, 0.9);
+	--input-bg: hsl(0, 0%, 100%);
+	color-scheme: light;
+}
+@font-face {
+  font-family: 'Google Sans';
+  src: url('fonts/gsans.ttf') format('truetype');
+  font-weight: 100 900;   
+  font-style: normal;
+}
+
+/* Reduced motion: kill the infinite shimmer/pulse and all movement for users who ask
+   the OS for less motion. Opacity fades collapse to instant as well; nothing waits on
+   an animation to become visible, so this is safe. */
+@media (prefers-reduced-motion: reduce) {
+	*, *::before, *::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+	}
+}
+/* Keyboard focus was invisible on almost every control. :focus-visible does not fire
+   for mouse clicks, so this only appears during keyboard navigation. */
+:focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: 2px;
+}
+
+
+
+
+
+
+/* Destructive marker: every red control carries a circled cross, so "this deletes,
+   removes or cancels" reads by shape and symbol in every vision mode, with no
+   per-mode styling needed. This replaced the old accent-red striping. The circle is
+   --danger-on with the cross in --danger (the danger pair rather than the accent
+   pair, so the badge cannot change with the chosen accent). ::before means
+   dynamically created rows (the transfer dialog's remove option) get it for free. */
+.folder-btn.remove::before,
+.close-settings-btn::before,
+.close-help-btn::before,
+.conflict-btn.proceed::before,
+.export-cancel-btn::before,
+.transfer-option.remove::before {
+	content: '';
+	display: inline-block;
+	flex: 0 0 auto;
+	width: 16px;
+	height: 16px;
+	/* Inlined caution triangle (source: extra/caution-svgrepo-com.svg), filled white
+	   to match --danger-on on the red fills (a data URI cannot read CSS variables).
+	   An SVG layer centers geometrically; the unicode cross rode the font baseline
+	   and never sat straight. */
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 15' fill='%23ffffff'%3E%3Cpath d='M14.9,13.4L8.5,0.6c-0.4-0.8-1.5-0.8-1.9,0L0.1,13.4c-0.4,0.7,0.2,1.6,1,1.6h12.8C14.7,15,15.2,14.1,14.9,13.4z M7.5,13 C6.7,13,6,12.3,6,11.5S6.6,10,7.5,10S9,10.7,9,11.5C9,12.4,8.3,13,7.5,13z M8.5,9h-2L6,5.5C6,5.2,6.2,5,6.5,5h2C8.8,5,9,5.2,9,5.5 L8.5,9z'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: 14px 14px;
+	margin-right: 8px;
+	vertical-align: -3px;
+}
+/* ===== Accessibility (Phase 4) ===== */
+/* Increase contrast. Five things happen, and they are the website's ruleset ported
+           verbatim (its `@media (prefers-contrast: more)` block):
+
+           1. Borders show up everywhere and are fully solid. --border becomes
+              --contrast-border, and --contrast-border itself drops its 0.9 alpha.
+           2. Every grey text step collapses to the main text colour. Hierarchy loses,
+              readability wins.
+           3. Surfaces go pure black (dark) or pure white (light); the now-solid borders do
+              the separating that shades of grey used to. The page background stays
+              --surface-deep so the app still sits on a distinct backdrop.
+           4. The accent is pinned to one colour per theme. That happens in applyAccent()
+              rather than here, because contrast is a JS-known setting and the resolver is
+              the single source of truth for accent values.
+           5. Text gets heavier (see the weight rules further down).
+
+           Specificity note: this block must not clobber the light theme's surfaces, so the
+           theme-specific overrides below carry an extra attribute selector to outrank it. */
+:root[data-contrast="high"] {
+	--contrast-border: hsl(0, 0%, 100%);
+	--border: var(--contrast-border);
+	--text-2: var(--text);
+	--text-muted: var(--text);
+	--text-dimmer: var(--text);
+	--surface: hsl(0, 0%, 0%);
+	--bg: hsl(0, 0%, 0%);
+}
+:root[data-theme="light"][data-contrast="high"] {
+	--contrast-border: hsl(0, 0%, 0%);
+	--surface: hsl(0, 0%, 100%);
+	--bg: hsl(0, 0%, 100%);
+}
+/* NOTE: this list previously ended in a trailing comma before the brace, which
+   invalidates the ENTIRE selector list in CSS, so none of these borders rendered.
+   The toggle track and the dropdown buttons live in their own 1px rule below. */
+:root[data-contrast="high"] .context-menu,
+:root[data-contrast="high"] .person-item,
+:root[data-contrast="high"] .photo-item,
+:root[data-contrast="high"] .setting-group,
+:root[data-contrast="high"] .folder-list-container,
+:root[data-contrast="high"] .lightbox-detail-row,
+:root[data-contrast="high"] .lightbox-details,
+:root[data-contrast="high"] .settings-container,
+:root[data-contrast="high"] .help-container,
+:root[data-contrast="high"] .accent-swatch,
+:root[data-contrast="high"] .progress-bar,
+:root[data-contrast="high"] .wildcard-input,
+:root[data-contrast="high"] .min-photos-input {
+	border: 2px solid var(--contrast-border);
+}
+:root[data-contrast="high"] .toggle-slider,
+:root[data-contrast="high"] .view-dropdown {
+	border: 1px solid var(--contrast-border);
+}
+/* Contrast, item 5: heavier text. These are real weights only with a variable
+           font; the static Atkinson faces and Segoe have nothing between 400 and 700, so
+           555/650/750 silently round until the variable Atkinson Next faces land, at which
+           point contrast mode's font stack should lead with them. The website also bumps a
+           handful of rules that pin themselves to weight 400 by name; this stylesheet pins
+           no rule to 400, so there is nothing here to bump. */
+
+:root[data-contrast="high"] :is(.folder-item, button:not(.icon-btn), .tooltip, input[type="range"], .log-viewer ) {
+	border: 2px solid var(--contrast-border);
+}
+:root[data-contrast="high"] .log-entry {
+	border-bottom: 1px solid var(--contrast-border);
+	padding: 10px 0;
+}
+/* Selected states stop relying on the accent hue and invert instead, keeping each
+           control's own shape. Shared by contrast mode and achromatopsia, which is the one
+           mode where hue carries no information at all. */
+:is(:root[data-contrast="high"], :root[data-cvd="achromatopsia"]) .nav-item.active {
+	background: var(--text);
+	color: var(--bg);
+}
+:is(:root[data-contrast="high"], :root[data-cvd="achromatopsia"]) .person-item.selected,
+:is(:root[data-contrast="high"], :root[data-cvd="achromatopsia"]) .person-item.selected:hover:not(.menu-active) {
+	background: var(--text);
+	color: var(--bg);
+	box-shadow: inset 0 0 0 1px var(--text);
+}
+/* The knob already signals on/off by position, but under these modes the track
+           should not be the only other cue, and it must not read as "some accent colour".
+           Track inverts to the text colour; the knob flips to the background so it stays
+           visible against it. */
+:is(:root[data-contrast="high"], :root[data-cvd="achromatopsia"]) .toggle-switch input:checked + .toggle-slider {
+	background: var(--text);
+	
+}
+:is(:root[data-contrast="high"], :root[data-cvd="achromatopsia"]) .toggle-switch input:checked + .toggle-slider:before {
+	background: var(--bg);
+	border: 2px solid var(--contrast-border);
+	top: -5px;
+	left: 0;
+}
+
+:root[data-contrast="high"] ::-webkit-scrollbar {
+	width: 12px;
+	height: 12px;
+}
+
+:root[data-contrast="high"] ::-webkit-scrollbar-track {
+	background: var(--background, transparent);
+	border: 1px solid var(--text);
+}
+
+:root[data-contrast="high"] ::-webkit-scrollbar-thumb {
+	background: var(--text);
+	border: 1px solid var(--background, transparent);
+}
+
+:root[data-contrast="high"],
+:root[data-contrast="high"] .people-list {
+	scrollbar-width: thick;
+	scrollbar-color: var(--text) var(--background, transparent);
+}
+
+:is(:root[data-contrast="high"], :root[data-cvd="achromatopsia"]) .toggle-switch input + .toggle-slider:before {
+	background: var(--bg);
+	border: 2px solid var(--contrast-border);
+	top: -5px;
+	left: -9px;
+}
+/* Thick link underlines. Currently inert (the UI has no anchors yet); kept so the
+           About/help text picks it up for free when links do appear. */
+:is(:root[data-contrast="high"], :root[data-cvd="achromatopsia"]) a {
+	text-decoration-thickness: 2px;
+}
+/* Shown in place of the swatch row when the accent is not the user's to choose:
+           contrast mode pins it, and achromatopsia has no palette to offer. */
+.accent-fixed-note {
+	font-size: 12px;
+	color: var(--text-muted);
+	line-height: 1.5;
+}
+/* Bold fonts: bump weight everywhere; already-heavy text sits at/above this so it
+           is effectively unchanged. */
+/* Bold fonts: one flat weight everywhere, kept tied to --base-weight so the two knobs
+   move together. On the variable font this renders exactly; titles land on the same
+   weight, so hierarchy is carried by size and colour while bold mode is on. */
+:root[data-bold="on"] * {
+	font-weight: calc(var(--base-weight) * 2.25) !important;
+}
+/* Dyslexia-friendly fonts (user drops the files in app/fonts/). If a file is
+           missing the browser falls back to the default UI font, so the option is a safe
+           no-op until the fonts exist. */
+@font-face {
+	font-family: 'OpenDyslexic';
+	src: url('fonts/OpenDyslexic-Regular.otf');
+	/* OpenDyslexic's glyphs run visually larger than the app font at the same
+	   font-size; size-adjust rescales them at the font level so every existing
+	   font-size keeps its apparent size. Tune this one number to taste. */
+	size-adjust: 85%;
+	font-weight: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: 'OpenDyslexic';
+	src: url('fonts/OpenDyslexic-Bold.otf');
+	size-adjust: 85%;
+	font-weight: bold;
+	font-display: swap;
+}
+@font-face {
+	font-family: 'AtkinsonHyperlegible';
+	src: url('fonts/AtkinsonHyperlegible-Regular.ttf');
+	/* Atkinson runs only slightly large; a gentler trim than OpenDyslexic's. */
+	size-adjust: 94%;
+	font-weight: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: 'AtkinsonHyperlegible';
+	src: url('fonts/AtkinsonHyperlegible-Bold.ttf');
+	size-adjust: 94%;
+	font-weight: bold;
+	font-display: swap;
+}
+/* Atkinson Hyperlegible Next, the VARIABLE cut. Separate from the static Atkinson
+           above on purpose: this one carries a 200-800 weight axis, so increase-contrast's
+           555/650/750 render as real weights instead of rounding to normal/bold. The
+           static faces stay exactly as they are for the Dyslexia-friendly font setting,
+           which is a different, user-chosen option.
+
+           These files are not in the repo yet. Copy them from the website repo's
+           app/fonts/ into app/fonts/ here; the PyInstaller spec collects that whole folder,
+           so no build change is needed. Until they land these declarations are a safe
+           no-op: the face fails to load and the stack falls through to the next family.
+
+           VERIFY THE ITALIC FILENAME when copying. The plan names the regular and mono
+           files exactly but only says "+ its italic", so the name below follows the usual
+           Google Fonts convention and may not match. A mismatch fails silently. */
+
+
+
+@font-face {
+	font-family: 'AtkinsonHyperlegibleNext';
+	src: url('fonts/AtkinsonHyperlegibleNext-VariableFont_wght.ttf');
+	font-weight: 200 800;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: 'AtkinsonHyperlegibleNext';
+	src: url('fonts/AtkinsonHyperlegibleNext-Italic-VariableFont_wght.ttf');
+	font-weight: 200 800;
+	font-style: italic;
+	font-display: swap;
+}
+@font-face {
+	font-family: 'AtkinsonHyperlegibleMono';
+	src: url('fonts/AtkinsonHyperlegibleMono-VariableFont_wght.ttf');
+	font-weight: 200 800;
+	font-display: swap;
+}
+/* Contrast mode AND achromatopsia lead with Atkinson Next so their bumped weights
+           have somewhere to go; both modes need the variable axis for the same reason.
+           'Segoe UI Variable Text' sits behind it, matching the site: it is also variable,
+           so it covers any glyph Atkinson lacks without losing the in-between weights.
+
+           Deliberately NOT !important: the Dyslexia-friendly rules below are !important and
+           must keep winning, because that is an explicit font choice by the user and this
+           is only a mode default. */
+:is(:root[data-contrast="high"], :root[data-cvd="achromatopsia"]) body,
+:is(:root[data-contrast="high"], :root[data-cvd="achromatopsia"]) body * {
+	font-family: 'AtkinsonHyperlegibleNext', 'Segoe UI Variable Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-weight: calc(var(--base-weight) * 2.25) !important;
+}
+/* The `body *` above is broad enough to clobber the app's own monospace rules, so
+           every monospace surface is restored here, not just the code-ish tags. Same
+           specificity as the rule above, winning on order, so keep this block after it.
+           .wildcard-input and .log-viewer are the two that actually exist today; the tags
+           are listed for anything added later. */
+:root[data-contrast="high"] :is(code, kbd, pre, samp, .wildcard-input, .log-viewer, .folder-item) {
+	font-family: 'AtkinsonHyperlegibleMono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+}
+:root[data-dysfont="opendyslexic"] body,
+:root[data-dysfont="opendyslexic"] body * {
+	font-family: 'OpenDyslexic', sans-serif !important;
+}
+:root[data-dysfont="atkinson"] body,
+:root[data-dysfont="atkinson"] body * {
+	font-family: 'AtkinsonHyperlegible', sans-serif !important;
+}
+/* Colour-vision assist. The body-wide daltonization filters that used to sit here
+           are gone: see the note in ui.html where the filter defs were. Nothing transforms
+           colour any more. Instead applyAccent() swaps in a replacement palette per mode
+           (see CVD_PALETTES in ui_js_script.js) and the rules below move meaning off hue.
+
+           Achromatopsia is the deep case: no palette at all, the accent is pinned, and the
+           work is done by non-colour signals. Borders stay soft EXCEPT real contrast
+           borders on code/kbd text, small caption text goes slightly bolder, selected
+           states invert instead of tinting, and links get thick underlines. */
+:root[data-cvd="achromatopsia"] :is(code, kbd, .log-viewer) {
+	border: 1px solid var(--contrast-border);
+}
+/* 500, not 600. The site's wording is "slightly bolder" and it means it: 500 on the
+           small labels, 450 on docs body copy. 600 reads as a different typeface rather
+           than a lift, which defeats the point when weight is carrying the meaning that
+           hue used to. */
+:root[data-cvd="achromatopsia"] :is(.setting-description, .export-note, .person-count,
+	.photo-count, .group-header-count, .lightbox-counter, .lightbox-detail-label,
+	.size-label, .filter-panel-label) {
+}
+
+
+/* normal style sheet */
+
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+/* Form controls do not inherit typography by default; without this, any control that
+   lacks an explicit font-size renders at the UA default (13.33px on Windows Chromium)
+   no matter what the app's type settings say. */
+input, select, textarea, button {
+	font: inherit;
+}
+body {
+	/* The token existed but nothing consumed it for resting text, so the app actually
+	   ran at the font's default 400. Now normal text really is --base-weight, and the
+	   bold/contrast calc multipliers scale from the same knob. */
+	font-weight: var(--base-weight);
+	background: var(--bg);
+	color: var(--text);
+	overflow: hidden;
+	height: 100vh;
+	-webkit-app-region: no-drag;
+	font-stretch: 95%;
+	font-synthesis: none; 
+	-webkit-font-smoothing: antialiased;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	font-weight: 350;
+}
+
+.title-bar {
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	border-bottom: 1px solid var(--border);
+	user-select: none;
+	z-index: 9999;
+	position: sticky;
+	min-width: 100vw;
+	top: 0;
+}
+[data-theme="light"] .title-bar {
+	box-shadow: 0px 6px 7px 0 hsla(from var(--text) h s l / 0.3);
+	color-scheme: light;
+	background: var(--accent);
+}
+[data-theme="dark"] .title-bar {
+	box-shadow: 0px 6px 10px 0 hsla(from var(--bg) h s l / 0.8);
+	background: var(--bg);
+	color-scheme: dark;
+}
+
+.title-bar-drag {
+	flex: 1;
+	display: flex;
+	align-items: center;
+	height: 100%;
+	padding-left: 12px;
+	-webkit-app-region: drag;
+}
+.title-bar-title {	font-size: 1rem; }
+
+[data-theme="light"] .title-bar-title {
+	color: var(--accent-on);
+	font-weight: 500;
+	color-scheme: light;
+}
+[data-theme="dark"] .title-bar-title {
+	color: var(--text-2);
+	font-weight: 400;
+	color-scheme: dark;
+}
+.title-bar-controls {
+	display: flex;
+	height: 100%;
+	-webkit-app-region: no-drag;
+}
+.title-bar-btn {
+	width: 46px;
+	height: 100%;
+	border: none;
+	background: transparent;
+	color: var(--accent-on);
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.2s ease;
+	padding: 0;
+}
+[data-theme="light"] .title-bar-btn {
+	color: var(--accent-on);
+	color-scheme: light;
+}
+[data-theme="dark"] .title-bar-btn {
+	color: var(--text-dimmer);
+	color-scheme: dark;
+}
+.title-bar-btn:hover {
+	background: var(--surface);
+	color: var(--text);
+}
+.title-bar-btn.close-btn:hover {
+	background: var(--danger);
+	color: var(--danger-on);
+}
+.title-bar-btn svg {
+	pointer-events: none;
+}
+.app-container {
+	display: flex;
+	height: calc(100vh - 32px);
+	flex-direction: column;
+	transition: filter 0.3s ease;
+	-webkit-app-region: no-drag;
+}
+.app-container.blurred {
+	filter: blur(3px);
+	pointer-events: none;
+}
+.main-content {
+	display: flex;
+	flex: 1;
+	overflow: hidden;
+}
+.sidebar {
+	width: 240px;
+	background: var(--bg);
+	display: flex;
+	flex-direction: column;
+	border-right: 1px solid var(--border);
+}
+.sidebar-header {
+	padding: 24px 20px 16px;
+}
+.sidebar-title-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 16px;
+}
+.sidebar-title {
+	font-size: 22px;
+	font-weight: 700;
+	color: var(--text);
+}
+.sidebar-controls {
+	display: flex;
+	gap: 12px;
+	align-items: center;
+}
+.icon-btn {
+	background: transparent;
+	border: none;
+	color: var(--accent);
+	cursor: pointer;
+	padding: 6px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: color 0.3s ease;
+}
+.icon-btn:hover {
+	color: var(--accent-hover);
+}
+.icon-btn.active {
+	color: var(--accent);
+}
+.doner-icon {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+	width: 18px;
+}
+.doner-line {
+	width: 100%;
+	height: 2px;
+	background: currentColor;
+	border-radius: 1px;
+}
+.bento-icon {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 3px;
+	width: 18px;
+	height: 18px;
+}
+.bento-dot {
+	width: 4px;
+	height: 4px;
+	background: currentColor;
+	border-radius: 50%;
+}
+.people-list {
+	flex: 1;
+	overflow-y: auto;
+	padding: 0 12px;
+	scrollbar-width: thin;
+	scrollbar-color: var(--scrollbar);
+}
+
+.people-list::-webkit-scrollbar {
+	width: 6px;
+}
+.people-list::-webkit-scrollbar-track {
+	background: transparent;
+}
+.people-list::-webkit-scrollbar-thumb {
+	background: var(--surface);
+	border-radius: 3px;
+}
+.people-list::-webkit-scrollbar-thumb:hover {
+	background: var(--surface-2);
+}
+.person-item {
+	display: flex;
+	align-items: center;
+	padding: 12px 10px;
+	margin-bottom: 4px;
+	border-radius: 10px;
+	cursor: pointer;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	position: relative;
+}
+.person-item:hover:not(.menu-active) {
+	background: var(--surface);
+	transform: translateX(4px);
+	box-shadow: 0 2px 8px hsla(0, 0%, 0%, 0.2);
+}
+.person-item.active {
+	background: var(--accent);
+}
+.person-item.active .person-name,
+.person-item.active .person-count {
+	color: var(--accent-on);
+}
+/* On hover, the active person keeps its accent background (so its accent-on text
+           stays readable); the slide/shadow/avatar effects still come from the generic
+           hover rules. */
+.person-item.active:hover:not(.menu-active) {
+	background: var(--accent);
+}
+.person-avatar {
+	width: 44px;
+	height: 44px;
+	border-radius: 50%;
+	background: linear-gradient(135deg, var(--avatar-grad-a) 0%, var(--avatar-grad-b) 100%);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: 600;
+	font-size: 16px;
+	margin-right: 12px;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.person-item:hover:not(.menu-active) .person-avatar {
+	transform: scale(1.1);
+	box-shadow: 0 4px 12px hsl(from var(--accent) h s l / 0.4);
+}
+.person-info {
+	flex: 1;
+}
+.person-name {
+	font-size: 14px;
+	font-weight: 500;
+	margin-bottom: 2px;
+	color: var(--text);
+}
+.person-count {
+	font-size: 12px;
+	color: var(--text-muted);
+}
+.kebab-menu {
+	opacity: 0;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	padding: 6px 10px;
+	background: var(--bg);
+	border-radius: 6px;
+	border: none;
+	color: var(--text);
+	cursor: pointer;
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+}
+.kebab-dot {
+	width: 3px;
+	height: 3px;
+	background: var(--text);
+	border-radius: 50%;
+}
+.person-item:hover .kebab-menu {
+	opacity: 1;
+}
+.photo-item:hover .kebab-menu {
+	opacity: 1;
+}
+.kebab-menu:hover {
+	background: var(--surface-2);
+}
+.context-menu {
+	position: fixed;
+	background: var(--surface);
+	border-radius: 8px;
+	box-shadow: var(--shadow-menu);
+	overflow: hidden;
+	z-index: 10000;
+	min-width: 200px;
+	display: none;
+	animation: menuSlideIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.context-menu.show {
+	display: block;
+}
+@keyframes menuSlideIn {
+	from {
+		opacity: 0;
+		transform: translateY(-8px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+.context-menu-item {
+	padding: 12px 16px;
+	color: var(--text);
+	cursor: pointer;
+	transition: background 0.2s ease;
+	font-size: 13px;
+	background: var(--surface);
+}
+.context-menu-item:hover {
+	background: var(--surface-2);
+}
+.alphabet-item {
+	padding: 12px 10px;
+	margin-bottom: 4px;
+	border-radius: 10px;
+	cursor: pointer;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	text-align: center;
+	font-size: 18px;
+	font-weight: 600;
+	color: var(--text);
+}
+.alphabet-item:hover {
+	background: var(--surface);
+	transform: translateX(4px);
+}
+.alphabet-item.disabled {
+	color: var(--surface-3);
+	cursor: default;
+}
+.alphabet-item.disabled:hover {
+	background: transparent;
+	transform: none;
+}
+.content-area {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	background: var(--surface);
+}
+.content-header {
+	padding: 24px 28px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	border-bottom: 1px solid var(--border);
+	background: var(--surface-deep-hover);
+}
+.content-title {
+	font-size: 24px;
+	font-weight: 700;
+	color: var(--text);
+	/* The title is the flexible party: it shrinks and wraps FIRST when the header
+	   runs out of room, so the controls keep their intrinsic width. */
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+.content-controls {
+	display: flex;
+	/* stretch, not center: if any control gets taller (a dropdown wrapping its
+	   label), every sibling stretches to the same height so the row stays a block. */
+	align-items: stretch;
+	gap: 24px;
+	/* Never shrink below intrinsic size; the title folds instead. */
+	flex: 0 0 auto;
+}
+.content-header button, .content-header select {
+    background: var(--accent);
+    color: var(--accent-on);
+}
+
+.size-control {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+.size-label {
+	font-size: 13px;
+	color: var(--text-muted);
+}
+.size-slider {
+	width: 160px;
+	height: 6px;
+	border-radius: 3px;
+	background: var(--accent);
+	outline: none;
+	appearance: none;
+	cursor: pointer;
+	transition: all 0.3s ease;
+}
+.size-slider::-webkit-slider-thumb {
+	appearance: none;
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	cursor: pointer;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	box-shadow: 0 2px 8px hsl(from var(
+	--accent) h s l / 0.4);
+}
+
+[data-theme="light"] .size-slider::-webkit-slider-thumb {
+	background: var(--surface-deep-hover);
+		filter: drop-shadow(0px 0px 2px var(--text)) drop-shadow(0px 0px 1px var(--text));
+	color-scheme: light;
+}
+
+[data-theme="dark"] .size-slider::-webkit-slider-thumb {
+	background: var(--accent);
+	filter: drop-shadow(0px 0px 2px black) drop-shadow(0px 0px 1px black);
+	color-scheme: dark;
+}
+
+.size-slider::-webkit-slider-thumb:hover {
+	transform: scale(1.2);
+	box-shadow: 0 4px 16px hsl(from var(--accent) h s l / 0.6);
+}
+.size-slider::-moz-range-thumb {
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	background: var(--accent);
+	cursor: pointer;
+	border: none;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	box-shadow: 0 2px 8px hsl(from var(--accent) h s l / 0.4);
+}
+.size-slider::-moz-range-thumb:hover {
+	transform: scale(1.2);
+	box-shadow: 0 4px 16px hsl(from var(--accent) h s l / 0.6);
+}
+.view-dropdown {
+	padding: 10px 16px;
+	border: none;
+	border-radius: 8px;
+	font-size: 13px;
+	cursor: pointer;
+	transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	outline: none;
+}
+.view-dropdown:hover {
+	background: var(--accent-hover);
+}
+.view-dropdown:focus {
+	box-shadow: 0 0 0 3px hsl(from var(--accent) h s l / 0.3);
+}
+/* Settings dropdowns sit on a subsection (--surface); give them a darker normal
+           bg so they stand out (hover/focus unchanged). */
+.content-panel .view-dropdown {
+	background: var(--input-bg);
+}
+.content-panel .view-dropdown:hover {
+	background: var(--surface-2);
+}
+.photo-grid-container {
+	flex: 1;
+	overflow-y: auto;
+	padding: 24px 28px;
+	scrollbar-width: thin;
+	scrollbar-color: var(--scrollbar);
+	background: var(--surface-2);
+}
+.photo-grid-container::-webkit-scrollbar {
+	width: 8px;
+}
+.photo-grid-container::-webkit-scrollbar-track {
+	background: transparent;
+}
+.photo-grid-container::-webkit-scrollbar-thumb {
+	background: var(--surface);
+	border-radius: 4px;
+}
+.photo-grid-container::-webkit-scrollbar-thumb:hover {
+	background: var(--surface-2);
+}
+.photo-grid {
+	/* Virtualized grid: cells are absolutely positioned by JS (see
+               renderGridWindow in ui_js_script.js) and the element's height is set
+               in JS to the full virtual height, so the scrollbar stays accurate
+               even though only the visible rows exist in the DOM. */
+	position: relative;
+	width: 100%;
+	animation: fadeIn 0.5s ease;
+}
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+.photo-item {
+	/* Position and size are assigned by the virtualizer. Only transform and
+               box-shadow are transitioned: animating left/top/width/height would
+               make recycled cells visibly slide when they are repositioned. */
+	position: absolute;
+	border-radius: 8px;
+	cursor: pointer;
+	transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease;
+	box-shadow: 0 2px 8px hsla(0, 0%, 0%, 0.2);
+}
+.photo-item:hover:not(.menu-active) {
+	transform: scale(1.05);
+	box-shadow: 0 12px 24px hsla(0, 0%, 0%, 0.4);
+	z-index: 10;
+}
+.photo-item::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: linear-gradient(180deg, hsla(0, 0%, 0%, 0) 0%, hsla(0, 0%, 0%, 0.3) 100%);
+	opacity: 0;
+	transition: opacity 0.3s ease;
+	z-index: 2;
+	pointer-events: none;
+	border-radius: 8px;
+}
+.photo-item:hover:not(.menu-active)::before {
+	opacity: 1;
+}
+.photo-placeholder {
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(135deg, var(--avatar-grad-a) 0%, var(--avatar-grad-b) 100%);
+	border-radius: 8px;
+	overflow: hidden;
+}
+.photo-item .kebab-menu {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	z-index: 4;
+}
+/* One-row bottom bar (Phase 1): Settings | status/progress text | progress bar
+           (when scanning) | Help (pushed to the right edge). */
+.bottom-bar {
+	background: var(--surface-deep-hover);
+	border-top: 1px solid var(--border);
+	padding: 12px 28px;
+	display: flex;
+	align-items: center;
+	gap: 16px;
+}
+.settings-btn {
+	flex: 0 0 auto;
+	padding: 10px 20px;
+	background: var(--accent);
+	border: none;
+	border-radius: 8px;
+	color: var(--accent-on);
+	font-size: 14px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.settings-btn:hover {
+	background: var(--accent-hover);
+}
+/* No box of its own - inherits the bottom-bar background. Shows the face count,
+           or the progress text while a scan/export runs (the two spans swap). */
+.status-text {
+	flex: 0 0 auto;
+	/* Capped: plain 30vw reserved about 1000px of the bottom bar on an ultrawide for
+	   one line of status text, squeezing the progress bar. */
+	min-width: min(30vw, 420px);
+	font-size: 0.85rem;
+	color: var(--text-2);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	font-weight: 500;
+}
+/* The section stays in flow as a flex:1 filler even when the bar is hidden, so
+           the Help button stays pinned right without a margin-auto that would stop the
+           bar from growing. */
+.progress-section {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+.progress-bar {
+	flex: 1;
+	min-width: 0;
+	height: 8px;
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: 4px;
+	overflow: hidden;
+	position: relative;
+}
+.progress-fill {
+	height: 100%;
+	background: linear-gradient(90deg, var(--accent) 0%, hsl(from var(--accent) h s l / 0.6) 100%);
+	width: 35%;
+	border-radius: 4px;
+	transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+	position: relative;
+	overflow: hidden;
+}
+.progress-fill::after {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
+	background: linear-gradient(90deg,
+			transparent,
+			hsla(0, 0%, 100%, 0.3),
+			transparent);
+	animation: shimmer 2s infinite;
+}
+@keyframes shimmer {
+	0% {
+		transform: translateX(-100%);
+	}
+	100% {
+		transform: translateX(100%);
+	}
+}
+.help-btn {
+	flex: 0 0 auto;
+	padding: 6px;
+	background: transparent;
+	border: none;
+	color: var(--accent);
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.3s ease;
+	border-radius: 50%;
+}
+.help-btn:hover {
+	color: var(--accent);
+	background: hsl(from var(--accent) h s l / 0.1);
+}
+.settings-overlay {
+	position: fixed;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	display: none;
+	align-items: center;
+	justify-content: center;
+	z-index: 99998;
+	background: var(--scrim);
+	backdrop-filter: blur(3px);
+	animation: fadeInOverlay 0.3s ease;
+	top: 32px;
+}
+.settings-overlay.active {
+	display: flex;
+}
+@keyframes fadeInOverlay {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+.settings-container {
+	position: relative;
+	width: calc(100vw - 80px);
+	height: calc(100vh - 80px);
+	min-width: 80vw;
+	max-width: min(90vw, 177vh);
+	max-height: 96vh;
+	min-height: calc(100vh - 64px);
+	background: var(--bg);
+	border-radius: 12px;
+	box-shadow: var(--shadow-dialog);
+	display: flex;
+	overflow: hidden;
+	z-index: 99980;
+	animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes slideIn {
+	from {
+		opacity: 0;
+		transform: scale(0.95) translateY(20px);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1) translateY(0);
+	}
+}
+.settings-sidebar {
+	min-width: 220px;
+	background: var(--surface-deep);
+	border-right: 1px solid var(--border);
+	display: flex;
+	flex-direction: column;
+	padding: 24px 0;
+	width: 15dvw;
+}
+.settings-header {
+	padding: 0 20px 24px;
+	border-bottom: 1px solid var(--border);
+}
+.settings-title {
+	font-size: 24px;
+	font-weight: 700;
+	color: var(--text);
+}
+.settings-nav {
+	flex: 1;
+	padding: 24px 12px;
+}
+.nav-item {
+	padding: 14px 16px;
+	margin-bottom: 4px;
+	border-radius: 8px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	font-size: 14px;
+	color: var(--text);
+	font-weight: 350;
+}
+
+[data-theme="light"] .nav-item {font-weight: 500;color-scheme: light;}
+
+.nav-item:hover {
+	background: var(--surface);
+	color: var(--text);
+}
+.nav-item.active {
+	background: var(--accent);
+	color: var(--accent-on);
+}
+.settings-footer {
+	padding: 20px;
+	border-top: 1px solid var(--border);
+}
+.close-settings-btn {
+	width: 100%;
+	padding: 12px 32px;
+	background: var(--danger);
+	border: none;
+	border-radius: 8px;
+	color: var(--danger-on);
+	font-size: 14px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: background 0.2s ease;
+	margin-bottom: 12px;
+}
+.close-settings-btn:hover {
+	background: var(--danger-hover);
+}
+.footer-credit {
+	text-align: center;
+	font-size: 11px;
+	color: var(--text-dimmer);
+}
+.settings-content {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+.content-panel {
+	display: none;
+	flex-direction: column;
+	height: 100%;
+	padding: 40px 48px;
+	overflow-y: auto;
+}
+.content-panel.active {
+	display: flex;
+}
+.content-panel::-webkit-scrollbar {
+	width: 8px;
+}
+.content-panel::-webkit-scrollbar-track {
+	background: transparent;
+}
+.content-panel::-webkit-scrollbar-thumb {
+	background: var(--surface);
+	border-radius: 4px;
+}
+.panel-title {
+	font-size: 28px;
+	font-weight: 700;
+	margin-bottom: 32px;
+}
+.setting-group {
+	background: var(--surface);
+	border-radius: 12px;
+	padding: 24px;
+	margin-bottom: 24px;
+}
+.setting-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 16px 0;
+}
+.setting-row:not(:last-child) {
+	border-bottom: 1px solid var(--border);
+}
+.setting-label {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 14px;
+	color: var(--text-muted);
+}
+
+[data-theme="light"] .setting-label {
+	color: var(--text);
+	font-weight:380;
+	color-scheme: light;
+}
+.info-icon {
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	border: 1.5px solid var(--text-muted);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 10px;
+	color: var(--text-dimmer);
+	cursor: help;
+	position: relative;
+	font-weight: 400;
+}
+.info-icon:hover {
+	border-color: var(--text-muted);
+	color: var(--text-muted);
+}
+.tooltip {
+	position: fixed;
+	background: var(--surface);
+	color: var(--text-2);
+	padding: 12px 16px;
+	border-radius: 8px;
+	font-size: 12px;
+	line-height: 1.5;
+	width: 320px;
+	box-shadow: var(--shadow-card);
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity 0.2s ease;
+	z-index: 99999;
+	white-space: normal;
+}
+.tooltip::after {
+	content: '';
+	position: absolute;
+	top: 100%;
+	left: 50%;
+	transform: translateX(-50%);
+	border: 6px solid transparent;
+	border-top-color: var(--surface);
+}
+.info-icon:hover .tooltip {
+	opacity: 1;
+}
+.threshold-control {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	width: 100%;
+	margin-left: 24px;
+}
+.threshold-slider-wrapper {
+	flex: 1;
+	display: flex;
+	align-items: center;
+	gap: 16px;
+}
+.threshold-slider {
+	flex: 1;
+	height: 6px;
+	border-radius: 3px;
+	background: var(--bg);
+	outline: none;
+	appearance: none;
+	cursor: pointer;
+}
+.threshold-slider::-webkit-slider-thumb {
+	appearance: none;
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	background: var(--accent);
+	cursor: pointer;
+	box-shadow: 0 2px 8px hsl(from var(--accent) h s l / 0.4);
+}
+.threshold-slider::-moz-range-thumb {
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	background: var(--accent);
+	cursor: pointer;
+	border: none;
+	box-shadow: 0 2px 8px hsl(from var(--accent) h s l / 0.4);
+}
+.threshold-value {
+	min-width: 45px;
+	text-align: right;
+	font-size: 14px;
+	color: var(--text-muted);
+}
+.recalibrate-btn {
+	padding: 8px 20px;
+	background: var(--accent);
+	border: none;
+	border-radius: 6px;
+	color: var(--accent-on);
+	font-size: 13px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: background 0.2s ease;
+}
+.recalibrate-btn:hover {
+	background: var(--accent-hover);
+}
+.toggle-switch {
+	position: relative;
+	width: 48px;
+	height: 26px;
+	cursor: pointer;
+	min-width:50px;
+}
+.toggle-switch input {
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
+.toggle-slider {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: var(--text-dimmer);
+	border-radius: 13px;
+	border: 1px solid transparent;
+	transition: all 0.3s ease;
+	height: 20px;
+}
+[data-theme="dark"] .toggle-slider {
+	    /* Accent-independent on purpose: this was var(--accent-on), which flips
+	       black/white with the accent (unpredictably so with custom accents) and
+	       inverted the OFF-state track. Off states never take accent-derived colour. */
+	    background: var(--text-dimmer);
+	    color-scheme: dark;
+}
+[data-theme="light"] .toggle-slider {
+	    background: var(--text-dimmer);
+	color-scheme: light;
+}
+.toggle-slider:before {
+	content: '';
+	position: absolute;
+	height: 22px;
+	width: 22px;
+	left: -2px;
+	top: -2px;
+	background: var(--accent-on);
+	border-radius: 50%;
+	transition: all 0.3s ease;
+}
+[data-theme="dark"] .toggle-slider:before {
+	background: var(--text);
+	color-scheme: dark;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+	background: var(--accent);
+}
+.toggle-switch input:checked + .toggle-slider:before {
+	transform: translateX(32px);
+}
+.folder-section {
+	margin-bottom: 32px;
+}
+.folder-section-title {
+	font-size: 17px;
+	color: var(--text-2);
+	margin-bottom: 12px;
+	font-weight: 500;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+.folder-list-container {
+	background: var(--input-bg);
+	border-radius: 8px;
+	padding: 16px;
+	height: 200px;
+	overflow-y: auto;
+	margin-top: 20px;
+}
+.folder-list-container::-webkit-scrollbar {
+	width: 6px;
+}
+.folder-list-container::-webkit-scrollbar-track {
+	background: transparent;
+}
+.folder-list-container::-webkit-scrollbar-thumb {
+	background: var(--surface-2);
+	border-radius: 3px;
+}
+.folder-item {
+	padding: 10px 12px;
+	border-radius: 6px;
+	margin-bottom: 8px;
+	font-size: 13px;
+	color: var(--text);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	background: var(--surface-deep);
+}
+.folder-item:last-child {
+	margin-bottom: 0;
+}
+.folder-item:hover {
+	background: var(--surface-3);
+}
+.folder-item.selected {
+	background: var(--accent);
+	color: var(--accent-on);
+}
+.folder-controls {
+	display: flex;
+	gap: 12px;
+	margin-top: 12px;
+}
+.folder-btn {
+	padding: 8px 16px;
+	background: var(--accent);
+	border: none;
+	border-radius: 6px;
+	color: var(--accent-on);
+	font-size: 13px;
+	cursor: pointer;
+	transition: background 0.2s ease;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+.folder-btn:hover {
+	background: var(--accent-hover)
+}
+/* Match the Close Settings button: solid red background, light text (was red text
+           on a transparent button). */
+.folder-btn.remove {
+	background: var(--danger);
+	color: var(--danger-on);
+}
+.folder-btn.remove:hover {
+	background: var(--danger-hover);
+}
+/* Themed so it follows the app theme instead of the webview's OS form-control
+           colours (which left it dark-on-white in the light theme). */
+.min-photos-input {
+	background: var(--bg);
+	color: var(
+	--text);
+	border: 1px solid var(
+	--surface-2);
+	border-radius: 6px;
+	padding: 8px 8px;
+	width: 64px;
+	font-size: 13px;
+	outline: none;
+	text-align: left;
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+
+  -webkit-appearance: none !important;
+  margin: 0 !important;
+}
+.min-photos-control {
+            display: flex;
+            align-items: baseline;
+            font-size: 14px;
+            gap:  12px;
+            font-stretch: 92%;
+            color: var(--text-dimmer);
+}
+
+.min-photos-control span {
+	min-width: fit-content;
+}
+
+.wildcard-input
+{
+	background: var(--surface);
+	border-radius: 8px;
+	padding: 12px 16px;
+	font-size: 13px;
+	color: var(--text);
+	width: 100%;
+	outline: none;
+	transition: all 0.2s ease;
+}
+.wildcard-input:focus {
+	background: var(--input-bg);
+}
+.log-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 24px;
+}
+
+input::-webkit-input-placeholder,
+input[type="text"],
+input:not([type="range" i], [type="checkbox" i], [type="radio" i])
+ {
+	text-transform: none;
+	text-indent: 0px;
+	text-shadow: none;
+	display: block;
+	text-align: start;
+	appearance: auto;
+	cursor: text;
+	-webkit-rtl-ordering: logical;
+	background-color: var(--input-bg);
+	margin: 0em 0em 0em 0em;
+	padding: 0;
+	border-width: inherit;
+	border-style: solid;
+	border-color: transparent;
+	border-image: inherit;
+	padding-block: 8px;
+	padding-inline: 8px;
+	height: 36px;
+	width:  100%;
+}
+.log-header-actions {
+	display: flex;
+	gap: 12px;
+	align-items: center;
+}
+.save-log-btn {
+	padding: 10px 20px;
+	background: var(--accent);
+	border: none;
+	border-radius: 8px;
+	color: var(--accent-on);
+	font-size: 13px;
+	cursor: pointer;
+	transition: background 0.2s ease;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+.save-log-btn:hover {
+	background: var(--accent-hover);
+}
+.log-viewer {
+	background: var(--text-2);
+	border-radius: 8px;
+	padding: 20px;
+	font-size: 13px;
+	color: var(--surface-deep);
+	/* Shorter now that the Log shares the About panel with the section above it. */
+	height: 479px;
+	overflow-y: auto;
+	line-height: 1.9;
+	font-weight: 400;
+	font-stretch: 109%;
+}
+[data-theme="dark"] .log-viewer {
+	background: var(--input-bg);
+	color:  var(--text-dimmer);
+}
+.log-viewer::-webkit-scrollbar {
+	width: 8px;
+}
+.log-viewer::-webkit-scrollbar-track {
+	background: transparent;
+}
+.log-viewer::-webkit-scrollbar-thumb {
+	background: var(--surface);
+	border-radius: 4px;
+}
+.log-entry {
+	margin-bottom: 2px;
+}
+.hidden-file-input {
+	display: none;
+}
+.cleanup-overlay {
+	position: fixed;
+	top: 32px;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	display: none;
+	align-items: center;
+	justify-content: center;
+	z-index: 100000;
+	background: var(--scrim);
+	backdrop-filter: blur(3px);
+	animation: fadeInOverlay 0.3s ease;
+}
+.cleanup-overlay.active {
+	display: flex;
+}
+.cleanup-message {
+	background: var(--bg);
+	border-radius: 12px;
+	padding: 48px 64px;
+	box-shadow: var(--shadow-dialog);
+	animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.cleanup-title {
+	font-size: 24px;
+	font-weight: 700;
+	color: var(--text);
+	text-align: center;
+}
+.export-result-body {
+	margin-top: 20px;
+	text-align: center;
+}
+.export-result-line {
+	font-size: 15px;
+	color: var(--text-2);
+	margin: 6px 0;
+}
+.export-note {
+	font-size: 14px;
+	color: var(--text-dimmer);
+	line-height: 1.8;
+	margin-bottom: 16px;
+	font-weight: 300;
+}
+/* Breathing room between the people search box and the selectable list (Phase 2). */
+.export-search {
+	margin-bottom: 12px;
+}
+/* XMP consent (Phase 5): the "I understand" gate and a disabled-button look. */
+.xmp-understand {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	margin-top: 20px;
+	cursor: pointer;
+	color: var(--text-2);
+	font-size: 14px;
+}
+.xmp-understand input {
+	width: 16px;
+	height: 16px;
+	cursor: pointer;
+	accent-color: var(--accent);
+}
+.folder-btn:disabled {
+	opacity: 0.45;
+	cursor: not-allowed;
+}
+/* About panel (Phase 6): centred copy + a row of equal-width accent buttons. */
+.about-text {
+	text-align: center;
+	color: var(--text-dimmer);
+	font-size: 14px;
+	line-height: 1.55;
+	font-weight: 400;
+	letter-spacing: 0.01em;
+}
+.about-text .about-title {
+	font-size: 41px;
+	font-weight: 600;
+	color: var(--accent);
+	margin-bottom: -13px;
+}
+.about-text span {
+    font-size: 12px;
+    line-height: 4.8;
+    color: var(--text-2);
+}
+.about-buttons {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+	gap: 10px;
+	padding-inline: 90px;
+}
+/* Help + Report sit in their own centered row above the rest. */
+.about-buttons-primary {
+	display: flex;
+	justify-content: center;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-top: 24px;
+}
+.about-buttons-primary .about-btn {
+	min-width: 180px;
+}
+.about-buttons.about-buttons-rest {
+	margin-top: 12px;
+}
+/* Most About buttons are neutral; only .primary (Help, Report) is accented. */
+.about-btn {
+	padding: 10px 16px;
+	background: var(--bg);
+	color: var(--text);
+	border: none;
+	border-radius: 8px;
+	font-size: 14px;
+	box-shadow: inset 0 0 0 1px var(
+ --accent);
+	font-weight: 500;
+	cursor: pointer;
+	transition: background 0.2s ease;
+}
+.about-btn:hover {
+	background: var(--surface-3);
+}
+.about-btn.primary {
+	background: var(--accent);
+	color: var(
+	--accent-on);
+}
+.about-btn.primary:hover {
+	background: var(--accent-hover);
+}
+/* Themes & Accessibility panel (Phase 3). Two subheaders instead of a panel title. */
+/* Same type style as a category header (.panel-title), per the brief. */
+.settings-subheader {
+	font-size: 28px;
+	font-weight: 700;
+	color: var(--text);
+	margin-bottom: 20px;
+}
+.settings-subheader.secondary {
+	margin-top: 32px;
+}
+.accent-swatches {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+	align-items: center;
+	margin-top: 4px;
+}
+/* Circle colour is set inline per swatch (the resolved value for the current
+           theme x contrast). */
+.accent-swatch {
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+	cursor: pointer;
+	box-shadow: inset 0 0 0 1px hsla(0, 0%, 0%, 0.25);
+	transition: transform 0.15s ease;
+}
+.accent-swatch:hover {
+	transform: scale(1.12);
+}
+.accent-swatch.selected {
+	box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--text), inset 0 0 0 1px hsla(0, 0%, 0%, 0.25);
+}
+
+.export-actions {
+	flex-wrap: wrap;
+	align-items: center;
+}
+#photoFilterBtn.active,
+#photoGroupBtn.active {
+	background: var(--accent);
+	color: var(--accent-on);
+}
+.group-header {
+	position: absolute;
+	left: 0;
+	right: 0;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 0 12px;
+	box-sizing: border-box;
+	cursor: pointer;
+	color: var(--text-2);
+	background: var(--surface-deep);
+	border-radius: 8px;
+	user-select: none;
+}
+.group-header:hover {
+	background: var(--surface-deep-hover);
+	/* The hover fill is close to the grid background; an inset 1px ring in the
+               normal header color separates a hovered (often collapsed) header from its
+               neighbours without resizing the element the way a border would. */
+	box-shadow: inset 0 0 0 1px var(--surface-deep);
+}
+.group-header-icon {
+	flex: 0 0 auto;
+	display: inline-flex;
+	align-items: center;
+}
+.group-header-label {
+	flex: 1 1 auto;
+	min-width: 0;
+	font-size: 14px;
+	font-weight: 600;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.group-header-count {
+	flex: 0 0 auto;
+	font-size: 12px;
+	color: var(--text-muted);
+}
+.context-menu-item.active {
+	background: var(--accent);
+	color: var(--accent-on);
+}
+.filter-panel {
+	padding: 12px;
+	min-width: 210px;
+	max-height: 420px;
+	overflow-y: auto;
+	scrollbar-width: thin;
+	/* Thumb uses the grid panel's bg (var(--bg)), not the menu's own bg
+               (var(--surface)), so the thumb stays visible against the lighter menu. */
+	scrollbar-color: var(--bg) transparent;
+}
+.filter-panel::-webkit-scrollbar {
+	width: 6px;
+}
+.filter-panel::-webkit-scrollbar-track {
+	background: transparent;
+}
+.filter-panel::-webkit-scrollbar-thumb {
+	background: var(--bg);
+	border-radius: 3px;
+}
+.filter-panel-label {
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--text-muted);
+	margin: 10px 0 4px;
+}
+.filter-panel-label:first-child {
+	margin-top: 0;
+}
+.filter-check {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 4px 2px;
+	font-size: 13px;
+	color: var(--text-2);
+	cursor: pointer;
+}
+.filter-path-input {
+	width: 100%;
+	box-sizing: border-box;
+	padding: 6px 8px;
+	margin-bottom: 8px;
+	background: var(--bg);
+	border: 1px solid var(--surface-2);
+	border-radius: 6px;
+	color: var(--text);
+	font-size: 13px;
+	outline: none;
+}
+.filter-panel-empty {
+	font-size: 13px;
+	color: var(--text-muted);
+	padding: 4px 2px;
+}
+.export-cancel-btn {
+	margin-left: 12px;
+	padding: 4px 14px;
+	font-size: 12px;
+	color: var(--danger-on);
+	background: var(--danger-hover);
+	border: none;
+	border-radius: 6px;
+	cursor: pointer;
+	white-space: nowrap;
+}
+.export-cancel-btn:hover {
+	background: var(--danger);
+}
+.export-cancel-btn:disabled {
+	background: var(--danger-deep);
+	color: var(--text-muted);
+	cursor: default;
+}
+.rename-input-container {
+	margin-top: 24px;
+}
+#renameInput {
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+.hidden-overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	pointer-events: none;
+	z-index: 1;
+	border-radius: 8px;
+	background-image: repeating-linear-gradient(45deg,
+			transparent,
+			transparent 10px,
+			hsla(0, 0%, 0%, 0.5) 10px,
+			hsla(0, 0%, 0%, 0.5) 11px);
+}
+.lightbox-overlay {
+	position: fixed;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	display: none;
+	align-items: center;
+	justify-content: center;
+	z-index: 100001;
+	background: var(--scrim-heavy);
+	backdrop-filter: blur(3px);
+	animation: fadeInOverlay 0.3s ease;
+	top: 32px;
+}
+.lightbox-overlay.active {
+	display: flex;
+}
+.lightbox-close {
+	position: absolute;
+	top: 24px;
+	right: 24px;
+	width: 48px;
+	height: 48px;
+	background: var(--danger);
+	border: none;
+	border-radius: 50%;
+	color: var(--danger-on);
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.3s ease;
+	z-index: 100003;
+}
+.lightbox-close:hover {
+	background: var(--glass-hover);
+	transform: scale(1.1);
+}
+/* F4: two-column preview - image (0.7) and a details panel (0.3). Fixed height
+           so the details panel is always full-height even when the image is short/wide.
+           Width leaves 100px gutters each side so the viewport-edge controls (prev/next
+           nav, bottom-right open-external) never overlap the image or details panel. */
+.lightbox-content {
+	width: calc(100vw - 200px);
+	height: 90vh;
+	display: grid;
+	grid-template-columns: 0.7fr 0.3fr;
+	gap: 16px;
+	align-items: stretch;
+	position: relative;
+}
+.lightbox-image-pane {
+	position: relative;
+	min-width: 0;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+/* F4 details panel disabled (show_photo_details off): single image column,
+           panel hidden. Everything else about the preview is unchanged. */
+.lightbox-content.no-details {
+	grid-template-columns: 1fr;
+}
+.lightbox-content.no-details .lightbox-details {
+	display: none;
+}
+/* Below this width the 70/30 split starves the image (at 900px the photo gets under
+   500px), so the details pane bows out and the photo takes the full stage, same as the
+   no-details mode. */
+@media (max-width: 980px) {
+	.lightbox-content {
+		grid-template-columns: 1fr;
+	}
+	.lightbox-content .lightbox-details {
+		display: none;
+	}
+}
+.lightbox-nav {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 64px;
+	height: 64px;
+	background: var(--glass);
+	border: none;
+	border-radius: 50%;
+	color: var(--bg);
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.3s ease;
+	z-index: 100003;
+}
+.lightbox-nav:hover {
+	background: var(--glass-hover);
+	transform: translateY(-50%) scale(1.1);
+}
+.lightbox-prev {
+	left: 24px;
+}
+.lightbox-next {
+	right: 24px;
+}
+.lightbox-counter {
+	position: absolute;
+	bottom: 24px;
+	left: 50%;
+	transform: translateX(-50%);
+	background: hsla(0, 0%, 0%, 0.7);
+	color: var(--text);
+	padding: 12px 24px;
+	border-radius: 24px;
+	font-size: 14px;
+	font-weight: 500;
+	z-index: 100003;
+}
+.lightbox-actions {
+	position: absolute;
+	bottom: 24px;
+	right: 24px;
+	display: flex;
+	gap: 12px;
+	z-index: 100003;
+}
+.lightbox-action-btn {
+	width: 48px;
+	height: 48px;
+	background: var(--glass);
+	border: none;
+	border-radius: 50%;
+	color: var(--text);
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.3s ease;
+}
+.lightbox-action-btn:hover {
+	background: var(--glass-hover);
+	transform: scale(1.1);
+}
+.help-container {
+	position: relative;
+	width: 1000px;
+	max-width: calc(100vw - 80px);
+	max-height: calc(100vh - 80px);
+	background: var(--bg);
+	border-radius: 12px;
+	box-shadow: var(--shadow-dialog);
+	overflow: hidden;
+	z-index: 99999;
+	animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	display: flex;
+	flex-direction: column;
+}
+.help-content {
+	padding: 40px 48px;
+	overflow-y: auto;
+	flex: 1;
+}
+.help-content::-webkit-scrollbar {
+	width: 8px;
+}
+.help-content::-webkit-scrollbar-track {
+	background: transparent;
+}
+.help-content::-webkit-scrollbar-thumb {
+	background: var(--surface);
+	border-radius: 4px;
+}
+.help-content::-webkit-scrollbar-thumb:hover {
+	background: var(--surface-2);
+}
+.help-title {
+	font-size: 28px;
+	font-weight: 700;
+	margin-bottom: 32px;
+	color: var(--text);
+}
+.help-list {
+	margin-bottom: 32px;
+}
+.help-item {
+	font-size: 15px;
+	color: var(--text-2);
+	margin-bottom: 16px;
+	line-height: 1.6;
+	padding-left: 24px;
+	position: relative;
+}
+.help-item::before {
+	content: '';
+	position: absolute;
+	left: 8px;
+	top: 10px;
+	width: 4px;
+	height: 4px;
+	background: var(--accent);
+	border-radius: 50%;
+}
+.close-help-btn {
+	width: 100%;
+	padding: 12px 32px;
+	background: var(--danger);
+	border: none;
+	border-radius: 8px;
+	color: var(--danger-on);
+	font-size: 14px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: background 0.2s ease;
+}
+.close-help-btn:hover {
+	background: var(--danger-hover);
+}
+.no-folders-container {
+	position: relative;
+	width: 520px;
+	max-width: calc(100vw - 80px);
+	background: var(--bg);
+	border-radius: 12px;
+	box-shadow: var(--shadow-dialog);
+	overflow: hidden;
+	z-index: 99999;
+	animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.no-folders-content {
+	padding: 48px 56px;
+	text-align: center;
+}
+.no-folders-icon {
+	margin: 0 auto 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.no-folders-icon svg {
+	opacity: 0.8;
+}
+.no-folders-title {
+	font-size: 28px;
+	font-weight: 700;
+	margin-bottom: 16px;
+	color: var(--text);
+}
+.no-folders-message {
+	font-size: 15px;
+	color: var(--text-muted);
+	margin-bottom: 32px;
+	line-height: 1.6;
+}
+.no-folders-btn {
+	width: 100%;
+	padding: 14px 32px;
+	background: var(--accent);
+	border: none;
+	border-radius: 8px;
+	color: var(--accent-on);
+	font-size: 15px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: background 0.2s ease;
+}
+.no-folders-btn:hover {
+	background: var(--accent-hover);
+}
+/* overlay for transfer people*/
+.transfer-overlay {
+	position: fixed;
+	top: 32px;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	display: none;
+	align-items: center;
+	justify-content: center;
+	z-index: 100002;
+	background: var(--scrim);
+	backdrop-filter: blur(3px);
+	animation: fadeInOverlay 0.3s ease;
+}
+.transfer-overlay.active {
+	display: flex;
+}
+.transfer-dialog {
+	background: var(--bg);
+	border-radius: 12px;
+	padding: 24px;
+	width: 400px;
+	height: 700px;
+	/* The fixed height wins in normal windows; this cap keeps the dialog inside short
+	   windows instead of clipping (the old 750px cap could never engage). */
+	max-height: min(700px, calc(100vh - 48px));
+	box-shadow: var(--shadow-dialog);
+	animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	display: flex;
+	flex-direction: column;
+}
+.transfer-title {
+	font-size: 20px;
+	font-weight: 700;
+	margin-bottom: 16px;
+	color: var(--text);
+}
+.transfer-list {
+	flex: 1;
+	overflow-y: auto;
+	margin-bottom: 16px;
+}
+.transfer-list::-webkit-scrollbar {
+	width: 6px;
+}
+.transfer-list::-webkit-scrollbar-track {
+	background: transparent;
+}
+.transfer-list::-webkit-scrollbar-thumb {
+	background: var(--surface-2);
+	border-radius: 3px;
+}
+.transfer-option {
+	padding: 14px 16px;
+	margin-bottom: 6px;
+	background: var(--surface);
+	border-radius: 8px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	font-size: 14px;
+	color: var(--text-2);
+}
+.transfer-option:hover {
+	background: var(--surface-2);
+	/*transform: translateX(4px);*/
+}
+.transfer-option.remove {
+	background: hsl(from var(--danger-2) h s l / 0.1);
+	color: var(--danger-2);
+	font-weight: 500;
+}
+.transfer-option.remove:hover {
+	background: hsl(from var(--danger-2) h s l / 0.2);
+}
+.transfer-cancel {
+	padding: 12px;
+	background: var(--surface);
+	border: none;
+	border-radius: 8px;
+	color: var(--text);
+	font-size: 14px;
+	cursor: pointer;
+	transition: background 0.2s ease;
+}
+.transfer-cancel:hover {
+	background: var(--surface-2);
+}
+/* Prevent tooltips from showing in transfer dialog */
+.transfer-dialog .tooltip,
+.transfer-overlay .tooltip {
+	display: none !important;
+}
+/* Loading for scroll for more photos in grid */
+#loading-indicator {
+	animation: pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse {
+	0%, 100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.5;
+	}
+}
+.photo-item.selected {
+	outline: 3px solid var(--accent);
+	outline-offset: -3px;
+	z-index: 5;
+}
+.photo-item.selected::after {
+	content: '';
+	position: absolute;
+	top: 8px;
+	left: 8px;
+	width: 24px;
+	height: 24px;
+	background: var(--accent);
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 6;
+	box-shadow: 0 2px 8px hsla(0, 0%, 0%, 0.3);
+}
+.photo-item.selected::before {
+	content: '✓';
+	position: absolute;
+	top: 8px;
+	left: 8px;
+	width: 24px;
+	height: 24px;
+	color: var(--accent-on);
+	font-size: 14px;
+	font-weight: bold;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 7;
+}
+.selection-info {
+	position: fixed;
+	bottom: 80px;
+	left: 50%;
+	transform: translateX(-50%);
+	background: var(--surface);
+	border: 1px solid var(--accent);
+	border-radius: 8px;
+	padding: 12px 24px;
+	color: var(--text);
+	font-size: 13px;
+	font-weight: 500;
+	box-shadow: var(--shadow-card);
+	z-index: 1000;
+	display: none;
+	animation: slideUp 0.2s ease;
+}
+.selection-info.show {
+	display: block;
+}
+@keyframes slideUp {
+	from {
+		opacity: 0;
+		transform: translateX(-50%) translateY(10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(-50%) translateY(0);
+	}
+}
+.selection-info-text {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+}
+.selection-info-text span {
+	color: var(--accent);
+}
+.clear-selection-btn {
+	background: transparent;
+	border: none;
+	color: var(--text-muted);
+	cursor: pointer;
+	padding: 4px 8px;
+	margin-left: 12px;
+	border-radius: 4px;
+	transition: all 0.2s ease;
+}
+.clear-selection-btn:hover {
+	background: var(--surface-2);
+	color: var(--text);
+}
+/* People multi-select highlight (F9). Uses the app accent (var(--accent)) like the
+           grid selection, but as a subtle tint + inset ring instead of a full outline.
+           The :hover rule has higher specificity than the generic person-item hover,
+           so the ring and tint survive while hovering a selected row. */
+.person-item.selected {
+	background: hsl(from var(--accent) h s l / 0.18);
+	box-shadow: inset 0 0 0 1px var(--accent);
+}
+.person-item.selected:hover:not(.menu-active) {
+	background: hsl(from var(--accent) h s l / 0.22);
+	box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+/* Pin indicator on the right edge of a pinned person row (F9), left of the
+           kebab slot. */
+.person-pin {
+	flex: 0 0 auto;
+	display: flex;
+	align-items: center;
+	margin-right: 6px;
+	opacity: 1;
+	color: var(--accent);
+}
+/* People selection bar: same look as the grid's .selection-info but anchored
+           left with padding (defined after .selection-info so these win) so it reads
+           as belonging to the people list, not the grid (F9). */
+.people-selection-info {
+	left: 24px;
+	transform: none;
+}
+.name-conflict-message {
+	background: var(--bg);
+	border-radius: 12px;
+	padding: 32px 40px;
+	max-width: 520px;
+	box-shadow: var(--shadow-dialog);
+	animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.conflict-warning {
+	font-size: 14px;
+	color: var(--text-2);
+	margin: 20px 0 16px;
+	line-height: 1.6;
+	text-align: center;
+}
+.conflict-question {
+	font-size: 15px;
+	color: var(--text);
+	font-weight: 600;
+	margin-bottom: 28px;
+	text-align: center;
+}
+.conflict-buttons {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+.conflict-btn {
+	width: 100%;
+	padding: 14px 24px;
+	border: none;
+	border-radius: 8px;
+	font-size: 14px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	text-align: center;
+}
+.conflict-btn.proceed {
+	background: var(--danger);
+	color: var(--danger-on);
+}
+.conflict-btn.proceed:hover {
+	background: var(--danger-hover);
+}
+.conflict-btn.auto-rename {
+	background: var(--accent);
+	color: var(--accent-on);
+}
+.conflict-btn.auto-rename:hover {
+	background: var(--accent-hover);
+}
+.conflict-btn.go-back {
+	background: var(--surface);
+	color: var(--text);
+}
+.conflict-btn.go-back:hover {
+	background: var(--surface-2);
+}
+.lightbox-content img {
+	max-width: 100%;
+	/* Cap on the viewport (matches the content's 90vh), not the parent's 100%:
+               in the grid the percentage chain doesn't constrain reliably, so tall
+               portrait images overflowed the content box and got clipped at the bottom. */
+	max-height: 90vh;
+	object-fit: contain;
+	border-radius: 8px;
+	box-shadow: var(--shadow-dialog);
+}
+/* F4 details panel: grey panel matching the grid background, full height,
+           scrollable, with darker (people-list bg) row cards. */
+.lightbox-details {
+	background: var(--bg);
+	border-radius: 12px;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	box-shadow: 0 20px 60px hsla(0, 0%, 0%, 0.6);
+}
+
+[data-theme="dark"] .lightbox-details {
+	color-scheme: dark;
+	background: var(--surface-deep-hover);
+}
+.lightbox-details-header {
+	flex: 0 0 auto;
+	font-size: 18px;
+	font-weight: 600;
+	color: var(--text);
+	padding: 20px 20px 14px;
+}
+.lightbox-details-rows {
+	flex: 1;
+	overflow-y: auto;
+	padding: 0 16px 16px;
+	scrollbar-width: thin;
+	scrollbar-color: var(--scrollbar);
+}
+.lightbox-details-rows::-webkit-scrollbar {
+	width: 8px;
+}
+.lightbox-details-rows::-webkit-scrollbar-track {
+	background: transparent;
+}
+.lightbox-details-rows::-webkit-scrollbar-thumb {
+	background: var(--surface);
+	border-radius: 4px;
+}
+.lightbox-details-rows::-webkit-scrollbar-thumb:hover {
+	background: var(--surface-2);
+}
+.lightbox-detail-row {
+	display: grid;
+	grid-template-columns: 0.3fr 0.7fr;
+	gap: 12px;
+	padding: 10px 2px;
+	border-bottom: 1px solid var(--surface-deep);
+}
+[data-theme="dark"]  .lightbox-detail-row {
+	color-scheme: dark;
+	border-bottom: 1px solid var(--surface-3);
+}
+.lightbox-detail-row:last-child {
+	border-bottom: none;
+}
+.lightbox-detail-label {
+	color: var(--text-muted);
+	font-size: 0.885rem;
+	text-align: left;
+	word-break: break-word;
+}
+.lightbox-detail-value {
+	color: var(--text);
+	font-size: 0.885rem;
+	text-align: left;
+	word-break: break-word;
+	overflow-wrap: anywhere;
+}
+
+.lightbox-detail-value {
+	color: var(--text-2);
+	font-weight:450;
+	color-scheme: dark;
+}
+
+/* F4: accent the "open in default app" icon (blue) to set it apart from the
+           white close/nav buttons. */
+#lightboxOpenExternal {
+	color: var(--accent);
+}
+.face-tags-overlay {
+	position: absolute;
+	pointer-events: none;
+	z-index: 100002;
+}
+.face-tag-box {
+	position: absolute;
+	border: 2px solid var(--accent);
+	border-radius: 12px;
+	box-shadow: 0 0 0 1px hsla(0, 0%, 0%, 0.5), 0 0 10px hsl(from var(--accent) h s l / 0.5);
+	pointer-events: none;
+}
+.face-tag-label {
+	position: absolute;
+	top: -26px;
+	left: 0;
+	background: hsl(from var(--accent) h s l / 0.95);
+	/* var(--accent-on), not var(--text): white on the runtime blue accent measured
+	   3.23:1 (an AA failure DevTools flagged); the per-palette on-accent colour is
+	   exactly what this token exists for. */
+	color: var(--accent-on);
+	padding: 4px 10px;
+	border-radius: 4px;
+	font-size: 12px;
+	font-weight: 600;
+	white-space: nowrap;
+	box-shadow: 0 2px 4px hsla(0, 0%, 0%, 0.4);
+}
+.face-tag-label::before {
+	content: '';
+	position: absolute;
+	top: 100%;
+	left: 8px;
+	border: 5px solid transparent;
+	border-top-color: hsl(from var(--accent) h s l / 0.95);
+}
+
+
+/* Styled select popup. The earlier attempt targeted ::-internal-* pseudo-elements,
+   which author CSS is not allowed to style (they are UA-internal, hence "refused to
+   design"). The supported route is the customizable select: opting the select AND its
+   ::picker into base appearance makes the popup an in-page, fully stylable box and the
+   option elements real styling targets. Chromium 135+; if a WebView2 predates it these
+   rules are ignored and the native popup stays, so this is a safe enhancement. */
+select.view-dropdown,
+select.view-dropdown::picker(select) {
+	appearance: base-select;
+}
+select.view-dropdown {
+	border: none;
+}
+select.view-dropdown::picker(select) {
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: 10px;
+	box-shadow: var(--shadow-menu);
+	padding: 6px;
+	margin-top: 4px;
+}
+select.view-dropdown option {
+	padding: 10px 12px;
+	border-radius: 6px;
+	font-size: 13px;
+	color: var(--text-2);
+	background: var(--surface);
+	cursor: pointer;
+	transition: background 0.15s ease;
+}
+select.view-dropdown option:hover,
+select.view-dropdown option:focus {
+	background: var(--surface-2);
+	color: var(--text);
+}
+/* Same selected treatment as .context-menu-item.active; the accent row replaces the
+   UA checkmark, which is hidden below. */
+select.view-dropdown option:checked {
+	background: var(--accent);
+	color: var(--accent-on);
+}
+select.view-dropdown option::checkmark {
+	display: none;
+}
+/* Invisible native-resize grips for the frameless window (built by buildResizeGrips
+   in ui_js_script.js, native loop started by begin_resize in api.py). Edges stay
+   5px thin so right-hand scrollbars remain grabbable; corners are larger, matching
+   Windows' own diagonal priority. Above every overlay so the window can be resized
+   whatever is open. */
+.resize-grip {
+	position: fixed;
+	z-index: 100005;
+	background: transparent;
+}
+.resize-grip-n { top: 0; left: 12px; right: 12px; height: 5px; cursor: ns-resize; }
+.resize-grip-s { bottom: 0; left: 12px; right: 12px; height: 5px; cursor: ns-resize; }
+.resize-grip-e { right: 0; top: 12px; bottom: 12px; width: 5px; cursor: ew-resize; }
+.resize-grip-w { left: 0; top: 12px; bottom: 12px; width: 5px; cursor: ew-resize; }
+.resize-grip-ne { top: 0; right: 0; width: 12px; height: 12px; cursor: nesw-resize; }
+.resize-grip-nw { top: 0; left: 0; width: 12px; height: 12px; cursor: nwse-resize; }
+.resize-grip-se { bottom: 0; right: 0; width: 12px; height: 12px; cursor: nwse-resize; }
+.resize-grip-sw { bottom: 0; left: 0; width: 12px; height: 12px; cursor: nesw-resize; }
+/* Custom colour controls, gated by the Advanced "Custom colours" toggle. The custom
+   accent well is a native color input dressed as a swatch; disabled state mirrors
+   .folder-btn:disabled so the control is visible but clearly inert (the same
+   show-but-do-not-activate pattern as the Hardlink export option). */
+/* Written as input.accent-swatch-custom on purpose: the app's generic input rule
+   (input:not([type=range]...) at specificity 0,1,1) sets width 100 percent and a
+   36px height, which turned the well into a full-width ellipse. These selectors tie
+   at 0,1,1 and win on order, being later in the file. */
+input.accent-swatch-custom {
+	width: 28px;
+	height: 28px;
+	padding: 0;
+	border: none;
+	background: none;
+	cursor: pointer;
+	appearance: none;
+	display: inline-block;
+}
+input.accent-swatch-custom::-webkit-color-swatch-wrapper {
+	padding: 0;
+}
+input.accent-swatch-custom::-webkit-color-swatch {
+	border: 1px solid var(--border);
+	border-radius: 50%;
+}
+input.accent-swatch-custom:disabled {
+	opacity: 0.45;
+	cursor: not-allowed;
+}
+/* Grey the whole row while locked, so the state reads at a glance. */
+.setting-row:has(#customAccentPicker:disabled) {
+	opacity: 0.45;
+}
+/* Normal mode only: scrollbars materialise while their container is actually
+   scrolling (ui_js_script.js toggles .is-scrolling) and vanish otherwise. Contrast
+   and colour-vision modes keep their permanent scrollbars, hence the :not() chain,
+   which also matches the pre-JS state where the attributes are absent. Both rules
+   are needed: containers using the standard scrollbar-color property AND containers
+   styled through the -webkit pseudos. */
+:root:not([data-contrast="high"]):not([data-cvd="protanopia"]):not([data-cvd="deuteranopia"]):not([data-cvd="tritanopia"]):not([data-cvd="achromatopsia"]) :is(.people-list, .photo-grid-container, .filter-panel, .lightbox-details-rows):not(.is-scrolling) {
+	scrollbar-color: transparent transparent;
+}
+:root:not([data-contrast="high"]):not([data-cvd="protanopia"]):not([data-cvd="deuteranopia"]):not([data-cvd="tritanopia"]):not([data-cvd="achromatopsia"]) *:not(.is-scrolling)::-webkit-scrollbar-thumb {
+	background: transparent;
+}
+/* Reduce transparency (toggle in Themes and Accessibility, or inherited from the
+   Windows transparency setting while on 'auto'): overlays become the solid page
+   background instead of a translucent blurred scrim, and the floating cards drop
+   their shadows. */
+:root[data-transparency="reduce"] :is(.settings-overlay, .cleanup-overlay, .transfer-overlay, .lightbox-overlay) {
+	background: var(--bg);
+	backdrop-filter: none;
+}
+:root[data-transparency="reduce"] :is(.settings-container, .help-container, .no-folders-container, .transfer-dialog, .cleanup-message, .name-conflict-message, .lightbox-details, .lightbox-content img, .selection-info, .context-menu, .tooltip) {
+	box-shadow: none;
+}

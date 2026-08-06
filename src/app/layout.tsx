@@ -1,18 +1,27 @@
 import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
+import localFont from "next/font/local";
 import { JsonLd } from "@/components/json-ld";
 import { SITE, siteGraphLd } from "@/lib/seo";
 import "./globals.css";
 import "./globals_override.css";
 
-const sans = Geist({ subsets: ["latin"], variable: "--font-sans" });
-const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" });
-const serif = Instrument_Serif({
-	subsets: ["latin"],
-	weight: "400",
-	style: ["normal", "italic"],
-	variable: "--font-serif",
+// Both faces are variable, which is what makes --base-weight (350) render
+// as a real weight rather than rounding to 400. The fallback chains live
+// in globals.css, on --font-sans / --font-mono.
+const sans = localFont({
+	src: "../fonts/gsans.ttf",
+	weight: "100 900",
+	style: "normal",
+	display: "swap",
+	variable: "--font-gsans",
+});
+const mono = localFont({
+	src: "../fonts/AtkinsonHyperlegibleMono-VariableFont_wght.ttf",
+	weight: "200 800",
+	style: "normal",
+	display: "swap",
+	variable: "--font-mono-atk",
 });
 
 export const metadata: Metadata = {
@@ -53,7 +62,7 @@ export const viewport: Viewport = {
 	width: "device-width",
 	initialScale: 1,
 	colorScheme: "dark",
-	themeColor: "#0a0b0e",
+	themeColor: "#0d0d0d",
 };
 
 export default function RootLayout({
@@ -62,10 +71,7 @@ export default function RootLayout({
 	children: React.ReactNode;
 }) {
 	return (
-		<html
-			lang="en"
-			className={`${sans.variable} ${mono.variable} ${serif.variable}`}
-		>
+		<html lang="en" className={`${sans.variable} ${mono.variable}`}>
 			<body>
 				{children}
 				<JsonLd data={siteGraphLd()} />

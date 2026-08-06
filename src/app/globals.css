@@ -1,57 +1,120 @@
 @import "tailwindcss";
 
-/* github unlisted — global stylesheet. THE single source for site-wide
+/* github unlisted - global stylesheet. THE single source for site-wide
    tokens, the reset, and every element shared across marketing + app
-   (page shell, bloom, top navigation, footer, wordmark, nav links,
+   (page shell, bloom, top navigation, footer, wordmark, nav pills,
    drawer, chips, status dot). Loaded on every route via layout.tsx.
-   Breakpoint overrides for these live in globals_override.css. */
+   Breakpoint overrides for these live in globals_override.css.
+
+   Dark only. There is no light theme and no theme attribute: every
+   surface below assumes a near-black ground. */
 
 :root {
-	/* Brand accent — THE single CSS source. Every pink/orange in the
+	/* Brand accent - THE single CSS source. Every accent tint in the
 	   browser derives from this via relative color: rgb(from var(--accent)
 	   r g b / a) for tints, hsl(from var(--accent) h s l) for shades.
-	   Build-time OG/icon images can't read CSS vars — their source is
-	   ACCENT in src/lib/brand.ts; keep the two in sync. */
-	--accent: #ff960f;
+	   Build-time OG/icon images can't read CSS vars, so their source is
+	   ACCENT in src/lib/brand.ts; keep the two in sync.
+	   hsl(199 56% 62%) == rgb(102, 178, 212). Black on it measures 8.9:1,
+	   which is why --accent-on is black rather than white: anything with
+	   an accent FILL takes --accent-on text. */
+	--accent: hsl(199, 56%, 62%);
+	--accent-hover: hsl(199, 36%, 51%);
+	--accent-on: hsl(0, 0%, 0%);
 
-	/* Surfaces (shared site-wide) */
-	--bg: #0f0f0f;
-	--surface: #161616;
-	--surface-2: #1c2029;
-	--border: #262a35;
-	--border-soft: #1f222b;
-	--border-strong: #363a47;
+	/* Surfaces - one neutral ramp by lightness. Panels separate from the
+	   page by stepping along this ramp rather than by drawing a border. */
+	--bg: hsl(0, 0%, 5%);
+	--surface: hsl(0, 0%, 8%);
+	--surface-2: hsl(0, 0%, 6.2%);
+	--surface-3: hsl(0, 0%, 18%);
+	--surface-deep: hsl(0, 0%, 10%);
+	--surface-deep-hover: hsl(0, 0%, 9%);
+	/* Inputs sit BELOW the page, not above it: a well, not a card. */
+	--input-bg: hsl(0, 0%, 3%);
 
-	/* Text — desaturated greyscale neutral scale */
-	--text: #f3f3f3;
-	--text-2: #bababa;
-	--text-3: #989898;
-	--muted: #7f7f7f;
-	--faint: #555555;
+	/* Text - every tier derives from --text toward --bg, so the whole
+	   hierarchy re-derives from one value. The percentage is mix distance:
+	   14 / 19 / 35 / 52 lands on 78 / 74 / 60 / 46 lightness. */
+	--text: hsl(0, 0%, 90%);
+	--text-2: color-mix(in hsl, var(--text), var(--bg) 14%);
+	--text-3: color-mix(in hsl, var(--text), var(--bg) 19%);
+	--muted: color-mix(in hsl, var(--text), var(--bg) 35%);
+	--faint: color-mix(in hsl, var(--text), var(--bg) 52%);
 
-	/* Type families */
+	/* Borders are hairlines, not outlines: a 6% white line reading as a
+	   seam between two surfaces. --border-strong is the hover/focus step.
+	   --outline is the one genuinely visible ring, for pills and buttons
+	   that have no fill of their own to define their shape. */
+	--border: hsla(0, 0%, 100%, 0.06);
+	--border-soft: hsla(0, 0%, 100%, 0.035);
+	--border-strong: hsla(0, 0%, 100%, 0.16);
+	--outline: color-mix(in hsl, var(--text), var(--bg) 33%);
+
+	/* Effects - shared scrims and shadows, so no rule invents its own. */
+	--scrim: hsla(0, 0%, 0%, 0.6);
+	--scrim-heavy: hsla(0, 0%, 0%, 0.9);
+	--shadow-card: 0 4px 12px hsla(0, 0%, 0%, 0.5);
+	--shadow-menu: 0 8px 24px hsla(0, 0%, 0%, 0.5);
+	--shadow-dialog: 0 0 45px hsla(0, 0%, 0%, 0.85);
+	--shadow-accent: 0 2px 8px hsl(from var(--accent) h s l / 0.4);
+
+	/* Type families. next/font/local (layout.tsx) supplies --font-gsans
+	   and --font-mono-atk from src/fonts; the fallback chains live here so
+	   the whole stack is readable in one place. */
+	--base-weight: 350;
 	--font-sans:
-		"Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
-		sans-serif;
-	--font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
-	--font-serif: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+		var(--font-gsans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+		system-ui, sans-serif;
+	--font-mono:
+		var(--font-mono-atk), ui-monospace, "Cascadia Mono", Consolas, monospace;
 
 	/* Fluid type scale. Site-facing font-sizes route through these;
-	   component-internal sizes (icon glyphs, chip text) stay fixed-px. */
-	--fs-display: clamp(36px, 2.9vw, 59px);
-	--fs-h1: clamp(26px, 1.2vw + 1.2rem, 36px);
-	--fs-h2: clamp(20px, 0.3vw + 1.2rem, 26px);
-	--fs-h3: clamp(15px, 0.25vw + 0.9rem, 20px);
-	--fs-body: clamp(14px, 0.28vw + 0.8125rem, 19px);
-	--fs-ui: clamp(12px, 0.19vw + 0.7rem, 15px);
-	--fs-caption: clamp(10.5px, 0.1vw + 0.7rem, 13px);
-	--fs-btn: clamp(12px, 0.19vw + 0.7rem, 15px);
+	   component-internal sizes (icon glyphs, chip text) stay fixed-px.
+	   Every minimum is already a comfortable phone size, so no breakpoint
+	   has to re-tune them. */
+	--fs-display: clamp(38px, 2.7vw + 0.5rem, 58px);
+	--fs-h1: clamp(25px, 1.1vw + 0.85rem, 35px);
+	--fs-h2: clamp(19px, 0.45vw + 0.95rem, 26px);
+	--fs-h3: clamp(16px, 0.25vw + 0.88rem, 20px);
+	--fs-body: clamp(14px, 0.24vw + 0.82rem, 18px);
+	--fs-ui: clamp(13px, 0.15vw + 0.76rem, 15.5px);
+	--fs-caption: clamp(11.5px, 0.1vw + 0.68rem, 13.5px);
+	--fs-btn: clamp(13px, 0.15vw + 0.76rem, 15.5px);
+
+	/* Fluid space scale. Padding, margin and gap route through these so
+	   spacing tracks the viewport the way type does; fixed px stays only
+	   where a value is keyed to a glyph or an icon box. Resolves to about
+	   5 / 8 / 10 / 14 / 19 / 25 / 34 / 45 / 61 on a 1920 desktop, and to
+	   each minimum on a phone. */
+	--sp-1: clamp(4px, 0.1vw + 0.2rem, 6px);
+	--sp-2: clamp(6px, 0.15vw + 0.3rem, 9px);
+	--sp-3: clamp(8px, 0.2vw + 0.4rem, 12px);
+	--sp-4: clamp(10px, 0.3vw + 0.5rem, 16px);
+	--sp-5: clamp(14px, 0.45vw + 0.62rem, 22px);
+	--sp-6: clamp(18px, 0.65vw + 0.75rem, 28px);
+	--sp-7: clamp(22px, 1vw + 0.9rem, 40px);
+	--sp-8: clamp(28px, 1.5vw + 1rem, 56px);
+	--sp-9: clamp(34px, 2.2vw + 1.2rem, 76px);
+
+	/* Corner radii. Small controls 6, standard controls 8, rows 10,
+	   cards and dialogs 12, pills fully round. */
+	--r-xs: 4px;
+	--r-sm: 6px;
+	--r-md: 8px;
+	--r-lg: 10px;
+	--r-xl: 12px;
+	--r-pill: 999px;
 
 	/* Frosted chrome backdrop shared by the nav + footer. */
 	--chrome-backdrop: blur(4px) brightness(134%) grayscale(100%);
+
+	/* Native form controls, select popups and scrollbars follow the app
+	   rather than the OS scheme. */
+	color-scheme: dark;
 }
 
-/* ─── Reset ────────────────────────────────────────────────── */
+/* --- Reset --- */
 *,
 *::before,
 *::after {
@@ -65,25 +128,61 @@ body {
 }
 body {
 	font-family: var(--font-sans);
+	/* The resting weight of the whole site. Everything heavier is a
+	   deliberate step up from here, not from an unstated 400. */
+	font-weight: var(--base-weight);
 	background: var(--bg);
 	color: var(--text);
 	-webkit-font-smoothing: antialiased;
 	text-rendering: optimizeLegibility;
-	letter-spacing: -0.005em;
-	font-feature-settings: "ss01", "cv11";
 	position: relative;
 	overflow-x: hidden;
+}
+/* Form controls do not inherit typography by default; without this, any control lacking an explicit font-size renders at the UA default (13.33px on Chromium) whatever the page's type settings say. */
+input,
+select,
+textarea,
+button {
+	font: inherit;
 }
 a {
 	color: inherit;
 	text-decoration: none;
 }
 button {
-	font-family: inherit;
 	cursor: pointer;
 }
-input {
-	font-family: inherit;
+
+/* Keyboard focus, once, for every control. :focus-visible does not fire
+   on mouse clicks, so this only shows during keyboard navigation. */
+:focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: 2px;
+}
+
+/* Scrollbars follow the surface ramp instead of the OS chrome. Both
+   properties inherit, so declaring them on the root covers every
+   scroll container; the -webkit pseudos below repeat it for engines
+   that predate scrollbar-color. */
+html {
+	scrollbar-width: thin;
+	scrollbar-color: var(--surface-3) transparent;
+}
+::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+::-webkit-scrollbar-thumb {
+	background: var(--surface-3);
+	border-radius: var(--r-xs);
+}
+@media (hover: hover) {
+	::-webkit-scrollbar-thumb:hover {
+		background: var(--outline);
+	}
 }
 
 /* Lock background scroll while the nav drawer or the viewer tree sheet
@@ -94,9 +193,9 @@ body[data-contact="open"] {
 	overflow: hidden;
 }
 
-/* ─── Page shell + main + bloom ────────────────────────────── */
-/* Every page (marketing + app) is a flex column so <main> fills the
-   gap between the nav and footer and the footer pins to the bottom. */
+/* --- Page shell + main + bloom --- */
+/* Every page (marketing + app) is a flex column so <main> fills the gap
+   between the nav and footer and the footer pins to the bottom. */
 .page-shell {
 	position: relative;
 	z-index: 1;
@@ -105,8 +204,8 @@ body[data-contact="open"] {
 	min-height: 100vh;
 }
 
-/* Every page <main> carries the base background; the home hero opts
-   out (normal.css) so the bloom only shows through there. */
+/* Every page <main> carries the base background; the home hero opts out
+   (normal.css) so the bloom only shows through there. */
 main {
 	background: var(--bg);
 }
@@ -122,7 +221,7 @@ main {
 
 /* Page fade-in. template.tsx remounts this wrapper on every navigation,
    replaying the animation (reduced-motion users get it near-instant via
-   the prefers-reduced-motion block below). */
+   the prefers-reduced-motion block at the end of this file). */
 .page-fade {
 	animation: page-fade-in 0.28s ease;
 }
@@ -135,11 +234,11 @@ main {
 	}
 }
 
-/* ─── Wordmark (shared) ────────────────────────────────────── */
+/* --- Wordmark (shared) --- */
 .wordmark {
 	display: inline-flex;
 	align-items: center;
-	gap: 9px;
+	gap: var(--sp-2);
 	color: var(--text);
 	font-weight: 500;
 	min-width: 0;
@@ -154,7 +253,7 @@ main {
 	place-items: center;
 	background: var(--surface);
 	border: 1px solid var(--border);
-	border-radius: 7px;
+	border-radius: var(--r-sm);
 	flex-shrink: 0;
 	color: var(--accent);
 }
@@ -168,57 +267,75 @@ main {
 	color: var(--accent);
 }
 
-/* ─── Unified top navigation (site-wide) ───────────────────── */
-/* Padding + border-bottom adopted from the old app topbar; layout and
-   the frosted backdrop from the old marketing nav. Surface-specific
-   children (.topbar__center / __right / __meta) live in app.css; the
-   marketing sign-in pill (.nav-cta) lives in normal.css. */
+/* --- Unified top navigation (site-wide) --- */
+/* Surface-specific children (.topbar__center / __right / __meta) live in
+   app.css; the marketing sign-in pill (.nav-cta) lives in normal.css. */
 .topbar {
 	position: relative;
 	z-index: 5;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 16px 28px;
-	gap: 16px;
+	padding: var(--sp-4) var(--sp-6);
+	gap: var(--sp-4);
 	border-bottom: 1px solid var(--border-soft);
 	backdrop-filter: var(--chrome-backdrop);
 }
 
-/* Inline desktop / tablet navigation links. */
+/* Inline desktop / tablet navigation. Each item is an outlined pill and
+   the current page is the one accent-FILLED pill, so the active state is
+   carried by shape and fill rather than by an underline. */
 .nav-links {
 	display: flex;
-	gap: 28px;
+	align-items: center;
+	gap: var(--sp-2);
 	font-size: var(--fs-ui);
-	color: var(--text-2);
-	letter-spacing: 0.1em;
 }
 .nav-links a {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--sp-1);
+	padding: var(--sp-2) var(--sp-5);
+	border-radius: var(--r-pill);
+	border: 1px solid var(--outline);
 	color: var(--text-2);
-	padding-bottom: 4px;
-	border-bottom: 1px solid transparent;
+	letter-spacing: 0.04em;
+	white-space: nowrap;
 	transition:
 		color 0.2s ease,
+		background 0.2s ease,
 		border-color 0.2s ease;
 }
 @media (hover: hover) {
 	.nav-links a:hover {
 		color: var(--text);
+		border-color: var(--text-2);
+		background: var(--surface);
 	}
 }
 .nav-links a.is-active {
-	color: var(--text);
-	border-bottom-color: var(--accent);
+	background: var(--accent);
+	border-color: var(--accent);
+	color: var(--accent-on);
+	font-weight: 500;
+}
+@media (hover: hover) {
+	.nav-links a.is-active:hover {
+		background: var(--accent-hover);
+		border-color: var(--accent-hover);
+		color: var(--accent-on);
+	}
 }
 
-/* ─── Footer (shared) ──────────────────────────────────────── */
+/* --- Footer (shared) --- */
 .site-footer {
 	position: relative;
 	z-index: 5;
-	padding: 20px 44px;
+	padding: var(--sp-5) var(--sp-7);
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	gap: var(--sp-4);
 	font-family: var(--font-mono);
 	font-size: var(--fs-caption);
 	color: var(--muted);
@@ -230,7 +347,7 @@ main {
 .site-footer a {
 	display: inline-flex;
 	align-items: center;
-	gap: 8px;
+	gap: var(--sp-2);
 	color: var(--muted);
 }
 .site-footer a .url {
@@ -244,37 +361,36 @@ main {
 	}
 }
 
-/* ─── Contact (footer button + modal form) ─────────────────── */
-/* Matches the landing hero CTA (.btn--outline-accent in normal.css), but
-   restyled here since the footer is site-wide and normal.css isn't loaded
-   on app pages. */
+/* --- Contact (footer button + modal form) --- */
+/* Accent-filled pill, matching the app's primary actions. Restyled here
+   rather than reused from normal.css, since the footer is site-wide and
+   normal.css is not loaded on app pages. */
 .site-footer__contact {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	gap: 10px;
-	padding: 2px 15px;
-	border-radius: 9px;
-	background: transparent;
-	border: 1.5px solid rgb(159, 159, 159);
-	color: var(--accent);
+	gap: var(--sp-2);
+	padding: var(--sp-2) var(--sp-5);
+	border-radius: var(--r-pill);
+	background: var(--accent);
+	border: 1px solid var(--accent);
+	color: var(--accent-on);
 	font-family: var(--font-sans);
 	font-weight: 500;
 	font-size: var(--fs-btn);
-	letter-spacing: 0.15em;
+	letter-spacing: 0.1em;
 	text-transform: uppercase;
 	cursor: pointer;
 	transition:
 		background 0.15s ease,
-		border-color 0.15s ease,
-		color 0.15s ease;
+		border-color 0.15s ease;
 }
 
 .contact-backdrop {
 	position: fixed;
 	inset: 0;
-	background: rgba(0, 0, 0, 0.55);
-	backdrop-filter: blur(2px);
+	background: var(--scrim);
+	backdrop-filter: blur(3px);
 	z-index: 80;
 	border: 0;
 	padding: 0;
@@ -289,10 +405,10 @@ main {
 	max-height: 88vh;
 	overflow-y: auto;
 	z-index: 81;
-	padding: 22px;
+	padding: var(--sp-6);
 	background: var(--surface);
-	border: 1px solid var(--border);
-	border-radius: 14px;
+	border-radius: var(--r-xl);
+	box-shadow: var(--shadow-dialog);
 	animation: contact-in 0.18s ease;
 }
 @keyframes contact-in {
@@ -307,7 +423,8 @@ main {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	margin-bottom: 16px;
+	gap: var(--sp-3);
+	margin-bottom: var(--sp-5);
 }
 .contact-modal__title {
 	margin: 0;
@@ -323,10 +440,13 @@ main {
 	height: 32px;
 	background: transparent;
 	border: 1px solid var(--border);
-	border-radius: 8px;
+	border-radius: var(--r-md);
 	color: var(--text-2);
 	cursor: pointer;
 	padding: 0;
+	transition:
+		color 0.15s ease,
+		border-color 0.15s ease;
 }
 .contact-modal__close svg {
 	width: 14px;
@@ -336,28 +456,31 @@ main {
 .contact-form {
 	display: flex;
 	flex-direction: column;
-	gap: 14px;
+	gap: var(--sp-4);
 }
 .contact-field {
 	display: flex;
 	flex-direction: column;
-	gap: 6px;
+	gap: var(--sp-2);
 }
 .contact-label {
 	font-size: var(--fs-caption);
 	color: var(--text-3);
 	letter-spacing: 0.02em;
 }
+/* Inputs are wells: they drop below the modal surface instead of drawing
+   a ring on it, and only take a visible border once focused. */
 .contact-input {
 	width: 100%;
-	background: var(--bg);
-	border: 1px solid var(--border);
-	border-radius: 8px;
-	padding: 9px 11px;
+	background: var(--input-bg);
+	border: 1px solid transparent;
+	border-radius: var(--r-md);
+	padding: var(--sp-3);
 	color: var(--text);
 	font-family: var(--font-sans);
 	font-size: var(--fs-ui);
 	outline: 0;
+	transition: border-color 0.15s ease;
 }
 .contact-input::placeholder {
 	color: var(--muted);
@@ -372,11 +495,10 @@ main {
 }
 .contact-select {
 	appearance: none;
-	-webkit-appearance: none;
 	-moz-appearance: none;
 	padding-right: 34px;
 	cursor: pointer;
-	background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23bababa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+	background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23c2c2c2' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
 	background-repeat: no-repeat;
 	background-position: right 11px center;
 	background-size: 12px;
@@ -397,24 +519,24 @@ main {
 .contact-submit {
 	margin-top: 2px;
 	height: 40px;
-	border-radius: 8px;
-	background: rgb(from var(--accent) r g b / 0.14);
-	border: 1px solid rgb(from var(--accent) r g b / 0.4);
-	color: var(--accent);
+	border-radius: var(--r-md);
+	background: var(--accent);
+	border: 1px solid var(--accent);
+	color: var(--accent-on);
 	font-family: var(--font-sans);
 	font-weight: 500;
 	font-size: var(--fs-ui);
 	cursor: pointer;
-	transition: background 0.15s ease;
+	transition: background 0.2s ease;
 }
 .contact-submit:disabled {
-	opacity: 0.6;
+	opacity: 0.45;
 	cursor: not-allowed;
 }
 .contact-sent {
 	display: flex;
 	flex-direction: column;
-	gap: 16px;
+	gap: var(--sp-5);
 }
 .contact-sent p {
 	margin: 0;
@@ -425,26 +547,28 @@ main {
 
 @media (hover: hover) {
 	.site-footer__contact:hover {
-		background: rgb(from var(--accent) r g b / 0.08);
-		border-color: var(--accent);
+		background: var(--accent-hover);
+		border-color: var(--accent-hover);
 	}
 	.contact-modal__close:hover {
 		color: var(--text);
 		border-color: var(--border-strong);
 	}
 	.contact-submit:not(:disabled):hover {
-		background: rgb(from var(--accent) r g b / 0.2);
+		background: var(--accent-hover);
 	}
 }
 
-/* ─── Status indicator dot ─────────────────────────────────── */
-/* Pulsing dot next to STATUS nav links and inside the drawer. Color
-   modifier driven by CURRENT_STATUS in src/lib/site-status.ts. */
+/* --- Status indicator dot --- */
+/* Pulsing dot next to STATUS nav links and inside the drawer. Colour
+   modifier driven by CURRENT_STATUS in src/lib/site-status.ts. These
+   three hues are deliberately their own: status must not shift when the
+   brand accent does. */
 .status-dot {
 	display: inline-block;
 	width: 8px;
 	height: 8px;
-	margin-left: 6px;
+	margin-left: var(--sp-1);
 	border-radius: 50%;
 	vertical-align: middle;
 	animation: status-dot-pulse 2.4s ease-in-out infinite;
@@ -473,7 +597,7 @@ main {
 	}
 }
 
-/* ─── Chip / pill primitive ────────────────────────────────── */
+/* --- Chip / pill primitive --- */
 /* Base + status-page variants here; dashboard variants (--public /
    --private / --shared / --neutral / --danger) live in app.css. */
 .chip {
@@ -508,21 +632,21 @@ main {
 	border-color: rgba(239, 68, 68, 0.32);
 	color: #ef4444;
 }
-/* Category pills (historical log): dark transparent background + neutral
-   border so they read as category labels, distinct from the severity
-   pills (--medium / --critical) beside them. */
+/* Category pills (historical log): a dark well plus a neutral border so
+   they read as category labels, distinct from the severity pills
+   (--medium / --critical) sitting beside them. */
 .chip--incident {
-	background: #00000075;
-	border-color: #565656;
+	background: var(--input-bg);
+	border-color: var(--surface-3);
 	color: #ef4444;
 }
 .chip--maintenance {
-	background: #00000075;
-	border-color: #565656;
+	background: var(--input-bg);
+	border-color: var(--surface-3);
 	color: #f5b756;
 }
 
-/* ─── Hamburger + slide-in drawer ──────────────────────────── */
+/* --- Hamburger + slide-in drawer --- */
 .hamburger {
 	display: none;
 	align-items: center;
@@ -530,19 +654,21 @@ main {
 	width: 40px;
 	height: 40px;
 	background: transparent;
-	border: 1px solid var(--border);
-	border-radius: 10px;
-	color: var(--text);
+	border: 1px solid var(--outline);
+	border-radius: 50%;
+	color: var(--text-2);
 	cursor: pointer;
 	padding: 0;
 	transition:
 		border-color 0.15s ease,
-		background 0.15s ease;
+		background 0.15s ease,
+		color 0.15s ease;
 }
 @media (hover: hover) {
 	.hamburger:hover {
-		border-color: var(--border-strong);
-		background: rgba(255, 255, 255, 0.03);
+		border-color: var(--text-2);
+		background: var(--surface);
+		color: var(--text);
 	}
 }
 .hamburger svg {
@@ -553,8 +679,8 @@ main {
 .drawer-backdrop {
 	position: fixed;
 	inset: 0;
-	background: rgba(0, 0, 0, 0.55);
-	backdrop-filter: blur(2px);
+	background: var(--scrim);
+	backdrop-filter: blur(3px);
 	z-index: 70;
 	border: 0;
 	padding: 0;
@@ -569,7 +695,7 @@ main {
 	width: 280px;
 	max-width: 86vw;
 	background: var(--surface);
-	border-left: 1px solid var(--border);
+	box-shadow: var(--shadow-menu);
 	z-index: 71;
 	display: flex;
 	flex-direction: column;
@@ -584,7 +710,7 @@ main {
 	display: flex;
 	align-items: center;
 	justify-content: flex-end;
-	padding: 16px 18px;
+	padding: var(--sp-4) var(--sp-5);
 	border-bottom: 1px solid var(--border-soft);
 }
 .drawer-panel__close {
@@ -595,10 +721,13 @@ main {
 	height: 36px;
 	background: transparent;
 	border: 1px solid var(--border);
-	border-radius: 8px;
+	border-radius: var(--r-md);
 	color: var(--text-2);
 	cursor: pointer;
 	padding: 0;
+	transition:
+		color 0.15s ease,
+		border-color 0.15s ease;
 }
 @media (hover: hover) {
 	.drawer-panel__close:hover {
@@ -611,17 +740,20 @@ main {
 	height: 14px;
 }
 
+/* Drawer rows are the phone form of the nav pills: same active fill,
+   squared off to the panel width. */
 .drawer-panel__links {
 	display: flex;
 	flex-direction: column;
-	padding: 6px 0;
+	gap: var(--sp-1);
+	padding: var(--sp-3);
 }
 .drawer-panel__links a {
-	padding: 14px 22px;
+	padding: var(--sp-3) var(--sp-4);
+	border-radius: var(--r-md);
 	font-size: var(--fs-body);
 	color: var(--text-2);
-	border-bottom: 1px solid var(--border-soft);
-	letter-spacing: 0.04em;
+	letter-spacing: 0.02em;
 	transition:
 		color 0.15s ease,
 		background 0.15s ease;
@@ -629,19 +761,28 @@ main {
 @media (hover: hover) {
 	.drawer-panel__links a:hover {
 		color: var(--text);
-		background: rgba(255, 255, 255, 0.025);
+		background: var(--surface-deep);
 	}
 }
 .drawer-panel__links a.is-active {
-	color: var(--accent);
+	background: var(--accent);
+	color: var(--accent-on);
+	font-weight: 500;
+}
+@media (hover: hover) {
+	.drawer-panel__links a.is-active:hover {
+		background: var(--accent-hover);
+		color: var(--accent-on);
+	}
 }
 .drawer-panel__links a.is-cta {
-	color: var(--accent);
+	margin-top: var(--sp-2);
+	border: 1px solid var(--outline);
+	color: var(--text);
 	font-weight: 500;
-	background: rgb(from var(--accent) r g b / 0.04);
 }
 
-/* ─── Reduced motion ───────────────────────────────────────── */
+/* --- Reduced motion --- */
 @media (prefers-reduced-motion: reduce) {
 	*,
 	*::before,

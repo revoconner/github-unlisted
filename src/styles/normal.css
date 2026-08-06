@@ -1,37 +1,47 @@
-/* github unlisted — "normal" stylesheet (home, FAQ, privacy, status).
+/* github unlisted - "normal" stylesheet (home, FAQ, privacy, status).
    Shared tokens, reset, chrome (nav, footer, bloom, page shell, wordmark)
    live in globals.css; only the marketing-page tokens and layouts are
    here. Breakpoint overrides live in normal_override.css. */
 
 :root {
-	--radius-pill: 999px;
-	--radius-md: 12px;
-	--shadow-hero: 0 4px 40px rgba(0, 0, 0, 0.6);
+	/* Marketing-only: the soft drop behind the big display headings. */
+	--shadow-hero: 0 4px 40px hsla(0, 0%, 0%, 0.6);
 }
 
-/* ─── Marketing sign-in pill (nav child, marketing-only) ───── */
+/* --- Marketing sign-in pill (nav child, marketing-only) --- */
+/* The topbar's right-hand action. Accent FILL plus --accent-on text, the
+   same primary-action treatment the hero CTA and the footer contact
+   button use, so "the thing to click" reads identically everywhere. */
 .topbar .nav-cta {
-	padding: 8px 18px;
-	border-radius: var(--radius-pill);
-	border: 1px solid var(--border);
-	background: rgba(255, 255, 255, 0.02);
-	color: var(--text);
+	display: inline-flex;
+	align-items: center;
+	gap: var(--sp-2);
+	padding: var(--sp-2) var(--sp-5);
+	border-radius: var(--r-pill);
+	border: 1px solid var(--accent);
+	background: var(--accent);
+	color: var(--accent-on);
 	font-size: var(--fs-ui);
 	font-weight: 500;
+	white-space: nowrap;
+	transition:
+		background 0.15s ease,
+		border-color 0.15s ease;
 }
 @media (hover: hover) {
 	.topbar .nav-cta:hover {
-		background: rgba(255, 255, 255, 0.05);
+		background: var(--accent-hover);
+		border-color: var(--accent-hover);
 	}
 }
 
-/* ─── Buttons ──────────────────────────────────────────────── */
+/* --- Buttons --- */
 .btn {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	gap: 10px;
-	border: 1.5px solid transparent;
+	gap: var(--sp-3);
+	border: 1px solid transparent;
 	cursor: pointer;
 	font-family: var(--font-sans);
 	font-weight: 500;
@@ -41,31 +51,33 @@
 		border-color 0.15s ease,
 		color 0.15s ease;
 }
+/* The landing hero's single call to action. */
 .btn--outline-accent {
-	padding: 14px 28px;
-	border-radius: 75px;
-	background: transparent;
-	border-color: rgb(159, 159, 159);
-	color: var(--accent);
+	padding: var(--sp-4) var(--sp-7);
+	border-radius: var(--r-pill);
+	background: var(--accent);
+	border-color: var(--accent);
+	color: var(--accent-on);
 	font-size: var(--fs-btn);
-	letter-spacing: 0.15em;
+	letter-spacing: 0.12em;
 	text-transform: uppercase;
+	box-shadow: var(--shadow-accent);
 }
 @media (hover: hover) {
 	.btn--outline-accent:hover {
-		background: rgb(from var(--accent) r g b / 0.08);
-		border-color: var(--accent);
+		background: var(--accent-hover);
+		border-color: var(--accent-hover);
 	}
 }
 
-/* ─── Landing hero ─────────────────────────────────────────── */
+/* --- Landing hero --- */
 /* The home hero is the one <main> that stays transparent so the bloom
    shows through here only (every other main carries var(--bg)). */
 .hero {
 	flex: 1;
 	display: grid;
 	place-items: center;
-	padding: 60px;
+	padding: var(--sp-9) var(--sp-7);
 	position: relative;
 	z-index: 2;
 	background: transparent;
@@ -77,7 +89,7 @@
 }
 
 .hero__title {
-	margin: 0;
+	margin: 0 auto;
 	font-family: var(--font-sans);
 	font-weight: 400;
 	font-size: var(--fs-display);
@@ -87,12 +99,10 @@
 	text-wrap: balance;
 	text-shadow: var(--shadow-hero);
 	max-width: 926px;
-	margin-left: auto;
-	margin-right: auto;
 }
 
 .hero__sub {
-	margin: 36px auto 0;
+	margin: var(--sp-7) auto 0;
 	max-width: 580px;
 	font-size: var(--fs-body);
 	line-height: 1.6;
@@ -103,7 +113,7 @@
 .bracket-word {
 	display: inline-flex;
 	align-items: baseline;
-	gap: 6px;
+	gap: var(--sp-1);
 	vertical-align: baseline;
 }
 .bracket-word .bracket {
@@ -130,14 +140,14 @@
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	gap: 14px;
-	padding: 0 0 70px;
+	gap: var(--sp-4);
+	padding: 0 0 var(--sp-9);
 }
 .hero-cta__row {
 	display: flex;
 	align-items: center;
-	gap: 18px;
-	padding-bottom: 100px;
+	gap: var(--sp-5);
+	padding-bottom: var(--sp-9);
 }
 .hero-cta__divider {
 	width: 50px;
@@ -150,9 +160,9 @@
 	font-weight: 700;
 	letter-spacing: 0.18em;
 	text-transform: uppercase;
-	/* Darker, muted accent — keeps the hue, drops saturation + lightness
-	   so it reads as a recessed label. Derives from --accent. */
-	color: hsl(from var(--accent) h 64% 46%);
+	/* Keeps the accent hue but drops saturation and lightness so it reads
+	   as a recessed label. Derives from --accent. */
+	color: hsl(from var(--accent) h 40% 46%);
 }
 .hero-cta__tagline {
 	font-family: var(--font-mono);
@@ -162,12 +172,12 @@
 	text-transform: uppercase;
 }
 
-/* ─── FAQ page ─────────────────────────────────────────────── */
+/* --- FAQ page --- */
 .faq-content {
 	flex: 1;
 	display: flex;
 	justify-content: center;
-	padding: 60px 60px 80px;
+	padding: var(--sp-9) var(--sp-7);
 	position: relative;
 	z-index: 2;
 }
@@ -179,13 +189,13 @@
 .faq-eyebrow {
 	display: flex;
 	align-items: center;
-	gap: 14px;
+	gap: var(--sp-4);
 	font-family: var(--font-mono);
 	font-size: var(--fs-caption);
 	color: var(--muted);
 	letter-spacing: 0.22em;
 	text-transform: uppercase;
-	margin-bottom: 22px;
+	margin-bottom: var(--sp-5);
 }
 .faq-eyebrow .rule {
 	width: 28px;
@@ -197,7 +207,7 @@
 }
 
 .faq-title {
-	margin: 0 0 14px;
+	margin: 0 0 var(--sp-4);
 	font-family: var(--font-sans);
 	font-weight: 400;
 	font-size: var(--fs-display);
@@ -213,7 +223,7 @@
 }
 
 .faq-lede {
-	margin: 0 0 44px;
+	margin: 0 0 var(--sp-8);
 	max-width: 540px;
 	font-size: var(--fs-body);
 	line-height: 1.6;
@@ -234,11 +244,11 @@
 
 .faq-q {
 	width: 100%;
-	padding: 28px 8px;
+	padding: var(--sp-6) var(--sp-2);
 	display: grid;
 	grid-template-columns: 38px 1fr 28px;
 	align-items: center;
-	gap: 16px;
+	gap: var(--sp-4);
 	background: transparent;
 	border: 0;
 	text-align: left;
@@ -261,7 +271,7 @@
 	font-size: var(--fs-h2);
 	font-weight: 500;
 	letter-spacing: -0.015em;
-	color: rgba(243, 241, 238, 0.88);
+	color: var(--text-2);
 	line-height: 1.3;
 	text-wrap: balance;
 	transition: color 0.2s ease;
@@ -270,8 +280,8 @@
 .faq-q__icon {
 	width: 26px;
 	height: 26px;
-	border-radius: var(--radius-pill);
-	border: 1px solid rgba(255, 255, 255, 0.18);
+	border-radius: var(--r-pill);
+	border: 1px solid var(--border-strong);
 	color: var(--text-2);
 	display: inline-flex;
 	align-items: center;
@@ -313,7 +323,7 @@
 }
 .faq-a__body {
 	padding-left: 54px;
-	padding-right: 50px;
+	padding-right: var(--sp-8);
 	padding-bottom: 0;
 	color: var(--text-2);
 	font-size: var(--fs-body);
@@ -323,7 +333,7 @@
 	transition: padding-bottom 0.3s ease;
 }
 .faq-q[aria-expanded="true"] + .faq-a .faq-a__body {
-	padding-bottom: 30px;
+	padding-bottom: var(--sp-6);
 }
 
 .faq-a__body a {
@@ -336,12 +346,12 @@
 	}
 }
 
-/* ─── Legal pages (privacy) ────────────────────────────────── */
+/* --- Legal pages (privacy) --- */
 .legal-content {
 	flex: 1;
 	display: flex;
 	justify-content: center;
-	padding: 60px 60px 80px;
+	padding: var(--sp-9) var(--sp-7);
 }
 .legal-content__inner {
 	width: 100%;
@@ -352,27 +362,27 @@
 	font-weight: 600;
 	letter-spacing: -0.02em;
 	color: var(--text);
-	margin: 0 0 6px;
+	margin: 0 0 var(--sp-1);
 }
 .legal .legal-updated {
 	color: var(--muted);
 	font-size: var(--fs-caption);
-	margin: 0 0 30px;
+	margin: 0 0 var(--sp-7);
 }
 .legal h2 {
 	font-size: var(--fs-h3);
 	font-weight: 600;
 	color: var(--text);
-	margin: 32px 0 10px;
+	margin: var(--sp-7) 0 var(--sp-3);
 }
 .legal p {
 	color: var(--text-2);
 	font-size: var(--fs-body);
 	line-height: 1.7;
-	margin: 0 0 12px;
+	margin: 0 0 var(--sp-3);
 }
 .legal ul {
-	margin: 0 0 14px;
+	margin: 0 0 var(--sp-4);
 	padding-left: 22px;
 	list-style: disc;
 }
@@ -381,6 +391,9 @@
 	font-size: var(--fs-body);
 	line-height: 1.7;
 	margin: 5px 0;
+}
+.legal li::marker {
+	color: var(--muted);
 }
 .legal a {
 	color: var(--accent);
@@ -395,12 +408,12 @@
 	font-weight: 600;
 }
 
-/* ─── Status page ──────────────────────────────────────────── */
+/* --- Status page --- */
 .status-content {
 	flex: 1;
 	display: flex;
 	justify-content: center;
-	padding: 60px 60px 80px;
+	padding: var(--sp-9) var(--sp-7);
 	position: relative;
 	z-index: 2;
 }
@@ -411,13 +424,13 @@
 .status-eyebrow {
 	display: flex;
 	align-items: center;
-	gap: 14px;
+	gap: var(--sp-4);
 	font-family: var(--font-mono);
 	font-size: var(--fs-caption);
 	color: var(--muted);
 	letter-spacing: 0.22em;
 	text-transform: uppercase;
-	margin-bottom: 22px;
+	margin-bottom: var(--sp-5);
 }
 .status-eyebrow .rule {
 	width: 28px;
@@ -428,7 +441,7 @@
 	color: var(--accent);
 }
 .status-title {
-	margin: 0 0 32px;
+	margin: 0 0 var(--sp-7);
 	font-family: var(--font-sans);
 	font-weight: 400;
 	font-size: var(--fs-display);
@@ -439,16 +452,16 @@
 	text-shadow: var(--shadow-hero);
 }
 
-/* Section wrapper. h2 lives only inside .status-section so no global
-   h2 typography is introduced for the rest of the site. */
+/* Section wrapper. h2 lives only inside .status-section so no global h2
+   typography is introduced for the rest of the site. */
 .status-section {
-	margin-bottom: 36px;
+	margin-bottom: var(--sp-8);
 }
 .status-section:last-child {
 	margin-bottom: 0;
 }
 .status-section h2 {
-	margin: 0 0 14px;
+	margin: 0 0 var(--sp-4);
 	font-family: var(--font-sans);
 	font-size: var(--fs-h2);
 	font-weight: 600;
@@ -457,11 +470,11 @@
 }
 
 /* Card chrome shared by the Current Status section and the Historical
-   Status Log. Mirrors the dashboard's .repo-list. */
+   Status Log. A surface step, not an outline; it mirrors the dashboard's
+   .repo-list. */
 .status-card {
 	background: var(--surface);
-	border: 1px solid var(--border);
-	border-radius: 12px;
+	border-radius: var(--r-xl);
 	overflow: hidden;
 }
 
@@ -472,8 +485,8 @@
 	display: grid;
 	grid-template-columns: 1fr;
 	align-items: center;
-	gap: 12px;
-	padding: 20px 24px;
+	gap: var(--sp-3);
+	padding: var(--sp-5) var(--sp-6);
 	border-bottom: 1px solid var(--border-soft);
 }
 .status-current-row:last-child {
@@ -482,7 +495,7 @@
 .status-current-row__head {
 	display: flex;
 	flex-direction: row;
-	gap: 12px;
+	gap: var(--sp-3);
 	align-items: anchor-center;
 	flex-wrap: wrap;
 }
@@ -492,8 +505,8 @@
 .status-log-row {
 	display: grid;
 	grid-template-columns: 1fr;
-	gap: 12px;
-	padding: 20px 24px;
+	gap: var(--sp-3);
+	padding: var(--sp-5) var(--sp-6);
 	border-bottom: 1px solid var(--border-soft);
 }
 .status-log-row:last-child {
@@ -503,12 +516,12 @@
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	gap: 12px;
+	gap: var(--sp-3);
 	flex-wrap: wrap;
 }
 .status-log-row__pills {
 	display: flex;
-	gap: 6px;
+	gap: var(--sp-1);
 	flex-wrap: wrap;
 }
 
@@ -534,8 +547,7 @@
 }
 @media (hover: hover) {
 	.status-current-row__contact:hover {
-		color: var(--accent);
-		opacity: 0.85;
+		color: var(--accent-hover);
 	}
 }
 
@@ -549,13 +561,13 @@
 	list-style: disc;
 }
 .status-helpsheet > li {
-	margin: 8px 0;
+	margin: var(--sp-2) 0;
 }
 .status-helpsheet > li::marker {
 	color: var(--accent);
 }
 .status-helpsheet ul {
-	margin: 8px 0 4px;
+	margin: var(--sp-2) 0 var(--sp-1);
 	padding-left: 22px;
 	list-style: disc;
 }
@@ -568,18 +580,18 @@
 }
 
 /* Collapsible terminology help below the current status card. Native
-   <details>; default arrow stripped, replaced with a +/− indicator. */
+   <details>; default arrow stripped, replaced with a +/- indicator. */
 .status-help-collapsible {
-	margin-top: 18px;
+	margin-top: var(--sp-5);
 	border-bottom: 1px solid var(--border-soft);
 }
 .status-help-collapsible summary {
 	list-style: none;
 	cursor: pointer;
-	padding: 14px 4px;
+	padding: var(--sp-4) var(--sp-1);
 	display: flex;
 	align-items: center;
-	gap: 12px;
+	gap: var(--sp-3);
 	color: var(--text-2);
 	font-size: var(--fs-h2);
 	font-weight: 500;
@@ -598,7 +610,7 @@
 	line-height: 1;
 }
 .status-help-collapsible[open] summary::after {
-	content: "−";
+	content: "-";
 }
 .status-help-collapsible[open] summary {
 	color: var(--text);
@@ -609,5 +621,5 @@
 	}
 }
 .status-help-collapsible[open] .status-helpsheet {
-	padding-bottom: 18px;
+	padding-bottom: var(--sp-5);
 }

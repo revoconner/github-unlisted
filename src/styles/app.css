@@ -1,48 +1,43 @@
-/* github unlisted — app stylesheet (dashboard + viewer). Shared tokens,
+/* github unlisted - app stylesheet (dashboard + viewer). Shared tokens,
    reset, chrome (nav, footer, bloom, page shell, wordmark, chip base)
    live in globals.css; only app-specific tokens and components are here.
-   Breakpoint overrides live in app_override.css. */
+   Breakpoint overrides live in app_override.css.
+
+   Two conventions carry most of this file:
+   - a control with an accent FILL takes --accent-on (black) text; accent
+     as a text colour is only ever used on a dark ground.
+   - panels separate by stepping along the surface ramp. A border shows up
+     only where two surfaces genuinely abut (row dividers, pane edges) or
+     where a control has no fill to define its shape. */
 
 :root {
-	/* App-only surfaces */
-	--bg-2: #101010;
-	--bg-3: #0d0d0d;
-	--surface-3: #232734;
-
-	/* Accent family — derives from --accent in globals.css via relative
-	   color. --accent-ink is a near-black shade of the accent hue (text
-	   on the accent-filled avatar). */
-	--accent-ink: hsl(from var(--accent) h 50% 12%);
+	/* Accent family - derives from --accent in globals.css via relative
+	   colour, for the tinted (non-filled) accent states. */
 	--accent-dim: rgb(from var(--accent) r g b / 0.13);
 	--accent-border: rgb(from var(--accent) r g b / 0.32);
 	--accent-glow: rgb(from var(--accent) r g b / 0.4);
-	--accent-complimentary: hsl(from var(--accent) calc(h + 172) s 60.8%);
 
-	/* Semantic */
-	--green: #6ee5a4;
-	--green-dim: rgba(110, 229, 164, 0.14);
-	--green-border: rgba(110, 229, 164, 0.32);
-	--red: #f06b6b;
-	--red-dim: rgba(240, 107, 107, 0.14);
-	--red-border: rgba(240, 107, 107, 0.32);
+	/* Semantic. Their own hues, never derived from the accent, so they
+	   keep meaning if the brand colour moves. */
+	--green: hsl(150, 70%, 67%);
+	--green-dim: hsl(150 70% 67% / 0.14);
+	--green-border: hsl(150 70% 67% / 0.32);
+	--red: hsl(0, 79%, 68%);
+	--red-dim: hsl(0 79% 68% / 0.14);
+	--red-border: hsl(0 79% 68% / 0.32);
 
-	/* Private-repo accent (lavender) — kept distinct from the amber used
-	   for status "medium" indicators so the two never read as the same
-	   thing. */
-	--private: #b39bff;
+	/* Private-repo accent (lavender), kept distinct from the amber used
+	   for status "medium" so the two never read as the same thing. */
+	--private: hsl(255, 100%, 80%);
 	--private-dim: rgb(from var(--private) r g b / 0.14);
 	--private-border: rgb(from var(--private) r g b / 0.32);
 
-	/* Folder-icon gold — conventional folder colour, its own token so it
-	   is not confused with status amber. */
-	--folder: #f5b756;
+	/* Folder-icon gold - the conventional folder colour, its own token so
+	   it is not confused with status amber. */
+	--folder: hsl(38, 88%, 65%);
 }
 
-input {
-	font-family: inherit;
-}
-
-/* ─── Topbar (surface-specific children; base .topbar in globals) ─── */
+/* --- Topbar (surface-specific children; base .topbar in globals) --- */
 .topbar__center {
 	flex: 1;
 	display: flex;
@@ -52,7 +47,7 @@ input {
 .topbar__right {
 	display: flex;
 	align-items: center;
-	gap: 10px;
+	gap: var(--sp-3);
 	min-width: 0;
 }
 .topbar__meta {
@@ -68,9 +63,9 @@ input {
 .repo-tag {
 	display: flex;
 	align-items: center;
-	gap: 10px;
-	padding: 6px 14px;
-	border-radius: 999px;
+	gap: var(--sp-3);
+	padding: var(--sp-2) var(--sp-4);
+	border-radius: var(--r-pill);
 	background: var(--surface);
 	border: 1px solid var(--border);
 	font-family: var(--font-mono);
@@ -83,17 +78,16 @@ input {
 	color: var(--text);
 }
 
-/* ─── Buttons ──────────────────────────────────────────────── */
+/* --- Buttons --- */
 .btn {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	gap: 8px;
+	gap: var(--sp-2);
 	font-family: inherit;
 	font-weight: 500;
-	letter-spacing: -0.005em;
 	border: 1px solid transparent;
-	border-radius: 8px;
+	border-radius: var(--r-md);
 	cursor: pointer;
 	white-space: nowrap;
 	transition:
@@ -103,12 +97,12 @@ input {
 }
 .btn--sm {
 	height: 30px;
-	padding: 0 11px;
+	padding: 0 var(--sp-3);
 	font-size: var(--fs-btn);
 }
 .btn--md {
 	height: 36px;
-	padding: 0 14px;
+	padding: 0 var(--sp-4);
 	font-size: var(--fs-ui);
 }
 .btn--full {
@@ -118,55 +112,66 @@ input {
 .btn--ghost {
 	background: transparent;
 	color: var(--text-2);
-	border-color: var(--color-neutral-500);
+	border-color: var(--border-strong);
 }
 @media (hover: hover) {
 	.btn--ghost:hover {
 		color: var(--text);
 		background: var(--surface);
+		border-color: var(--outline);
 	}
 }
 
 .btn--secondary {
 	background: var(--surface);
 	color: var(--text);
-	border-color: var(--border);
+	border-color: transparent;
 }
 @media (hover: hover) {
 	.btn--secondary:hover {
-		border-color: var(--border-strong);
+		background: var(--surface-3);
 	}
 }
 
 .btn--danger {
-	background: transparent;
+	background: var(--red-dim);
 	color: var(--red);
 	border-color: var(--red-border);
 }
 @media (hover: hover) {
 	.btn--danger:hover {
-		background: var(--red-dim);
+		background: rgb(from var(--red) r g b / 0.24);
 	}
 }
 
+/* The primary action, filled the way the desktop app fills its primary
+   buttons: solid accent with black text. */
 .btn--accent {
-	background: var(--accent-dim);
-	color: var(--accent);
-	border-color: var(--accent-border);
+	background: var(--accent);
+	color: var(--accent-on);
+	border-color: var(--accent);
+	font-weight: 500;
 }
 @media (hover: hover) {
 	.btn--accent:hover {
-		background: rgb(from var(--accent) r g b / 0.2);
+		background: var(--accent-hover);
+		border-color: var(--accent-hover);
 	}
 }
 
-/* ─── Avatar ───────────────────────────────────────────────── */
+/* --- Avatar --- */
+/* Both gradient stops derive from the accent, so the avatar re-tints
+   with the brand instead of drifting to a fixed second colour. */
 .avatar {
 	width: 28px;
 	height: 28px;
 	border-radius: 50%;
-	background: linear-gradient(135deg, var(--accent) 0%, #6ec1c5 100%);
-	color: var(--accent-ink);
+	background: linear-gradient(
+		135deg,
+		var(--accent) 0%,
+		hsl(from var(--accent) calc(h + 42) 48% 56%) 100%
+	);
+	color: var(--accent-on);
 	display: inline-grid;
 	place-items: center;
 	font-family: var(--font-mono);
@@ -176,7 +181,7 @@ input {
 	flex-shrink: 0;
 }
 
-/* ─── Chips (dashboard-specific variants) ──────────────────────
+/* --- Chips (dashboard-specific variants) ---
    .chip base + .chip--md + status pills live in globals.css. */
 .chip--public {
 	background: var(--green-dim);
@@ -194,8 +199,8 @@ input {
 	color: var(--accent);
 }
 .chip--neutral {
-	background: var(--surface-2);
-	border-color: var(--border);
+	background: var(--input-bg);
+	border-color: var(--surface-3);
 	color: var(--text-2);
 }
 .chip--danger {
@@ -204,16 +209,22 @@ input {
 	color: var(--red);
 }
 
-/* ─── Form controls ────────────────────────────────────────── */
+/* --- Form controls --- */
+/* Every text field is a well: it drops BELOW the page rather than sitting
+   on it, and takes a visible border only on focus. */
 .field {
 	display: flex;
 	align-items: center;
-	gap: 10px;
+	gap: var(--sp-3);
 	height: 42px;
-	padding: 0 14px;
-	border-radius: 10px;
-	background: var(--surface);
-	border: 1px solid var(--border);
+	padding: 0 var(--sp-4);
+	border-radius: var(--r-lg);
+	background: var(--input-bg);
+	border: 1px solid transparent;
+	transition: border-color 0.15s ease;
+}
+.field:focus-within {
+	border-color: var(--border-strong);
 }
 .field input {
 	flex: 1;
@@ -236,21 +247,21 @@ input {
 	font-size: var(--fs-caption);
 	color: var(--muted);
 	padding: 2px 6px;
-	border: 1px solid var(--border);
-	border-radius: 4px;
+	border: 1px solid var(--border-strong);
+	border-radius: var(--r-xs);
 }
 
-/* ─── Dashboard ────────────────────────────────────────────── */
+/* --- Dashboard --- */
 .dashboard {
 	flex: 1;
-	padding: 40px 60px 80px;
+	padding: var(--sp-8) var(--sp-7) var(--sp-9);
 }
 .dashboard__head {
 	display: flex;
 	align-items: baseline;
 	justify-content: space-between;
-	gap: 12px;
-	margin-bottom: 6px;
+	gap: var(--sp-3);
+	margin-bottom: var(--sp-1);
 	flex-wrap: wrap;
 }
 .dashboard__title {
@@ -272,10 +283,11 @@ input {
 .dashboard__stats {
 	display: flex;
 	align-items: center;
-	gap: 12px;
+	gap: var(--sp-3);
 	color: var(--text-3);
 	font-size: var(--fs-ui);
-	margin-bottom: 28px;
+	margin-bottom: var(--sp-6);
+	flex-wrap: wrap;
 }
 .dashboard__stats .dot {
 	color: var(--faint);
@@ -294,15 +306,15 @@ input {
 .dashboard__filters {
 	display: grid;
 	grid-template-columns: 1fr auto;
-	gap: 12px;
+	gap: var(--sp-3);
 	align-items: center;
-	margin-bottom: 18px;
+	margin-bottom: var(--sp-5);
 }
 .dashboard__searchrow {
 	display: flex;
-	gap: 10px;
+	gap: var(--sp-3);
 	min-width: 0;
-	padding-right: 50px;
+	padding-right: var(--sp-8);
 }
 .dashboard__searchrow .field {
 	flex: 1;
@@ -310,42 +322,61 @@ input {
 .btn--filter {
 	display: inline-flex;
 	align-items: center;
-	gap: 8px;
+	gap: var(--sp-2);
 	height: 42px;
-	padding: 0 14px;
-	border-radius: 10px;
+	padding: 0 var(--sp-4);
+	border-radius: var(--r-lg);
 	background: var(--surface);
-	border: 1px solid var(--border);
+	border: 1px solid transparent;
 	color: var(--text-2);
 	font-size: var(--fs-ui);
 }
 
 /* Desktop pill bar: five equal-width slots so every pill shares the
-   width of the widest one. */
+   width of the widest one. The selected filter is accent-FILLED, the
+   same active treatment the nav pills use. */
 .dashboard__pills {
 	display: grid;
 	grid-template-columns: repeat(5, 1fr);
-	gap: 6px;
+	gap: var(--sp-1);
 }
 .pill {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	gap: 7px;
+	gap: var(--sp-2);
 	height: 42px;
-	padding: 0 14px;
-	border-radius: 10px;
+	padding: 0 var(--sp-4);
+	border-radius: var(--r-lg);
 	background: transparent;
-	border: 1px solid var(--border-soft);
+	border: 1px solid var(--border-strong);
 	color: var(--text-2);
 	font-size: var(--fs-btn);
 	cursor: pointer;
+	transition:
+		background 0.15s ease,
+		border-color 0.15s ease,
+		color 0.15s ease;
+}
+@media (hover: hover) {
+	.pill:hover {
+		color: var(--text);
+		background: var(--surface);
+	}
 }
 .pill[aria-selected="true"],
 .pill[aria-pressed="true"] {
-	background: var(--surface-2);
+	background: var(--accent);
 	border-color: var(--accent);
-	color: var(--text);
+	color: var(--accent-on);
+	font-weight: 500;
+}
+@media (hover: hover) {
+	.pill[aria-selected="true"]:hover,
+	.pill[aria-pressed="true"]:hover {
+		background: var(--accent-hover);
+		color: var(--accent-on);
+	}
 }
 .pill__count {
 	font-family: var(--font-mono);
@@ -353,28 +384,28 @@ input {
 }
 .pill[aria-selected="true"] .pill__count,
 .pill[aria-pressed="true"] .pill__count {
-	color: var(--text-3);
+	color: var(--accent-on);
+	opacity: 0.65;
 }
 
-/* Tablet/phone filter dropdown — replaces the pill bar via media query
-   swap in app_override.css. Custom chevron encoded as a data URI so
-   appearance:none doesn't strip the affordance. */
+/* Tablet/phone filter dropdown - replaces the pill bar via the media
+   query swap in app_override.css. Custom chevron encoded as a data URI
+   so appearance:none does not strip the affordance. */
 .dashboard__pills-select {
 	display: none;
 	height: 42px;
-	padding: 0 38px 0 14px;
-	border-radius: 10px;
-	background-color: var(--surface);
-	border: 1px solid var(--border);
+	padding: 0 38px 0 var(--sp-4);
+	border-radius: var(--r-lg);
+	background-color: var(--input-bg);
+	border: 1px solid transparent;
 	color: var(--text);
 	font: inherit;
 	font-size: var(--fs-ui);
 	cursor: pointer;
 	min-width: 0;
-	-webkit-appearance: none;
 	-moz-appearance: none;
 	appearance: none;
-	background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23b4b7c0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+	background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23c2c2c2' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
 	background-repeat: no-repeat;
 	background-position: right 12px center;
 	background-size: 12px;
@@ -384,23 +415,27 @@ input {
 	border-color: var(--border-strong);
 }
 
-/* Repo list card */
+/* Repo list card. A surface step, no outline. */
 .repo-list {
 	background: var(--surface);
-	border: 1px solid var(--border);
-	border-radius: 12px;
+	border-radius: var(--r-xl);
 	overflow: hidden;
 }
 .repo-row {
 	display: grid;
 	grid-template-columns: 1fr auto;
-	gap: 16px;
+	gap: var(--sp-4);
 	align-items: center;
-	padding: 14px 22px;
+	padding: var(--sp-4) var(--sp-5);
 	border-bottom: 1px solid var(--border-soft);
 }
 .repo-row:last-child {
 	border-bottom: 0;
+}
+@media (hover: hover) {
+	.repo-row:hover {
+		background: var(--surface-deep);
+	}
 }
 
 .repo-row__main {
@@ -409,8 +444,8 @@ input {
 .repo-row__head {
 	display: flex;
 	align-items: center;
-	gap: 10px;
-	margin-bottom: 6px;
+	gap: var(--sp-3);
+	margin-bottom: var(--sp-1);
 	flex-wrap: wrap;
 }
 .repo-row__name {
@@ -429,17 +464,17 @@ input {
 .repo-row__link {
 	display: flex;
 	align-items: center;
-	gap: 8px;
+	gap: var(--sp-2);
 	font-family: var(--font-mono);
 	font-size: var(--fs-caption);
 	color: var(--accent);
 	flex-wrap: wrap;
 }
-/* Shares with no auto-revoke read as steady-state, not time-sensitive,
-   so dim the whole line to a different colour — keeps accent for the
-   rows that actually have a deadline. */
+/* A share with no auto-revoke reads as steady state, not time-sensitive.
+   Idle states never take an accent-derived colour, so this drops to the
+   neutral text ramp rather than to a second hue. */
 .repo-row__link--idle {
-	color: var(--accent-complimentary);
+	color: var(--text-3);
 }
 
 .repo-row__empty {
@@ -451,12 +486,12 @@ input {
 .repo-row__actions {
 	display: flex;
 	align-items: center;
-	gap: 6px;
+	gap: var(--sp-1);
 	flex-wrap: wrap;
 	justify-content: flex-end;
 }
 
-/* ─── Viewer (recipient screen) ────────────────────────────── */
+/* --- Viewer (recipient screen) --- */
 /* The viewer <main> grows to fill the gap between topbar and footer;
    min-height:0 lets the inner panes own their scroll. */
 .viewer {
@@ -466,21 +501,21 @@ input {
 	grid-template-columns: 300px 1fr;
 }
 .viewer__sidebar {
-	border-right: 1px solid var(--border-soft);
-	background: var(--bg-3);
+	border-right: 1px solid var(--border);
+	background: var(--surface-2);
 	display: flex;
 	flex-direction: column;
 	min-height: 0;
 	overflow: hidden;
 }
 .viewer__sidebar-search {
-	padding: 16px 14px 12px;
+	padding: var(--sp-4) var(--sp-4) var(--sp-3);
 	border-bottom: 1px solid var(--border-soft);
 }
 .viewer__sidebar-search .field {
 	height: 34px;
-	padding: 0 11px;
-	border-radius: 8px;
+	padding: 0 var(--sp-3);
+	border-radius: var(--r-md);
 }
 .viewer__sidebar-search .field input {
 	font-size: var(--fs-ui);
@@ -492,30 +527,38 @@ input {
 }
 
 .tree {
-	padding: 8px 0;
+	padding: var(--sp-2) 0;
 	overflow-y: auto;
 	flex: 1;
 }
 .tree__row {
 	display: flex;
 	align-items: center;
-	gap: 8px;
-	padding: 6px 12px;
+	gap: var(--sp-2);
+	padding: var(--sp-1) var(--sp-3);
+	margin: 1px var(--sp-2);
+	border-radius: var(--r-sm);
 	font-family: var(--font-mono);
 	font-size: var(--fs-caption);
 	color: var(--text-2);
-	border-left: 2px solid transparent;
 	cursor: pointer;
+	transition: background 0.15s ease;
 }
 @media (hover: hover) {
 	.tree__row:hover {
-		background: rgba(255, 255, 255, 0.025);
+		background: var(--surface);
 	}
 }
+/* The file currently open is the one accent-FILLED row, matching the
+   active row in the desktop app's list. */
 .tree__row[aria-current="true"] {
-	background: var(--accent-dim);
-	border-left-color: var(--accent);
-	color: var(--text);
+	background: var(--accent);
+	color: var(--accent-on);
+}
+@media (hover: hover) {
+	.tree__row[aria-current="true"]:hover {
+		background: var(--accent-hover);
+	}
 }
 .tree__row--highlight {
 	color: var(--accent);
@@ -531,7 +574,7 @@ input {
 	background: none;
 	font: inherit;
 	text-align: left;
-	color: var(--text-2);
+	color: inherit;
 }
 .tree__chev {
 	color: var(--faint);
@@ -555,26 +598,40 @@ input {
 	color: var(--muted);
 	display: flex;
 }
+/* Placed after the icon rules above so it outranks them on order as well
+   as specificity: on the accent-filled active row the folder gold and the
+   grey chevrons would otherwise stay put and sit on a bright ground. */
+.tree__row[aria-current="true"] .icon-d,
+.tree__row[aria-current="true"] .icon-f,
+.tree__row[aria-current="true"] .chev,
+.tree__row[aria-current="true"] .tree__chev {
+	color: var(--accent-on);
+}
 
 /* Files-toggle button (visible on small viewports only). */
 .viewer__tree-toggle {
 	display: none;
 	align-items: center;
-	gap: 6px;
+	gap: var(--sp-1);
 	height: 28px;
-	padding: 0 10px;
-	border-radius: 6px;
-	background: var(--surface);
-	border: 1px solid var(--border);
+	padding: 0 var(--sp-3);
+	border-radius: var(--r-pill);
+	background: transparent;
+	border: 1px solid var(--border-strong);
 	color: var(--text-2);
 	font-family: var(--font-mono);
 	font-size: var(--fs-caption);
 	cursor: pointer;
+	transition:
+		color 0.15s ease,
+		background 0.15s ease,
+		border-color 0.15s ease;
 }
 @media (hover: hover) {
 	.viewer__tree-toggle:hover {
 		color: var(--text);
-		border-color: var(--border-strong);
+		background: var(--surface);
+		border-color: var(--outline);
 	}
 }
 .viewer__tree-toggle svg {
@@ -586,7 +643,7 @@ input {
 	display: none;
 	position: fixed;
 	inset: 0;
-	background: rgba(0, 0, 0, 0.55);
+	background: var(--scrim);
 	backdrop-filter: blur(4px);
 	z-index: 60;
 	border: 0;
@@ -603,67 +660,63 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	min-width: 0;
 }
 .readme {
-	padding: 34px 44px;
+	padding: var(--sp-7);
 	font-family: var(--font-sans);
 	color: var(--text-2);
 	font-size: var(--fs-body);
 	line-height: 1.65;
-	max-width: 720px;
+	max-width: 780px;
 }
 .readme__eyebrow {
 	display: flex;
 	align-items: center;
-	gap: 8px;
+	gap: var(--sp-2);
 	color: var(--muted);
 	font-family: var(--font-mono);
 	font-size: var(--fs-caption);
-	margin-bottom: 8px;
+	margin-bottom: var(--sp-2);
 	letter-spacing: 0.04em;
 }
 .readme h1 {
-	margin: 0 0 16px;
+	margin: 0 0 var(--sp-4);
 	font-size: var(--fs-h1);
 	font-weight: 600;
 	color: var(--text);
 	letter-spacing: -0.025em;
 }
 .readme h2 {
-	margin: 28px 0 12px;
+	margin: var(--sp-7) 0 var(--sp-3);
 	font-size: var(--fs-h2);
 	font-weight: 600;
 	color: var(--text);
 	letter-spacing: -0.015em;
 }
-.readme h2:first-of-type {
-	margin-top: 28px;
-}
 .readme p {
-	margin: 0 0 14px;
+	margin: 0 0 var(--sp-4);
 }
 .readme .readme__chips {
 	display: flex;
-	gap: 8px;
-	margin: 20px 0 24px;
+	gap: var(--sp-2);
+	margin: var(--sp-5) 0 var(--sp-6);
 	flex-wrap: wrap;
 }
 .readme :not(pre) > code,
 .readme .inline-code {
 	font-family: var(--font-mono);
-	background: var(--surface);
+	background: var(--input-bg);
 	padding: 1px 6px;
-	border-radius: 4px;
+	border-radius: var(--r-xs);
 	color: var(--accent);
 	font-size: 0.88em;
 }
 .readme pre {
-	background: var(--bg-2);
-	border: 1px solid var(--border);
-	border-radius: 8px;
-	padding: 14px 16px;
+	background: var(--input-bg);
+	border-radius: var(--r-md);
+	padding: var(--sp-4);
 	font-family: var(--font-mono);
 	font-size: 13px;
 	color: var(--text-2);
-	margin: 0 0 18px;
+	margin: 0 0 var(--sp-5);
 	overflow: auto;
 }
 .readme pre .prompt {
@@ -688,20 +741,20 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 }
 
 .readme h3 {
-	margin: 24px 0 10px;
+	margin: var(--sp-6) 0 var(--sp-3);
 	font-size: var(--fs-h3);
 	font-weight: 600;
 	color: var(--text);
 }
 .readme h4 {
-	margin: 20px 0 8px;
+	margin: var(--sp-5) 0 var(--sp-2);
 	font-size: var(--fs-body);
 	font-weight: 600;
 	color: var(--text);
 }
 .readme h5,
 .readme h6 {
-	margin: 18px 0 8px;
+	margin: var(--sp-5) 0 var(--sp-2);
 	font-size: var(--fs-body);
 	font-weight: 600;
 	color: var(--text-2);
@@ -709,13 +762,13 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 
 .readme h1,
 .readme h2 {
-	padding-bottom: 6px;
+	padding-bottom: var(--sp-1);
 	border-bottom: 1px solid var(--border-soft);
 }
 
 .readme ul,
 .readme ol {
-	margin: 0 0 14px;
+	margin: 0 0 var(--sp-4);
 	padding-left: 26px;
 }
 .readme ul {
@@ -739,26 +792,27 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	margin-left: -20px;
 }
 .readme li.task-list-item input {
-	margin-right: 8px;
+	margin-right: var(--sp-2);
+	accent-color: var(--accent);
 }
 
 .readme blockquote {
-	margin: 0 0 14px;
-	padding: 2px 16px;
-	border-left: 3px solid var(--border-strong);
+	margin: 0 0 var(--sp-4);
+	padding: 2px var(--sp-4);
+	border-left: 3px solid var(--accent);
 	color: var(--text-3);
 }
 
 .readme hr {
 	border: 0;
 	border-top: 1px solid var(--border);
-	margin: 24px 0;
+	margin: var(--sp-6) 0;
 }
 
 .readme img {
 	max-width: 100%;
 	height: auto;
-	border-radius: 6px;
+	border-radius: var(--r-sm);
 }
 
 .readme strong {
@@ -771,7 +825,7 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 
 .readme table {
 	border-collapse: collapse;
-	margin: 0 0 16px;
+	margin: 0 0 var(--sp-5);
 	display: block;
 	width: max-content;
 	max-width: 100%;
@@ -779,8 +833,8 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 }
 .readme th,
 .readme td {
-	border: 1px solid var(--border);
-	padding: 6px 13px;
+	border: 1px solid var(--surface-3);
+	padding: var(--sp-2) var(--sp-3);
 	text-align: left;
 }
 .readme th {
@@ -789,18 +843,18 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	font-weight: 600;
 }
 
-/* ─── Signed-out / error / notice screens ──────────────────── */
-/* signin-screen is a page <main> (flex child of .page-shell), so it
-   grows to fill the gap between topbar/footer and centres its content. */
+/* --- Signed-out / error / notice screens --- */
+/* signin-screen is a page <main> (flex child of .page-shell), so it grows
+   to fill the gap between topbar/footer and centres its content. */
 .signin-screen {
 	flex: 1;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	gap: 16px;
+	gap: var(--sp-4);
 	text-align: center;
-	padding: 24px;
+	padding: var(--sp-6);
 }
 .signin-screen h1 {
 	font-size: var(--fs-h2);
@@ -824,20 +878,21 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	text-decoration: underline;
 }
 
-/* ─── Viewer extras (breadcrumb / code / notice) ───────────── */
+/* --- Viewer extras (breadcrumb / code / notice) --- */
 .viewer__topinfo {
 	display: flex;
 	align-items: center;
-	gap: 10px;
-	padding: 12px 20px;
+	gap: var(--sp-3);
+	padding: var(--sp-3) var(--sp-5);
 	border-bottom: 1px solid var(--border-soft);
 	font-family: var(--font-mono);
 	font-size: var(--fs-caption);
 	color: var(--text-3);
-	background: var(--bg-3);
+	background: var(--surface-2);
 	position: sticky;
 	top: 0;
 	z-index: 1;
+	flex-wrap: wrap;
 }
 .viewer__topinfo a {
 	color: var(--text-2);
@@ -853,7 +908,7 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 .viewer__crumbs {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 4px;
+	gap: var(--sp-1);
 	align-items: center;
 	min-width: 0;
 }
@@ -861,11 +916,11 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	color: inherit;
 	display: flex;
 	align-items: center;
-	gap: 8px;
+	gap: var(--sp-2);
 	width: 100%;
 }
 .tree__empty {
-	padding: 16px 14px;
+	padding: var(--sp-4);
 	color: var(--muted);
 	font-size: var(--fs-caption);
 }
@@ -875,13 +930,13 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 .codeblock pre,
 .codeblock pre.shiki {
 	margin: 0;
-	padding: 18px 22px;
+	padding: var(--sp-5);
 	font-family: var(--font-mono);
 	font-size: 12.75px;
 	line-height: 1.6;
 	overflow: auto;
 	/* biome-ignore lint/complexity/noImportantStyles: must override Shiki's inline background-color */
-	background: var(--bg-2) !important;
+	background: var(--input-bg) !important;
 	border-radius: 0;
 }
 .codeblock--plain pre {
@@ -892,8 +947,8 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	gap: 12px;
-	padding: 12px 22px;
+	gap: var(--sp-3);
+	padding: var(--sp-3) var(--sp-5);
 	border-bottom: 1px solid var(--border-soft);
 	font-family: var(--font-mono);
 	font-size: var(--fs-caption);
@@ -906,9 +961,9 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	gap: 12px;
+	gap: var(--sp-3);
 	text-align: center;
-	padding: 24px;
+	padding: var(--sp-6);
 	background: var(--bg);
 }
 .notice-screen h1 {
@@ -934,26 +989,27 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	}
 }
 
-/* ─── TTL control (auto-revoke) ────────────────────────────── */
+/* --- TTL control (auto-revoke) --- */
 .ttl {
 	display: inline-flex;
 	align-items: center;
-	gap: 4px;
+	gap: var(--sp-1);
 }
 .ttl__num,
 .ttl__unit,
 .branch__sel {
 	height: 30px;
-	background: var(--surface);
+	background: var(--input-bg);
 	color: var(--text);
-	border: 1px solid var(--border);
-	border-radius: 6px;
+	border: 1px solid transparent;
+	border-radius: var(--r-sm);
 	font-family: var(--font-mono);
 	font-size: var(--fs-caption);
-	padding: 0 6px;
+	padding: 0 var(--sp-2);
+	transition: border-color 0.15s ease;
 }
 .ttl__num {
-	width: 50px;
+	width: 54px;
 	text-align: right;
 	-moz-appearance: textfield;
 	appearance: textfield;
@@ -964,7 +1020,7 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	margin: 0;
 }
 .ttl__unit {
-	padding-right: 4px;
+	padding-right: var(--sp-1);
 	cursor: pointer;
 }
 .ttl__num:disabled {
@@ -977,9 +1033,11 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	outline: none;
 	border-color: var(--border-strong);
 }
-/* Long branch names must not stretch the row; the full name stays readable in the native dropdown. */
+/* Long branch names must not stretch the row; the full name stays
+   readable in the native dropdown. */
 .branch__sel {
 	max-width: 150px;
+	cursor: pointer;
 }
 .rowtoggle {
 	display: inline-flex;
@@ -1006,7 +1064,7 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 .branchsw {
 	display: inline-flex;
 	align-items: center;
-	gap: 6px;
+	gap: var(--sp-2);
 	font-size: var(--fs-caption);
 	color: var(--text-2);
 }
@@ -1016,36 +1074,46 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 .branchsw__sel {
 	height: 28px;
 	max-width: 180px;
-	background: var(--surface);
+	background: var(--input-bg);
 	color: var(--text);
-	border: 1px solid var(--border);
-	border-radius: 6px;
+	border: 1px solid transparent;
+	border-radius: var(--r-sm);
 	font-family: var(--font-mono);
 	font-size: var(--fs-caption);
-	padding: 0 6px;
+	padding: 0 var(--sp-2);
+	cursor: pointer;
+	transition: border-color 0.15s ease;
 }
 .branchsw__sel:focus {
 	outline: none;
 	border-color: var(--border-strong);
 }
+/* These sit on the topinfo bar, which is only a hair off the surface
+   they would otherwise be filled with, so they take the outlined-pill
+   treatment (same as the nav) rather than a fill nobody can see. */
 .viewer__dl,
 .viewer__tab {
 	display: inline-flex;
 	align-items: center;
 	height: 28px;
-	padding: 0 10px;
-	border: 1px solid var(--border);
-	border-radius: 6px;
-	background: var(--surface);
+	padding: 0 var(--sp-3);
+	border: 1px solid var(--border-strong);
+	border-radius: var(--r-pill);
+	background: transparent;
 	color: var(--text-2);
 	font-size: var(--fs-caption);
 	white-space: nowrap;
+	transition:
+		color 0.15s ease,
+		background 0.15s ease,
+		border-color 0.15s ease;
 }
 @media (hover: hover) {
 	.viewer__dl:hover,
 	.viewer__tab:hover {
 		color: var(--text);
-		border-color: var(--border-strong);
+		background: var(--surface);
+		border-color: var(--outline);
 	}
 }
 
@@ -1057,25 +1125,24 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 .releases {
 	display: flex;
 	flex-direction: column;
-	gap: 18px;
-	padding: 18px 0;
+	gap: var(--sp-5);
+	padding: var(--sp-5) 0;
 }
 .release {
-	border: 1px solid var(--border);
-	border-radius: 10px;
+	border-radius: var(--r-lg);
 	background: var(--surface);
-	padding: 16px 18px;
+	padding: var(--sp-5);
 }
 .release__head {
 	display: flex;
 	align-items: center;
 	flex-wrap: wrap;
-	gap: 8px;
-	margin-bottom: 10px;
+	gap: var(--sp-2);
+	margin-bottom: var(--sp-3);
 }
 .release__name {
 	font-size: var(--fs-h3);
-	margin: 0 4px 0 0;
+	margin: 0 var(--sp-1) 0 0;
 }
 .release__tag {
 	font-family: var(--font-mono);
@@ -1087,12 +1154,12 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	color: var(--text-3);
 }
 .release__body {
-	margin-bottom: 14px;
+	margin-bottom: var(--sp-4);
 }
 .release__empty {
 	color: var(--text-3);
 	font-size: var(--fs-caption);
-	margin: 0 0 14px 0;
+	margin: 0 0 var(--sp-4) 0;
 }
 .release__assets {
 	display: flex;
@@ -1103,8 +1170,8 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	gap: 12px;
-	padding: 9px 2px;
+	gap: var(--sp-3);
+	padding: var(--sp-2) 2px;
 	border-bottom: 1px solid var(--border);
 	color: var(--text-2);
 	font-size: var(--fs-ui);

@@ -54,8 +54,8 @@ export function ogImage(title: string, subtitle: string) {
 				flexDirection: "column",
 				justifyContent: "space-between",
 				padding: "76px 80px",
-				background: "#0a0b0e",
-				color: "#f1f2f5",
+				background: "#0d0d0d",
+				color: "#e6e6e6",
 				backgroundImage: `radial-gradient(circle at 82% 6%, ${ACCENT}33, transparent 55%)`,
 			}}
 		>
@@ -70,7 +70,7 @@ export function ogImage(title: string, subtitle: string) {
 						letterSpacing: "-0.02em",
 					}}
 				>
-					<span style={{ color: "#8f93a0" }}>github</span>
+					<span style={{ color: "#9a9a9a" }}>github</span>
 					<span style={{ color: ACCENT, marginLeft: 10 }}>unlisted</span>
 				</div>
 			</div>
@@ -93,7 +93,7 @@ export function ogImage(title: string, subtitle: string) {
 						display: "flex",
 						marginTop: 24,
 						fontSize: 25,
-						color: "#b4b7c0",
+						color: "#c7c7c7",
 						maxWidth: 900,
 						lineHeight: 1.45,
 					}}
@@ -108,7 +108,7 @@ export function ogImage(title: string, subtitle: string) {
 					alignItems: "center",
 					justifyContent: "space-between",
 					fontSize: 22,
-					color: "#777b86",
+					color: "#757575",
 				}}
 			>
 				<span>www.github-unlisted.com</span>
