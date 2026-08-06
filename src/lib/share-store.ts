@@ -13,10 +13,15 @@ export interface ShareTarget {
 	ref?: string;
 	// Opt-in branch switcher for an unlocked share. Undefined/false keeps every existing link exactly as it was: other branches stay reachable by URL but are never enumerated to the recipient, because branch names themselves leak information.
 	showBranches?: boolean;
+	// Opt-in whole-branch zip download. Undefined/false keeps every existing link as it was. The recipient can already read each file, so this grants no new access, but it turns reading into one-click bulk retrieval and that is the owner's call to make.
+	allowDownload?: boolean;
 }
 
 // The per-share settings an owner can change after creation. Deliberately excludes the TTL, which has its own updater with different semantics.
-export type ShareSettings = Pick<ShareTarget, "ref" | "showBranches">;
+export type ShareSettings = Pick<
+	ShareTarget,
+	"ref" | "showBranches" | "allowDownload"
+>;
 
 const KEY_PREFIX = "share:";
 

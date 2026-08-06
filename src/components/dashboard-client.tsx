@@ -21,6 +21,7 @@ interface Share {
 	expiresAt?: number;
 	ref?: string;
 	showBranches?: boolean;
+	allowDownload?: boolean;
 }
 
 type Filter = "all" | "shared" | "notshared" | "public" | "private";
@@ -167,32 +168,29 @@ function BranchControl({
 	);
 }
 
-// Opt-in, and disabled while a branch is pinned: a locked share must never enumerate branches. Off by default so no existing link starts listing branch names on its own.
-function SwitcherToggle({
+// Generic per-row checkbox. Every one of these is off by default, so no link that has already been handed out changes behaviour on its own.
+function RowToggle({
+	label,
+	title,
 	checked,
 	disabled,
 	onChange,
 }: {
+	label: string;
+	title: string;
 	checked: boolean;
 	disabled?: boolean;
 	onChange: (v: boolean) => void;
 }) {
 	return (
-		<label
-			className="swtoggle"
-			title={
-				disabled
-					? "Not available while the link is locked to a branch"
-					: "Let the recipient switch branches. This lists every branch name to them."
-			}
-		>
+		<label className="rowtoggle" title={title}>
 			<input
 				type="checkbox"
 				checked={checked}
 				disabled={disabled}
 				onChange={(e) => onChange(e.target.checked)}
 			/>
-			<span>switcher</span>
+			<span>{label}</span>
 		</label>
 	);
 }
@@ -228,6 +226,7 @@ export function DashboardClient({
 	const [ttlSel, setTtlSel] = React.useState<Record<string, TtlSel>>({});
 	const [refSel, setRefSel] = React.useState<Record<string, string>>({});
 	const [swSel, setSwSel] = React.useState<Record<string, boolean>>({});
+	const [dlSel, setDlSel] = React.useState<Record<string, boolean>>({});
 	const [error, setError] = React.useState<string | null>(null);
 
 	const getSel = (key: string): TtlSel =>
@@ -246,6 +245,11 @@ export function DashboardClient({
 		!getRef(key, share) && (swSel[key] ?? share?.showBranches ?? false);
 	const setShow = (key: string, v: boolean) =>
 		setSwSel((prev) => ({ ...prev, [key]: v }));
+
+	const getDl = (key: string, share?: Share): boolean =>
+		dlSel[key] ?? share?.allowDownload ?? false;
+	const setDl = (key: string, v: boolean) =>
+		setDlSel((prev) => ({ ...prev, [key]: v }));
 
 	const shareByRepo = React.useMemo(() => {
 		const m = new Map<string, Share>();
@@ -301,6 +305,7 @@ export function DashboardClient({
 					ttlSeconds: ttlFor(getSel(r.fullName)),
 					ref: getRef(r.fullName) || null,
 					showBranches: getShow(r.fullName),
+					allowDownload: getDl(r.fullName),
 				}),
 			});
 			if (!res.ok) {
@@ -328,6 +333,7 @@ export function DashboardClient({
 					ttlSeconds: ttlFor(getSel(r.fullName)),
 					ref: getRef(r.fullName, s) || null,
 					showBranches: getShow(r.fullName, s),
+					allowDownload: getDl(r.fullName, s),
 				}),
 			});
 			if (!res.ok) {
@@ -568,6 +574,12 @@ export function DashboardClient({
 														? "any branch, switcher shown"
 														: "any branch"}
 											</span>
+											{share.allowDownload && (
+												<>
+													<span className="sep">·</span>
+													<span className="created">zip enabled</span>
+												</>
+											)}
 										</div>
 									) : (
 										<div className="repo-row__empty">not shared</div>
@@ -597,10 +609,23 @@ export function DashboardClient({
 												disabled={rowBusy}
 												onChange={(v) => setRef(r.fullName, v)}
 											/>
-											<SwitcherToggle
+											<RowToggle
+												label="switcher"
+												title={
+													getRef(r.fullName, share)
+														? "Not available while the link is locked to a branch"
+														: "Let the recipient switch branches. This lists every branch name to them."
+												}
 												checked={getShow(r.fullName, share)}
 												disabled={rowBusy || Boolean(getRef(r.fullName, share))}
 												onChange={(v) => setShow(r.fullName, v)}
+											/>
+											<RowToggle
+												label="zip"
+												title="Let the recipient download the shown branch as a zip."
+												checked={getDl(r.fullName, share)}
+												disabled={rowBusy}
+												onChange={(v) => setDl(r.fullName, v)}
 											/>
 											<ExpiryControl
 												sel={getSel(r.fullName)}
@@ -632,10 +657,23 @@ export function DashboardClient({
 												disabled={rowBusy}
 												onChange={(v) => setRef(r.fullName, v)}
 											/>
-											<SwitcherToggle
+											<RowToggle
+												label="switcher"
+												title={
+													getRef(r.fullName)
+														? "Not available while the link is locked to a branch"
+														: "Let the recipient switch branches. This lists every branch name to them."
+												}
 												checked={getShow(r.fullName)}
 												disabled={rowBusy || Boolean(getRef(r.fullName))}
 												onChange={(v) => setShow(r.fullName, v)}
+											/>
+											<RowToggle
+												label="zip"
+												title="Let the recipient download the shown branch as a zip."
+												checked={getDl(r.fullName)}
+												disabled={rowBusy}
+												onChange={(v) => setDl(r.fullName, v)}
 											/>
 											<ExpiryControl
 												sel={getSel(r.fullName)}

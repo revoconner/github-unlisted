@@ -33,6 +33,16 @@ export function getInstallationOctokit(installationId: number): Octokit {
 	});
 }
 
+// The bare installation token. Needed where Octokit's own redirect handling gets in the way, specifically the archive endpoints, which answer 302 with a signed URL we want to forward rather than follow.
+export async function getInstallationToken(
+	installationId: number,
+): Promise<string> {
+	const { appId, privateKey } = getAppCredentials();
+	const auth = createAppAuth({ appId, privateKey, installationId });
+	const { token } = await auth({ type: "installation" });
+	return token;
+}
+
 export interface InstallationRepo {
 	owner: string;
 	name: string;

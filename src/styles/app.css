@@ -981,7 +981,7 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 .branch__sel {
 	max-width: 150px;
 }
-.swtoggle {
+.rowtoggle {
 	display: inline-flex;
 	align-items: center;
 	gap: 5px;
@@ -990,15 +990,15 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	cursor: pointer;
 	user-select: none;
 }
-.swtoggle input {
+.rowtoggle input {
 	accent-color: var(--accent);
 	cursor: pointer;
 }
-.swtoggle:has(input:disabled) {
+.rowtoggle:has(input:disabled) {
 	opacity: 0.45;
 	cursor: not-allowed;
 }
-.swtoggle:has(input:disabled) input {
+.rowtoggle:has(input:disabled) input {
 	cursor: not-allowed;
 }
 
@@ -1027,4 +1027,22 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 .branchsw__sel:focus {
 	outline: none;
 	border-color: var(--border-strong);
+}
+.viewer__dl {
+	display: inline-flex;
+	align-items: center;
+	height: 28px;
+	padding: 0 10px;
+	border: 1px solid var(--border);
+	border-radius: 6px;
+	background: var(--surface);
+	color: var(--text-2);
+	font-size: var(--fs-caption);
+	white-space: nowrap;
+}
+@media (hover: hover) {
+	.viewer__dl:hover {
+		color: var(--text);
+		border-color: var(--border-strong);
+	}
 }

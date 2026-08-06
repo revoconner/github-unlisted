@@ -333,6 +333,14 @@ export default async function ViewPage({
 								shareId={shareId}
 							/>
 						)}
+						{target.allowDownload && (
+							<a
+								className="viewer__dl"
+								href={`/api/download?s=${encodeURIComponent(shareId)}&ref=${encodeURIComponent(ref)}`}
+							>
+								Download ZIP
+							</a>
+						)}
 						<div className="viewer__crumbs">
 							<Link
 								href={buildHref(
