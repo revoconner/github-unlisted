@@ -26,8 +26,8 @@ export interface SiteStatus {
 //   { type: "maintenance-critical", startedUtc: "2026-05-26 04:00 UTC" }
 //   { type: "incident",             startedUtc: "2026-05-26 04:00 UTC" }
 export const CURRENT_STATUS: SiteStatus = {
-	type: "maintenance-critical",
-	startedUtc: "2026-08-04 21:47 UTC",
+	type: "maintenance-medium",
+	startedUtc: "2026-08-06 21:35 UTC",
 };
 
 // Nav dot color class. Three colors map to four status types because

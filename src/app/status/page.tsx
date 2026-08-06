@@ -37,6 +37,14 @@ interface LogEntry {
 
 const log: LogEntry[] = [
 	{
+		id: "2026-08-04-share-controls",
+		startedUtc: "2026-08-04 21:47 UTC",
+		endedUtc: "2026-08-06 21:35 UTC",
+		category: "maintenance",
+		severity: "critical",
+		body: "New optional controls were added for the person sharing a repository. A link can now be locked to a single branch, offer the recipient a branch switcher, allow the branch being shown to be downloaded as a zip, and show a releases tab with release notes and downloadable release files. All four are switched off by default, so every link created before this work keeps behaving exactly as it did and needed no action from anyone. The dashboard and the shared-repository viewer were both changed repeatedly across the window, so the dashboard may have been briefly unavailable, or shown controls that were still settling, while updates were deployed. Existing shared links and repository access were not affected.",
+	},
+	{
 		id: "2026-06-02-stylesheet-consolidation",
 		startedUtc: "2026-06-02 15:09 UTC",
 		endedUtc: "2026-06-02 20:48 UTC",
