@@ -1,38 +1,13 @@
-/* github unlisted - breakpoint overrides for the app surfaces
-   (dashboard + viewer). Loaded right after app.css.
+/* github unlisted - breakpoint overrides for the viewer. Loaded right
+   after app.css.
 
-   Padding and type are clamp()-driven in app.css / globals.css, so
-   nothing here re-tunes a size. What is left is layout switching. */
+   Padding and type are clamp-driven, so nothing here re-tunes a size.
+   What is left is layout switching. */
 
-/* Tablet band - narrow the sidebar, swap the pill bar for a dropdown,
-   collapse repo rows to a single column. */
+/* Tablet band - narrow the file tree. */
 @media (max-width: 1250px) {
 	.viewer {
 		grid-template-columns: 240px 1fr;
-	}
-	.dashboard__pills {
-		display: none;
-	}
-	.dashboard__pills-select {
-		display: block;
-	}
-	.dashboard__searchrow {
-		padding-right: 0;
-	}
-	/* Repo rows collapse to a single column, so the right-side actions
-	   stack under the main info. The divider steps up from the hairline
-	   to a solid black seam, since it is now separating stacked blocks
-	   rather than sitting beside them. */
-	.repo-row {
-		grid-template-columns: 1fr;
-		border-bottom-color: hsl(0, 0%, 0%);
-	}
-	.repo-row__main {
-		padding-top: var(--sp-4);
-	}
-	.repo-row__actions {
-		padding: var(--sp-4) 0 var(--sp-3) 0;
-		justify-content: flex-start;
 	}
 }
 
@@ -62,21 +37,5 @@
 	}
 	.viewer__tree-toggle {
 		display: inline-flex;
-	}
-}
-
-/* Phone - stack the dashboard head and filters. */
-@media (max-width: 760px) {
-	.dashboard__head {
-		flex-direction: column;
-		gap: var(--sp-1);
-		align-items: flex-start;
-	}
-	/* Stack filters: search on row 1, dropdown on row 2 sized to content. */
-	.dashboard__filters {
-		grid-template-columns: 1fr;
-	}
-	.dashboard__pills-select {
-		justify-self: start;
 	}
 }

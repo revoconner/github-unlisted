@@ -25,11 +25,12 @@ interface Share {
 	showReleases?: boolean;
 }
 
-type Filter = "all" | "shared" | "notshared" | "public" | "private";
+type ShareFilter = "shared" | "notshared";
+type VisFilter = "public" | "private";
 
 type Unit = "days" | "weeks" | "months" | "years" | "never";
 
-// Months/years use fixed 30d/365d windows — close enough for a revoke timer.
+// Months/years use fixed 30d/365d windows, close enough for a revoke timer.
 const UNIT_SECONDS: Record<Exclude<Unit, "never">, number> = {
 	days: 86400,
 	weeks: 604800,
@@ -63,51 +64,54 @@ function until(ts: number): string {
 	return `in ${Math.ceil(d / 365)}y`;
 }
 
-function ExpiryControl({
-	sel,
+function ago(ts?: number): string {
+	if (!ts) return "";
+	const s = Math.max(1, Math.floor((Date.now() - ts) / 1000));
+	if (s < 60) return "just now";
+	const m = Math.floor(s / 60);
+	if (m < 60) return `${m}m ago`;
+	const h = Math.floor(m / 60);
+	if (h < 24) return `${h}h ago`;
+	const d = Math.floor(h / 24);
+	if (d < 7) return `${d}d ago`;
+	return `${Math.floor(d / 7)}w ago`;
+}
+
+const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
+// A switch, not a checkbox: the knob position states on/off without relying
+// on the accent fill alone.
+function Toggle({
+	checked,
 	disabled,
 	onChange,
+	label,
 }: {
-	sel: TtlSel;
+	checked: boolean;
 	disabled?: boolean;
-	onChange: (s: TtlSel) => void;
+	onChange: (v: boolean) => void;
+	label: string;
 }) {
-	const never = sel.unit === "never";
 	return (
-		<span className="ttl">
+		<label className="toggle">
 			<input
-				type="number"
-				min={1}
-				className="ttl__num"
-				aria-label="Auto-revoke amount"
-				value={sel.amount}
-				disabled={disabled || never}
-				onChange={(e) =>
-					onChange({
-						...sel,
-						amount: Math.max(1, Math.floor(Number(e.target.value) || 1)),
-					})
-				}
-			/>
-			<select
-				className="ttl__unit"
-				aria-label="Auto-revoke unit"
-				value={sel.unit}
+				type="checkbox"
+				checked={checked}
 				disabled={disabled}
-				onChange={(e) => onChange({ ...sel, unit: e.target.value as Unit })}
-			>
-				<option value="days">days</option>
-				<option value="weeks">weeks</option>
-				<option value="months">months</option>
-				<option value="years">years</option>
-				<option value="never">never revoke</option>
-			</select>
-		</span>
+				aria-label={label}
+				onChange={(e) => onChange(e.target.checked)}
+			/>
+			<span className="toggle__track" aria-hidden="true">
+				<span className="toggle__knob" />
+			</span>
+		</label>
 	);
 }
 
-// Empty value means "any branch": the link is not locked and the recipient can reach every branch by URL, which is how every share behaved before locking existed.
-function BranchControl({
+// Empty value means "any branch": the link is not locked and the recipient
+// can reach every branch by URL, which is how every share behaved before
+// locking existed.
+function BranchSelect({
 	repo,
 	value,
 	disabled,
@@ -121,7 +125,8 @@ function BranchControl({
 	const [branches, setBranches] = React.useState<string[] | null>(null);
 	const [loading, setLoading] = React.useState(false);
 
-	// Loaded on first interaction instead of for every row up front, which would be one GitHub call per repo on every dashboard render.
+	// Loaded on first interaction rather than for every row up front, which
+	// would be one GitHub call per repo on every dashboard render.
 	const load = async () => {
 		if (branches || loading) return;
 		setLoading(true);
@@ -142,7 +147,8 @@ function BranchControl({
 		}
 	};
 
-	// A locked branch that has since been deleted would otherwise vanish from the list and silently reset the row to "any branch".
+	// A locked branch that has since been deleted would otherwise vanish from
+	// the list and silently reset the row to "any branch".
 	const options = React.useMemo(() => {
 		const base = branches ?? [];
 		return value && !base.includes(value) ? [value, ...base] : base;
@@ -150,7 +156,7 @@ function BranchControl({
 
 	return (
 		<select
-			className="branch__sel"
+			className="select"
 			aria-label="Branch to share"
 			value={value}
 			disabled={disabled}
@@ -158,56 +164,15 @@ function BranchControl({
 			onPointerDown={load}
 			onChange={(e) => onChange(e.target.value)}
 		>
-			<option value="">any branch</option>
+			<option value="">Any branch</option>
 			{options.map((b) => (
 				<option key={b} value={b}>
 					{b}
 				</option>
 			))}
-			{loading && <option disabled>loading branches</option>}
+			{loading && <option disabled>Loading branches</option>}
 		</select>
 	);
-}
-
-// Generic per-row checkbox. Every one of these is off by default, so no link that has already been handed out changes behaviour on its own.
-function RowToggle({
-	label,
-	title,
-	checked,
-	disabled,
-	onChange,
-}: {
-	label: string;
-	title: string;
-	checked: boolean;
-	disabled?: boolean;
-	onChange: (v: boolean) => void;
-}) {
-	return (
-		<label className="rowtoggle" title={title}>
-			<input
-				type="checkbox"
-				checked={checked}
-				disabled={disabled}
-				onChange={(e) => onChange(e.target.checked)}
-			/>
-			<span>{label}</span>
-		</label>
-	);
-}
-
-function ago(ts?: number): string {
-	if (!ts) return "";
-	const s = Math.max(1, Math.floor((Date.now() - ts) / 1000));
-	if (s < 60) return "just now";
-	const m = Math.floor(s / 60);
-	if (m < 60) return `${m}m ago`;
-	const h = Math.floor(m / 60);
-	if (h < 24) return `${h}h ago`;
-	const d = Math.floor(h / 24);
-	if (d < 7) return `${d}d ago`;
-	const w = Math.floor(d / 7);
-	return `${w}w ago`;
 }
 
 export function DashboardClient({
@@ -221,48 +186,54 @@ export function DashboardClient({
 }) {
 	const router = useRouter();
 	const [query, setQuery] = React.useState("");
-	const [filter, setFilter] = React.useState<Filter>("all");
-	const [busy, setBusy] = React.useState<string | null>(null);
-	const [copied, setCopied] = React.useState<string | null>(null);
-	const [ttlSel, setTtlSel] = React.useState<Record<string, TtlSel>>({});
-	const [refSel, setRefSel] = React.useState<Record<string, string>>({});
-	const [swSel, setSwSel] = React.useState<Record<string, boolean>>({});
-	const [dlSel, setDlSel] = React.useState<Record<string, boolean>>({});
-	const [relSel, setRelSel] = React.useState<Record<string, boolean>>({});
+	const [shareFilter, setShareFilter] = React.useState<ShareFilter | null>(
+		null,
+	);
+	const [visFilter, setVisFilter] = React.useState<VisFilter | null>(null);
+	const [alphaOpen, setAlphaOpen] = React.useState(false);
+	const [selected, setSelected] = React.useState<string | null>(null);
+	const [busy, setBusy] = React.useState(false);
+	const [copied, setCopied] = React.useState(false);
 	const [error, setError] = React.useState<string | null>(null);
 
-	const getSel = (key: string): TtlSel =>
-		ttlSel[key] ?? { amount: 1, unit: "never" };
-	const setSel = (key: string, s: TtlSel) =>
-		setTtlSel((prev) => ({ ...prev, [key]: s }));
+	// Draft state per repo. Each falls back to whatever the share already
+	// stores, so an existing lock or flag shows up without the owner touching
+	// the control.
+	const [ttlSel, setTtlSel] = React.useState<Record<string, TtlSel>>({});
+	const [refSel, setRefSel] = React.useState<Record<string, string>>({});
 
-	// Falls back to what is already stored on the share so an existing lock shows up without the user touching the control.
-	const getRef = (key: string, share?: Share): string =>
-		refSel[key] ?? share?.ref ?? "";
-	const setRef = (key: string, v: string) =>
-		setRefSel((prev) => ({ ...prev, [key]: v }));
-
-	// Only meaningful without a lock, so a pinned branch forces this back off.
-	const getShow = (key: string, share?: Share): boolean =>
-		!getRef(key, share) && (swSel[key] ?? share?.showBranches ?? false);
-	const setShow = (key: string, v: boolean) =>
-		setSwSel((prev) => ({ ...prev, [key]: v }));
-
-	const getDl = (key: string, share?: Share): boolean =>
-		dlSel[key] ?? share?.allowDownload ?? false;
-	const setDl = (key: string, v: boolean) =>
-		setDlSel((prev) => ({ ...prev, [key]: v }));
-
-	const getRel = (key: string, share?: Share): boolean =>
-		relSel[key] ?? share?.showReleases ?? false;
-	const setRel = (key: string, v: boolean) =>
-		setRelSel((prev) => ({ ...prev, [key]: v }));
+	const listRef = React.useRef<HTMLDivElement | null>(null);
+	const rowRefs = React.useRef<Record<string, HTMLButtonElement | null>>({});
 
 	const shareByRepo = React.useMemo(() => {
 		const m = new Map<string, Share>();
 		for (const s of shares) m.set(`${s.owner}/${s.repo}`.toLowerCase(), s);
 		return m;
 	}, [shares]);
+
+	// The owner prefix is the same on nearly every row, so it is dropped from
+	// the list label. It stays searchable, and the panel header still shows
+	// the full owner/name.
+	const visible = React.useMemo(
+		() =>
+			repos.filter((r) => {
+				const isShared = shareByRepo.has(r.fullName.toLowerCase());
+				if (shareFilter === "shared" && !isShared) return false;
+				if (shareFilter === "notshared" && isShared) return false;
+				if (visFilter === "public" && r.private) return false;
+				if (visFilter === "private" && !r.private) return false;
+				if (query) {
+					const q = query.toLowerCase();
+					if (
+						!r.name.toLowerCase().includes(q) &&
+						!r.fullName.toLowerCase().includes(q)
+					)
+						return false;
+				}
+				return true;
+			}),
+		[repos, shareByRepo, shareFilter, visFilter, query],
+	);
 
 	const counts = React.useMemo(() => {
 		let shared = 0;
@@ -280,16 +251,42 @@ export function DashboardClient({
 		};
 	}, [repos, shareByRepo]);
 
-	const visible = repos.filter((r) => {
-		const isShared = shareByRepo.has(r.fullName.toLowerCase());
-		if (filter === "shared" && !isShared) return false;
-		if (filter === "notshared" && isShared) return false;
-		if (filter === "public" && r.private) return false;
-		if (filter === "private" && !r.private) return false;
-		if (query && !r.fullName.toLowerCase().includes(query.toLowerCase()))
-			return false;
-		return true;
-	});
+	// Which initials the quick-nav can actually jump to, keyed off the repo
+	// name (not the owner, which is identical on nearly every row).
+	const availableLetters = React.useMemo(() => {
+		const set = new Set<string>();
+		for (const r of visible) set.add(r.name[0]?.toUpperCase() ?? "");
+		return set;
+	}, [visible]);
+
+	// Keep a valid selection as filters narrow the list under it.
+	const active =
+		visible.find((r) => r.fullName === selected) ?? visible[0] ?? null;
+	const activeShare = active
+		? shareByRepo.get(active.fullName.toLowerCase())
+		: undefined;
+
+	const getSel = (key: string): TtlSel =>
+		ttlSel[key] ?? { amount: 1, unit: "never" };
+	const setSel = (key: string, s: TtlSel) =>
+		setTtlSel((prev) => ({ ...prev, [key]: s }));
+	const getRef = (key: string, share?: Share): string =>
+		refSel[key] ?? share?.ref ?? "";
+	const setRef = (key: string, v: string) =>
+		setRefSel((prev) => ({ ...prev, [key]: v }));
+
+	const jumpTo = (letter: string) => {
+		const target = visible.find(
+			(r) => (r.name[0]?.toUpperCase() ?? "") === letter,
+		);
+		setAlphaOpen(false);
+		if (!target) return;
+		setSelected(target.fullName);
+		rowRefs.current[target.fullName]?.scrollIntoView({
+			block: "nearest",
+			behavior: "smooth",
+		});
+	};
 
 	const failure = async (res: Response, fallback: string) => {
 		const data = (await res.json().catch(() => null)) as {
@@ -298,8 +295,32 @@ export function DashboardClient({
 		setError(data?.error ?? fallback);
 	};
 
+	// Only the keys that changed go in the body. The API leaves any key it
+	// does not receive alone, which is what keeps a toggle from silently
+	// restarting the auto-revoke window.
+	const patch = async (share: Share, body: Record<string, unknown>) => {
+		setBusy(true);
+		setError(null);
+		try {
+			const res = await fetch("/api/share", {
+				method: "PATCH",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ id: share.id, ...body }),
+			});
+			if (!res.ok) {
+				await failure(res, "Could not update the link");
+				return;
+			}
+			router.refresh();
+		} catch {
+			setError("Could not update the link");
+		} finally {
+			setBusy(false);
+		}
+	};
+
 	const create = async (r: Repo) => {
-		setBusy(r.fullName);
+		setBusy(true);
 		setError(null);
 		try {
 			const res = await fetch("/api/share", {
@@ -311,9 +332,6 @@ export function DashboardClient({
 					repo: r.name,
 					ttlSeconds: ttlFor(getSel(r.fullName)),
 					ref: getRef(r.fullName) || null,
-					showBranches: getShow(r.fullName),
-					allowDownload: getDl(r.fullName),
-					showReleases: getRel(r.fullName),
 				}),
 			});
 			if (!res.ok) {
@@ -324,42 +342,13 @@ export function DashboardClient({
 		} catch {
 			setError("Could not create the link");
 		} finally {
-			setBusy(null);
-		}
-	};
-
-	// One "Set" applies both controls. ttlSeconds is always sent, so pressing Set restarts the auto-revoke window even when only the branch changed.
-	const applySettings = async (r: Repo, s: Share) => {
-		setBusy(r.fullName);
-		setError(null);
-		try {
-			const res = await fetch("/api/share", {
-				method: "PATCH",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					id: s.id,
-					ttlSeconds: ttlFor(getSel(r.fullName)),
-					ref: getRef(r.fullName, s) || null,
-					showBranches: getShow(r.fullName, s),
-					allowDownload: getDl(r.fullName, s),
-					showReleases: getRel(r.fullName, s),
-				}),
-			});
-			if (!res.ok) {
-				await failure(res, "Could not update the link");
-				return;
-			}
-			router.refresh();
-		} catch {
-			setError("Could not update the link");
-		} finally {
-			setBusy(null);
+			setBusy(false);
 		}
 	};
 
 	const revoke = async (s: Share) => {
 		if (!confirm(`Revoke the link to ${s.owner}/${s.repo}?`)) return;
-		setBusy(`${s.owner}/${s.repo}`);
+		setBusy(true);
 		try {
 			const res = await fetch(`/api/share?id=${encodeURIComponent(s.id)}`, {
 				method: "DELETE",
@@ -367,28 +356,60 @@ export function DashboardClient({
 			if (!res.ok) throw new Error();
 			router.refresh();
 		} finally {
-			setBusy(null);
+			setBusy(false);
 		}
 	};
 
 	const copy = async (s: Share) => {
 		const url = `${window.location.origin}/${s.owner}/${s.repo}?s=${s.id}`;
 		await navigator.clipboard.writeText(url);
-		setCopied(s.id);
-		setTimeout(() => setCopied(null), 1500);
+		setCopied(true);
+		setTimeout(() => setCopied(false), 1500);
 	};
 
-	const pills: { key: Filter; label: string; n: number }[] = [
-		{ key: "all", label: "All", n: counts.all },
-		{ key: "shared", label: "Shared", n: counts.shared },
-		{ key: "notshared", label: "Not shared", n: counts.notshared },
-		{ key: "public", label: "Public", n: counts.public },
-		{ key: "private", label: "Private", n: counts.private },
+	const filters: {
+		key: ShareFilter | VisFilter;
+		label: string;
+		n: number;
+		on: boolean;
+		toggle: () => void;
+	}[] = [
+		{
+			key: "shared",
+			label: "Shared",
+			n: counts.shared,
+			on: shareFilter === "shared",
+			toggle: () => setShareFilter((v) => (v === "shared" ? null : "shared")),
+		},
+		{
+			key: "notshared",
+			label: "Not shared",
+			n: counts.notshared,
+			on: shareFilter === "notshared",
+			toggle: () =>
+				setShareFilter((v) => (v === "notshared" ? null : "notshared")),
+		},
+		{
+			key: "public",
+			label: "Public",
+			n: counts.public,
+			on: visFilter === "public",
+			toggle: () => setVisFilter((v) => (v === "public" ? null : "public")),
+		},
+		{
+			key: "private",
+			label: "Private",
+			n: counts.private,
+			on: visFilter === "private",
+			toggle: () => setVisFilter((v) => (v === "private" ? null : "private")),
+		},
 	];
+
+	const lockedRef = active ? getRef(active.fullName, activeShare) : "";
+	const switcherOn = Boolean(!lockedRef && activeShare?.showBranches);
 
 	return (
 		<div className="page-shell">
-			<div className="bloom" aria-hidden="true" />
 			<header className="topbar">
 				<a className="wordmark" href="/" aria-label="github unlisted home">
 					<span className="mark" aria-hidden="true">
@@ -434,7 +455,7 @@ export function DashboardClient({
 				<NavLinks signedIn={true} active="dashboard" />
 
 				<div className="topbar__right">
-					<a className="btn btn--ghost btn--sm" href="/api/github/logout">
+					<a className="nav-cta" href="/api/github/logout">
 						Sign out
 					</a>
 					<span
@@ -448,281 +469,360 @@ export function DashboardClient({
 				</div>
 			</header>
 
-			<main className="dashboard">
-				<div className="dashboard__head">
-					<h1 className="dashboard__title">Your repositories</h1>
-					<div className="dashboard__meta">
-						Signed in as <b>@{login}</b>
-					</div>
-				</div>
+			<main className="dash">
+				<div className="dash__inner">
+					<section className="dash__list" aria-label="Your repositories">
+						<div className="dash__listhead">
+							<div className="dash__searchrow">
+								<label className="field">
+									<span className="field__icon" aria-hidden="true">
+										<svg
+											width="15"
+											height="15"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											strokeWidth="2"
+											strokeLinecap="round"
+											strokeLinejoin="round"
+										>
+											<circle cx="11" cy="11" r="7" />
+											<line x1="21" y1="21" x2="16.65" y2="16.65" />
+										</svg>
+									</span>
+									<input
+										type="search"
+										placeholder="Search repositories"
+										value={query}
+										onChange={(e) => setQuery(e.target.value)}
+									/>
+								</label>
 
-				<div className="dashboard__stats">
-					<span>
-						<b>{counts.all}</b> repos
-					</span>
-					<span className="dot">·</span>
-					<span>
-						<span className="accent">{counts.shared}</span> shared
-					</span>
-				</div>
-
-				<div className="dashboard__filters">
-					<div className="dashboard__searchrow">
-						<label className="field">
-							<span className="field__icon" aria-hidden="true">
-								<svg
-									width="15"
-									height="15"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									strokeWidth="2"
-									strokeLinecap="round"
-									strokeLinejoin="round"
+								{/* Quick nav: expands into the initials present in the
+								    current list, so a long list is one click from any
+								    letter. */}
+								<button
+									type="button"
+									className="bento"
+									aria-label="Jump to a letter"
+									aria-expanded={alphaOpen}
+									onClick={() => setAlphaOpen((v) => !v)}
 								>
-									<circle cx="11" cy="11" r="7" />
-									<line x1="21" y1="21" x2="16.65" y2="16.65" />
-								</svg>
-							</span>
-							<input
-								type="search"
-								placeholder="Search repositories"
-								value={query}
-								onChange={(e) => setQuery(e.target.value)}
-							/>
-						</label>
-					</div>
+									<span className="bento__grid" aria-hidden="true">
+										{Array.from({ length: 9 }, (_, i) => (
+											// biome-ignore lint/suspicious/noArrayIndexKey: fixed 3x3 decorative grid
+											<span className="bento__dot" key={i} />
+										))}
+									</span>
+								</button>
+							</div>
 
-					{/* Desktop: button row. Tablet/phone: native select (below).
-					    Visibility is swapped by media query in app.css. */}
-					<div
-						className="dashboard__pills"
-						role="tablist"
-						aria-label="Filter repositories"
-					>
-						{pills.map((p) => (
-							<button
-								key={p.key}
-								type="button"
-								className="pill"
-								role="tab"
-								aria-selected={filter === p.key}
-								onClick={() => setFilter(p.key)}
-							>
-								{p.label} <span className="pill__count">{p.n}</span>
-							</button>
-						))}
-					</div>
+							{alphaOpen && (
+								<nav className="alpha" aria-label="Jump to a letter">
+									{LETTERS.map((l) => {
+										const has = availableLetters.has(l);
+										return (
+											<button
+												type="button"
+												key={l}
+												className={`alpha__item${has ? "" : " is-empty"}`}
+												disabled={!has}
+												onClick={() => jumpTo(l)}
+											>
+												{l}
+											</button>
+										);
+									})}
+								</nav>
+							)}
 
-					<select
-						className="dashboard__pills-select"
-						aria-label="Filter repositories"
-						value={filter}
-						onChange={(e) => setFilter(e.target.value as Filter)}
-					>
-						{pills.map((p) => (
-							<option key={p.key} value={p.key}>
-								{p.label} ({p.n})
-							</option>
-						))}
-					</select>
-				</div>
-
-				{error && (
-					<div className="signin-error" role="alert">
-						{error}
-					</div>
-				)}
-
-				<div className="repo-list">
-					{visible.length === 0 && (
-						<div className="repo-row__empty" style={{ padding: "20px" }}>
-							No repositories match.
+							{/* Two filter pairs plus a clear. Each pair is exclusive
+							    within itself; clicking an active one turns it off. */}
+							<div className="dash__filters">
+								{filters.map((f) => (
+									<button
+										key={f.key}
+										type="button"
+										className="filter"
+										aria-pressed={f.on}
+										onClick={f.toggle}
+									>
+										{f.label}
+										<span className="filter__count">{f.n}</span>
+									</button>
+								))}
+								<button
+									type="button"
+									className="filter filter--clear"
+									aria-label="Clear all filters"
+									title="Clear all filters"
+									disabled={!shareFilter && !visFilter}
+									onClick={() => {
+										setShareFilter(null);
+										setVisFilter(null);
+									}}
+								>
+									<svg
+										viewBox="0 0 24 24"
+										width="14"
+										height="14"
+										fill="none"
+										stroke="currentColor"
+										strokeWidth="2.4"
+										strokeLinecap="round"
+										aria-hidden="true"
+									>
+										<line x1="18" y1="6" x2="6" y2="18" />
+										<line x1="6" y1="6" x2="18" y2="18" />
+									</svg>
+								</button>
+							</div>
 						</div>
-					)}
-					{visible.map((r) => {
-						const share = shareByRepo.get(r.fullName.toLowerCase());
-						const rowBusy = busy === r.fullName;
-						return (
-							<article className="repo-row" key={r.fullName}>
-								<div className="repo-row__main">
-									<div className="repo-row__head">
-										<span className="repo-row__name">
-											<span className="owner">{r.owner}/</span>
-											{r.name}
+
+						<div className="dash__scroll" ref={listRef}>
+							{visible.length === 0 && (
+								<p className="dash__empty">No repositories match.</p>
+							)}
+							{visible.map((r) => {
+								const share = shareByRepo.get(r.fullName.toLowerCase());
+								const isActive = active?.fullName === r.fullName;
+								return (
+									<button
+										type="button"
+										key={r.fullName}
+										ref={(el) => {
+											rowRefs.current[r.fullName] = el;
+										}}
+										className={`repo-item${isActive ? " is-active" : ""}`}
+										aria-current={isActive}
+										onClick={() => setSelected(r.fullName)}
+									>
+										<span className="repo-item__name">{r.name}</span>
+										<span className="repo-item__meta">
+											<span
+												className={
+													r.private ? "tag tag--accent" : "tag tag--plain"
+												}
+											>
+												{r.private ? "private" : "public"}
+											</span>
+											<span
+												className={share ? "tag tag--accent" : "tag tag--plain"}
+											>
+												{share ? "shared" : "unshared"}
+											</span>
 										</span>
-										<span
-											className={`chip ${r.private ? "chip--private" : "chip--public"}`}
-										>
-											{r.private ? "private" : "public"}
-										</span>
-										{share && <span className="chip chip--shared">shared</span>}
+									</button>
+								);
+							})}
+						</div>
+					</section>
+
+					<aside className="dash__panel" aria-label="Share settings">
+						{!active ? (
+							<p className="dash__empty">
+								Select a repository to configure its link.
+							</p>
+						) : (
+							<>
+								<div className="panel__head">
+									<h1 className="panel__title">{active.name}</h1>
+									<p className="panel__sub">
+										{active.owner} / {active.name}
+									</p>
+								</div>
+
+								{error && (
+									<p className="panel__error" role="alert">
+										{error}
+									</p>
+								)}
+
+								<div className="panel__rows">
+									<div className="setting-row">
+										<span className="setting-row__label">Lock to a branch</span>
+										<div className="setting-row__control">
+											<BranchSelect
+												repo={active}
+												value={lockedRef}
+												disabled={busy}
+												onChange={(v) => {
+													setRef(active.fullName, v);
+													if (activeShare)
+														patch(activeShare, { ref: v || null });
+												}}
+											/>
+										</div>
 									</div>
-									{share ? (
-										<div
-											className={`repo-row__link${share.expiresAt ? "" : " repo-row__link--idle"}`}
-										>
-											{share.createdAt && (
-												<>
-													<span className="created">
-														created {ago(share.createdAt)}
-													</span>
-													<span className="sep">·</span>
-												</>
+
+									<div className="setting-row">
+										<span className="setting-row__label">
+											Recipient can switch branches
+											{lockedRef && (
+												<span className="setting-row__note">
+													Unavailable while the link is locked to a branch
+												</span>
 											)}
-											<span className="created">
-												{share.expiresAt
-													? `revokes ${until(share.expiresAt)}`
-													: "no auto-revoke"}
-											</span>
-											<span className="sep">·</span>
-											<span className="created">
-												{share.ref
-													? `locked to ${share.ref}`
-													: share.showBranches
-														? "any branch, switcher shown"
-														: "any branch"}
-											</span>
-											{share.allowDownload && (
-												<>
-													<span className="sep">·</span>
-													<span className="created">zip enabled</span>
-												</>
-											)}
-											{share.showReleases && (
-												<>
-													<span className="sep">·</span>
-													<span className="created">releases shown</span>
-												</>
+										</span>
+										<div className="setting-row__control">
+											<Toggle
+												label="Recipient can switch branches"
+												checked={switcherOn}
+												disabled={busy || !activeShare || Boolean(lockedRef)}
+												onChange={(v) =>
+													activeShare && patch(activeShare, { showBranches: v })
+												}
+											/>
+										</div>
+									</div>
+
+									<div className="setting-row">
+										<span className="setting-row__label">
+											Allow zip download
+										</span>
+										<div className="setting-row__control">
+											<Toggle
+												label="Allow zip download"
+												checked={Boolean(activeShare?.allowDownload)}
+												disabled={busy || !activeShare}
+												onChange={(v) =>
+													activeShare &&
+													patch(activeShare, { allowDownload: v })
+												}
+											/>
+										</div>
+									</div>
+
+									<div className="setting-row">
+										<span className="setting-row__label">Show releases</span>
+										<div className="setting-row__control">
+											<Toggle
+												label="Show releases"
+												checked={Boolean(activeShare?.showReleases)}
+												disabled={busy || !activeShare}
+												onChange={(v) =>
+													activeShare && patch(activeShare, { showReleases: v })
+												}
+											/>
+										</div>
+									</div>
+
+									<div className="setting-row">
+										<span className="setting-row__label">
+											Auto-revoke after
+										</span>
+										<div className="setting-row__control setting-row__control--pair">
+											<select
+												className="select"
+												aria-label="Auto-revoke unit"
+												value={getSel(active.fullName).unit}
+												disabled={busy}
+												onChange={(e) =>
+													setSel(active.fullName, {
+														...getSel(active.fullName),
+														unit: e.target.value as Unit,
+													})
+												}
+											>
+												<option value="never">Never</option>
+												<option value="days">Days</option>
+												<option value="weeks">Weeks</option>
+												<option value="months">Months</option>
+												<option value="years">Years</option>
+											</select>
+											{getSel(active.fullName).unit !== "never" && (
+												<input
+													type="number"
+													min={1}
+													className="numfield"
+													aria-label="Auto-revoke amount"
+													value={getSel(active.fullName).amount}
+													disabled={busy}
+													onChange={(e) =>
+														setSel(active.fullName, {
+															...getSel(active.fullName),
+															amount: Math.max(
+																1,
+																Math.floor(Number(e.target.value) || 1),
+															),
+														})
+													}
+												/>
 											)}
 										</div>
-									) : (
-										<div className="repo-row__empty">not shared</div>
+									</div>
+
+									{activeShare && (
+										<div className="setting-row">
+											<span className="setting-row__label">Link</span>
+											<div className="setting-row__control setting-row__control--pair">
+												<button
+													type="button"
+													className="btn btn--quiet btn--compact"
+													onClick={() => copy(activeShare)}
+												>
+													{copied ? "Copied" : "Copy"}
+												</button>
+												<a
+													className="btn btn--quiet btn--compact"
+													href={`/${active.owner}/${active.name}?s=${activeShare.id}`}
+													target="_blank"
+													rel="noopener"
+												>
+													Open
+												</a>
+											</div>
+										</div>
+									)}
+
+									{activeShare && (
+										<p className="panel__status">
+											{activeShare.createdAt &&
+												`Created ${ago(activeShare.createdAt)}. `}
+											{activeShare.expiresAt
+												? `Revokes ${until(activeShare.expiresAt)}.`
+												: "No auto-revoke set."}
+										</p>
 									)}
 								</div>
-								<div className="repo-row__actions">
-									{share ? (
-										<>
-											<a
-												className="btn btn--ghost btn--sm"
-												href={`/${r.owner}/${r.name}?s=${share.id}`}
-												target="_blank"
-												rel="noopener"
+
+								<div className="panel__foot">
+									{activeShare ? (
+										<button
+											type="button"
+											className="btn btn--destructive panel__action"
+											disabled={busy}
+											onClick={() => revoke(activeShare)}
+										>
+											<svg
+												viewBox="0 0 24 24"
+												width="15"
+												height="15"
+												fill="none"
+												stroke="currentColor"
+												strokeWidth="2.4"
+												strokeLinecap="round"
+												aria-hidden="true"
 											>
-												Visit
-											</a>
-											<button
-												type="button"
-												className="btn btn--ghost btn--sm"
-												onClick={() => copy(share)}
-											>
-												{copied === share.id ? "Copied" : "Copy"}
-											</button>
-											<BranchControl
-												repo={r}
-												value={getRef(r.fullName, share)}
-												disabled={rowBusy}
-												onChange={(v) => setRef(r.fullName, v)}
-											/>
-											<RowToggle
-												label="switcher"
-												title={
-													getRef(r.fullName, share)
-														? "Not available while the link is locked to a branch"
-														: "Let the recipient switch branches. This lists every branch name to them."
-												}
-												checked={getShow(r.fullName, share)}
-												disabled={rowBusy || Boolean(getRef(r.fullName, share))}
-												onChange={(v) => setShow(r.fullName, v)}
-											/>
-											<RowToggle
-												label="zip"
-												title="Let the recipient download the shown branch as a zip."
-												checked={getDl(r.fullName, share)}
-												disabled={rowBusy}
-												onChange={(v) => setDl(r.fullName, v)}
-											/>
-											<RowToggle
-												label="releases"
-												title="Show a releases tab with notes and downloadable assets."
-												checked={getRel(r.fullName, share)}
-												disabled={rowBusy}
-												onChange={(v) => setRel(r.fullName, v)}
-											/>
-											<ExpiryControl
-												sel={getSel(r.fullName)}
-												disabled={rowBusy}
-												onChange={(s) => setSel(r.fullName, s)}
-											/>
-											<button
-												type="button"
-												className="btn btn--secondary btn--sm"
-												disabled={rowBusy}
-												onClick={() => applySettings(r, share)}
-											>
-												{rowBusy ? "…" : "Set"}
-											</button>
-											<button
-												type="button"
-												className="btn btn--danger btn--sm"
-												disabled={rowBusy}
-												onClick={() => revoke(share)}
-											>
-												{rowBusy ? "…" : "Revoke"}
-											</button>
-										</>
+												<line x1="18" y1="6" x2="6" y2="18" />
+												<line x1="6" y1="6" x2="18" y2="18" />
+											</svg>
+											Revoke
+										</button>
 									) : (
-										<>
-											<BranchControl
-												repo={r}
-												value={getRef(r.fullName)}
-												disabled={rowBusy}
-												onChange={(v) => setRef(r.fullName, v)}
-											/>
-											<RowToggle
-												label="switcher"
-												title={
-													getRef(r.fullName)
-														? "Not available while the link is locked to a branch"
-														: "Let the recipient switch branches. This lists every branch name to them."
-												}
-												checked={getShow(r.fullName)}
-												disabled={rowBusy || Boolean(getRef(r.fullName))}
-												onChange={(v) => setShow(r.fullName, v)}
-											/>
-											<RowToggle
-												label="zip"
-												title="Let the recipient download the shown branch as a zip."
-												checked={getDl(r.fullName)}
-												disabled={rowBusy}
-												onChange={(v) => setDl(r.fullName, v)}
-											/>
-											<RowToggle
-												label="releases"
-												title="Show a releases tab with notes and downloadable assets."
-												checked={getRel(r.fullName)}
-												disabled={rowBusy}
-												onChange={(v) => setRel(r.fullName, v)}
-											/>
-											<ExpiryControl
-												sel={getSel(r.fullName)}
-												disabled={rowBusy}
-												onChange={(s) => setSel(r.fullName, s)}
-											/>
-											<button
-												type="button"
-												className="btn btn--accent btn--sm"
-												disabled={rowBusy}
-												onClick={() => create(r)}
-											>
-												{rowBusy ? "Creating…" : "Share link"}
-											</button>
-										</>
+										<button
+											type="button"
+											className="btn btn--primary panel__action"
+											disabled={busy}
+											onClick={() => create(active)}
+										>
+											Share
+										</button>
 									)}
 								</div>
-							</article>
-						);
-					})}
+							</>
+						)}
+					</aside>
 				</div>
 			</main>
 			<SiteFooter />

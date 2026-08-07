@@ -12,8 +12,6 @@ export default async function Page() {
 
 	return (
 		<div className="page-shell">
-			<div className="bloom" aria-hidden="true" />
-
 			<header className="topbar">
 				<a className="wordmark" href="/" aria-label="github unlisted home">
 					<span className="mark" aria-hidden="true">
@@ -73,55 +71,67 @@ export default async function Page() {
 
 			<main className="hero">
 				<div className="hero__inner">
-					<h1 className="hero__title">
-						Share Github private repository as
-						<br />
-						<span className="bracket-word">
-							<span className="word">unlisted</span>
-						</span>{" "}
-						repo.
-					</h1>
+					<h1 className="hero__title">Github Unlisted</h1>
 					<p className="hero__sub">
 						Share a private repo with a read-only link. No GitHub account needed
 						for the recipient. You retain all control.
 					</p>
-				</div>
-			</main>
 
-			<div className="hero-cta">
-				<div className="hero-cta__row">
-					{session ? (
-						<a className="btn btn--outline-accent" href="/app">
-							Open your repositories
-						</a>
-					) : (
-						<a className="btn btn--outline-accent" href="/api/github/login">
+					{/* 16:9 slot for a viewer screenshot, so an owner can see what
+					    their recipient will see before installing anything. Holding
+					    the ratio now keeps the layout from jumping when the real
+					    image lands. */}
+					<div className="hero__shot">
+						<div className="hero__shot-placeholder">
 							<svg
-								width="14"
-								height="14"
+								width="28"
+								height="28"
 								viewBox="0 0 24 24"
-								fill="currentColor"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="1.5"
+								strokeLinecap="round"
+								strokeLinejoin="round"
 								aria-hidden="true"
 							>
-								<path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2.1c-3.3.7-4-1.6-4-1.6-.5-1.4-1.3-1.8-1.3-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1.1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.7-5.5 6 .4.4.8 1.1.8 2.2v3.2c0 .3.2.7.8.6A12 12 0 0 0 12 .3" />
+								<rect x="3" y="4" width="18" height="16" rx="2" />
+								<path d="M3 15l4.5-4.5 3.5 3.5 3-3L21 16" />
+								<circle cx="8.5" cy="8.5" r="1.2" />
 							</svg>
-							Install on GitHub
+							<span>Viewer preview coming soon</span>
+						</div>
+					</div>
+
+					<div className="hero__actions">
+						{session ? (
+							<a className="btn btn--primary" href="/app">
+								Open your repositories
+							</a>
+						) : (
+							<a className="btn btn--primary" href="/api/github/login">
+								<svg
+									width="15"
+									height="15"
+									viewBox="0 0 24 24"
+									fill="currentColor"
+									aria-hidden="true"
+								>
+									<path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2.1c-3.3.7-4-1.6-4-1.6-.5-1.4-1.3-1.8-1.3-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1.1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.7-5.5 6 .4.4.8 1.1.8 2.2v3.2c0 .3.2.7.8.6A12 12 0 0 0 12 .3" />
+								</svg>
+								Install on GitHub
+							</a>
+						)}
+						<a
+							className="btn btn--quiet"
+							href="https://github.com/revoconner/github-unlisted"
+							target="_blank"
+							rel="noopener"
+						>
+							View source code
 						</a>
-					)}
-					<span className="hero-cta__divider" aria-hidden="true" />
-					<a
-						className="hero-cta__label"
-						href="https://github.com/revoconner/github-unlisted"
-						target="_blank"
-						rel="noopener"
-					>
-						Source code
-					</a>
+					</div>
 				</div>
-				<div className="hero-cta__tagline">
-					Free and open source \ no hidden cost
-				</div>
-			</div>
+			</main>
 
 			<SiteFooter />
 		</div>

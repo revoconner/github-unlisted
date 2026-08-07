@@ -3,11 +3,7 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { NAV_ITEMS, type NavActive } from "@/lib/nav";
-import {
-	CURRENT_STATUS,
-	statusDotAriaLabel,
-	statusDotClass,
-} from "@/lib/site-status";
+import { StatusIcon } from "./status-icon";
 
 interface Props {
 	signedIn: boolean;
@@ -88,16 +84,7 @@ export function SiteDrawer({ signedIn, active = null }: Props) {
 								aria-current={active === item.key ? "page" : undefined}
 							>
 								{item.label}
-								{item.dot && (
-									<>
-										{" "}
-										<span
-											className={`status-dot ${statusDotClass(CURRENT_STATUS)}`}
-											role="img"
-											aria-label={statusDotAriaLabel(CURRENT_STATUS)}
-										/>
-									</>
-								)}
+								{item.dot && <StatusIcon />}
 							</a>
 						),
 					)}

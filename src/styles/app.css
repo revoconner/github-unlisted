@@ -1,49 +1,25 @@
-/* github unlisted - app stylesheet (dashboard + viewer). Shared tokens,
-   reset, chrome (nav, footer, bloom, page shell, wordmark, chip base)
-   live in globals.css; only app-specific tokens and components are here.
-   Breakpoint overrides live in app_override.css.
+/* github unlisted - the VIEWER stylesheet. This is the one surface that
+   departs from the site language: the recipient's read-only file browser.
+   Everything else (home, FAQ, privacy, status, dashboard) shares
+   normal.css.
 
-   Two conventions carry most of this file:
-   - a control with an accent FILL takes --accent-on (black) text; accent
-     as a text colour is only ever used on a dark ground.
-   - panels separate by stepping along the surface ramp. A border shows up
-     only where two surfaces genuinely abut (row dividers, pane edges) or
-     where a control has no fill to define its shape. */
+   Shared tokens, the reset, and the chrome (nav, footer, page shell,
+   wordmark, chip base) live in globals.css. Breakpoint overrides for
+   this sheet live in app_override.css.
+
+   Monospace appears HERE and nowhere else on the site, and only on
+   actual code: the code block's <pre>, and <pre>/<code> inside a
+   rendered README. */
 
 :root {
-	/* Accent family - derives from --accent in globals.css via relative
-	   colour, for the tinted (non-filled) accent states. */
-	--accent-dim: rgb(from var(--accent) r g b / 0.13);
-	--accent-border: rgb(from var(--accent) r g b / 0.32);
-	--accent-glow: rgb(from var(--accent) r g b / 0.4);
-
-	/* Semantic. Their own hues, never derived from the accent, so they
-	   keep meaning if the brand colour moves. */
-	--green: hsl(150, 70%, 67%);
-	--green-dim: hsl(150 70% 67% / 0.14);
-	--green-border: hsl(150 70% 67% / 0.32);
-	--red: hsl(0, 79%, 68%);
-	--red-dim: hsl(0 79% 68% / 0.14);
-	--red-border: hsl(0 79% 68% / 0.32);
-
-	/* Private-repo accent (lavender), kept distinct from the amber used
-	   for status "medium" so the two never read as the same thing. */
-	--private: hsl(255, 100%, 80%);
-	--private-dim: rgb(from var(--private) r g b / 0.14);
-	--private-border: rgb(from var(--private) r g b / 0.32);
-
-	/* Folder-icon gold - the conventional folder colour, its own token so
-	   it is not confused with status amber. */
+	/* Folder-icon gold. Its own token so it is never confused with a
+	   status colour. */
 	--folder: hsl(38, 88%, 65%);
+	/* Accent tints, for the states that are highlighted but not filled. */
+	--accent-dim: rgb(from var(--accent) r g b / 0.13);
 }
 
-/* --- Topbar (surface-specific children; base .topbar in globals) --- */
-.topbar__center {
-	flex: 1;
-	display: flex;
-	justify-content: center;
-	min-width: 0;
-}
+/* --- Topbar children specific to the viewer --- */
 .topbar__right {
 	display: flex;
 	align-items: center;
@@ -51,7 +27,6 @@
 	min-width: 0;
 }
 .topbar__meta {
-	font-family: var(--font-mono);
 	font-size: var(--fs-caption);
 	color: var(--text-3);
 	white-space: nowrap;
@@ -60,438 +35,7 @@
 	min-width: 0;
 }
 
-.repo-tag {
-	display: flex;
-	align-items: center;
-	gap: var(--sp-3);
-	padding: var(--sp-2) var(--sp-4);
-	border-radius: var(--r-pill);
-	background: var(--surface);
-	border: 1px solid var(--border);
-	font-family: var(--font-mono);
-	font-size: var(--fs-ui);
-}
-.repo-tag__owner {
-	color: var(--muted);
-}
-.repo-tag__name {
-	color: var(--text);
-}
-
-/* --- Buttons --- */
-.btn {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	gap: var(--sp-2);
-	font-family: inherit;
-	font-weight: 500;
-	border: 1px solid transparent;
-	border-radius: var(--r-md);
-	cursor: pointer;
-	white-space: nowrap;
-	transition:
-		background 0.15s ease,
-		border-color 0.15s ease,
-		color 0.15s ease;
-}
-.btn--sm {
-	height: 30px;
-	padding: 0 var(--sp-3);
-	font-size: var(--fs-btn);
-}
-.btn--md {
-	height: 36px;
-	padding: 0 var(--sp-4);
-	font-size: var(--fs-ui);
-}
-.btn--full {
-	width: 100%;
-}
-
-.btn--ghost {
-	background: transparent;
-	color: var(--text-2);
-	border-color: var(--border-strong);
-}
-@media (hover: hover) {
-	.btn--ghost:hover {
-		color: var(--text);
-		background: var(--surface);
-		border-color: var(--outline);
-	}
-}
-
-.btn--secondary {
-	background: var(--surface);
-	color: var(--text);
-	border-color: transparent;
-}
-@media (hover: hover) {
-	.btn--secondary:hover {
-		background: var(--surface-3);
-	}
-}
-
-.btn--danger {
-	background: var(--red-dim);
-	color: var(--red);
-	border-color: var(--red-border);
-}
-@media (hover: hover) {
-	.btn--danger:hover {
-		background: rgb(from var(--red) r g b / 0.24);
-	}
-}
-
-/* The primary action, filled the way the desktop app fills its primary
-   buttons: solid accent with black text. */
-.btn--accent {
-	background: var(--accent);
-	color: var(--accent-on);
-	border-color: var(--accent);
-	font-weight: 500;
-}
-@media (hover: hover) {
-	.btn--accent:hover {
-		background: var(--accent-hover);
-		border-color: var(--accent-hover);
-	}
-}
-
-/* --- Avatar --- */
-/* Both gradient stops derive from the accent, so the avatar re-tints
-   with the brand instead of drifting to a fixed second colour. */
-.avatar {
-	width: 28px;
-	height: 28px;
-	border-radius: 50%;
-	background: linear-gradient(
-		135deg,
-		var(--accent) 0%,
-		hsl(from var(--accent) calc(h + 42) 48% 56%) 100%
-	);
-	color: var(--accent-on);
-	display: inline-grid;
-	place-items: center;
-	font-family: var(--font-mono);
-	font-size: 11px;
-	font-weight: 600;
-	letter-spacing: 0.02em;
-	flex-shrink: 0;
-}
-
-/* --- Chips (dashboard-specific variants) ---
-   .chip base + .chip--md + status pills live in globals.css. */
-.chip--public {
-	background: var(--green-dim);
-	border-color: var(--green-border);
-	color: var(--green);
-}
-.chip--private {
-	background: var(--private-dim);
-	border-color: var(--private-border);
-	color: var(--private);
-}
-.chip--shared {
-	background: var(--accent-dim);
-	border-color: var(--accent-border);
-	color: var(--accent);
-}
-.chip--neutral {
-	background: var(--input-bg);
-	border-color: var(--surface-3);
-	color: var(--text-2);
-}
-.chip--danger {
-	background: var(--red-dim);
-	border-color: var(--red-border);
-	color: var(--red);
-}
-
-/* --- Form controls --- */
-/* Every text field is a well: it drops BELOW the page rather than sitting
-   on it, and takes a visible border only on focus. */
-.field {
-	display: flex;
-	align-items: center;
-	gap: var(--sp-3);
-	height: 42px;
-	padding: 0 var(--sp-4);
-	border-radius: var(--r-lg);
-	background: var(--input-bg);
-	border: 1px solid transparent;
-	transition: border-color 0.15s ease;
-}
-.field:focus-within {
-	border-color: var(--border-strong);
-}
-.field input {
-	flex: 1;
-	background: transparent;
-	border: 0;
-	outline: 0;
-	color: var(--text);
-	font-size: var(--fs-body);
-	min-width: 0;
-}
-.field input::placeholder {
-	color: var(--muted);
-}
-.field__icon {
-	color: var(--muted);
-	display: flex;
-}
-.field__kbd {
-	font-family: var(--font-mono);
-	font-size: var(--fs-caption);
-	color: var(--muted);
-	padding: 2px 6px;
-	border: 1px solid var(--border-strong);
-	border-radius: var(--r-xs);
-}
-
-/* --- Dashboard --- */
-.dashboard {
-	flex: 1;
-	padding: var(--sp-8) var(--sp-7) var(--sp-9);
-}
-.dashboard__head {
-	display: flex;
-	align-items: baseline;
-	justify-content: space-between;
-	gap: var(--sp-3);
-	margin-bottom: var(--sp-1);
-	flex-wrap: wrap;
-}
-.dashboard__title {
-	margin: 0;
-	font-size: var(--fs-h1);
-	font-weight: 600;
-	letter-spacing: -0.025em;
-}
-.dashboard__meta {
-	font-family: var(--font-mono);
-	font-size: var(--fs-caption);
-	color: var(--muted);
-}
-.dashboard__meta b {
-	color: var(--text-2);
-	font-weight: 400;
-}
-
-.dashboard__stats {
-	display: flex;
-	align-items: center;
-	gap: var(--sp-3);
-	color: var(--text-3);
-	font-size: var(--fs-ui);
-	margin-bottom: var(--sp-6);
-	flex-wrap: wrap;
-}
-.dashboard__stats .dot {
-	color: var(--faint);
-}
-.dashboard__stats b {
-	color: var(--text-2);
-	font-weight: 400;
-}
-.dashboard__stats .accent {
-	color: var(--accent);
-	font-weight: 400;
-}
-
-/* Filters row: search on the left, filter group on the right. Two-col
-   grid on desktop and tablet (collapses to single column on phone). */
-.dashboard__filters {
-	display: grid;
-	grid-template-columns: 1fr auto;
-	gap: var(--sp-3);
-	align-items: center;
-	margin-bottom: var(--sp-5);
-}
-.dashboard__searchrow {
-	display: flex;
-	gap: var(--sp-3);
-	min-width: 0;
-	padding-right: var(--sp-8);
-}
-.dashboard__searchrow .field {
-	flex: 1;
-}
-.btn--filter {
-	display: inline-flex;
-	align-items: center;
-	gap: var(--sp-2);
-	height: 42px;
-	padding: 0 var(--sp-4);
-	border-radius: var(--r-lg);
-	background: var(--surface);
-	border: 1px solid transparent;
-	color: var(--text-2);
-	font-size: var(--fs-ui);
-}
-
-/* Desktop pill bar: five equal-width slots so every pill shares the
-   width of the widest one. The selected filter is accent-FILLED, the
-   same active treatment the nav pills use. */
-.dashboard__pills {
-	display: grid;
-	grid-template-columns: repeat(5, 1fr);
-	gap: var(--sp-1);
-}
-.pill {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	gap: var(--sp-2);
-	height: 42px;
-	padding: 0 var(--sp-4);
-	border-radius: var(--r-lg);
-	background: transparent;
-	border: 1px solid var(--border-strong);
-	color: var(--text-2);
-	font-size: var(--fs-btn);
-	cursor: pointer;
-	transition:
-		background 0.15s ease,
-		border-color 0.15s ease,
-		color 0.15s ease;
-}
-@media (hover: hover) {
-	.pill:hover {
-		color: var(--text);
-		background: var(--surface);
-	}
-}
-.pill[aria-selected="true"],
-.pill[aria-pressed="true"] {
-	background: var(--accent);
-	border-color: var(--accent);
-	color: var(--accent-on);
-	font-weight: 500;
-}
-@media (hover: hover) {
-	.pill[aria-selected="true"]:hover,
-	.pill[aria-pressed="true"]:hover {
-		background: var(--accent-hover);
-		color: var(--accent-on);
-	}
-}
-.pill__count {
-	font-family: var(--font-mono);
-	color: var(--faint);
-}
-.pill[aria-selected="true"] .pill__count,
-.pill[aria-pressed="true"] .pill__count {
-	color: var(--accent-on);
-	opacity: 0.65;
-}
-
-/* Tablet/phone filter dropdown - replaces the pill bar via the media
-   query swap in app_override.css. Custom chevron encoded as a data URI
-   so appearance:none does not strip the affordance. */
-.dashboard__pills-select {
-	display: none;
-	height: 42px;
-	padding: 0 38px 0 var(--sp-4);
-	border-radius: var(--r-lg);
-	background-color: var(--input-bg);
-	border: 1px solid transparent;
-	color: var(--text);
-	font: inherit;
-	font-size: var(--fs-ui);
-	cursor: pointer;
-	min-width: 0;
-	-moz-appearance: none;
-	appearance: none;
-	background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23c2c2c2' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-	background-repeat: no-repeat;
-	background-position: right 12px center;
-	background-size: 12px;
-}
-.dashboard__pills-select:focus {
-	outline: none;
-	border-color: var(--border-strong);
-}
-
-/* Repo list card. A surface step, no outline. */
-.repo-list {
-	background: var(--surface);
-	border-radius: var(--r-xl);
-	overflow: hidden;
-}
-.repo-row {
-	display: grid;
-	grid-template-columns: 1fr auto;
-	gap: var(--sp-4);
-	align-items: center;
-	padding: var(--sp-4) var(--sp-5);
-	border-bottom: 1px solid var(--border-soft);
-}
-.repo-row:last-child {
-	border-bottom: 0;
-}
-@media (hover: hover) {
-	.repo-row:hover {
-		background: var(--surface-deep);
-	}
-}
-
-.repo-row__main {
-	min-width: 0;
-}
-.repo-row__head {
-	display: flex;
-	align-items: center;
-	gap: var(--sp-3);
-	margin-bottom: var(--sp-1);
-	flex-wrap: wrap;
-}
-.repo-row__name {
-	font-family: var(--font-mono);
-	font-size: var(--fs-ui);
-	color: var(--text);
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-	min-width: 0;
-}
-.repo-row__name .owner {
-	color: var(--text-3);
-}
-
-.repo-row__link {
-	display: flex;
-	align-items: center;
-	gap: var(--sp-2);
-	font-family: var(--font-mono);
-	font-size: var(--fs-caption);
-	color: var(--accent);
-	flex-wrap: wrap;
-}
-/* A share with no auto-revoke reads as steady state, not time-sensitive.
-   Idle states never take an accent-derived colour, so this drops to the
-   neutral text ramp rather than to a second hue. */
-.repo-row__link--idle {
-	color: var(--text-3);
-}
-
-.repo-row__empty {
-	font-family: var(--font-mono);
-	font-size: var(--fs-caption);
-	color: var(--faint);
-}
-
-.repo-row__actions {
-	display: flex;
-	align-items: center;
-	gap: var(--sp-1);
-	flex-wrap: wrap;
-	justify-content: flex-end;
-}
-
-/* --- Viewer (recipient screen) --- */
+/* --- Viewer shell --- */
 /* The viewer <main> grows to fill the gap between topbar and footer;
    min-height:0 lets the inner panes own their scroll. */
 .viewer {
@@ -500,6 +44,11 @@
 	display: grid;
 	grid-template-columns: 300px 1fr;
 }
+/* The releases view has no file tree, so it drops the sidebar column. */
+.viewer--wide {
+	grid-template-columns: 1fr;
+}
+
 .viewer__sidebar {
 	border-right: 1px solid var(--border);
 	background: var(--surface-2);
@@ -509,23 +58,43 @@
 	overflow: hidden;
 }
 .viewer__sidebar-search {
-	padding: var(--sp-4) var(--sp-4) var(--sp-3);
-	border-bottom: 1px solid var(--border-soft);
-}
-.viewer__sidebar-search .field {
-	height: 34px;
-	padding: 0 var(--sp-3);
-	border-radius: var(--r-md);
-}
-.viewer__sidebar-search .field input {
-	font-size: var(--fs-ui);
-}
-.viewer__sidebar-search .field__kbd {
-	font-size: 10.5px;
-	padding: 1px 5px;
-	border-radius: 3px;
+	padding: var(--sp-3);
+	border-bottom: 1px solid var(--border);
 }
 
+/* The one field in the viewer. A well, like every input on the site. */
+.field {
+	display: flex;
+	align-items: center;
+	gap: var(--sp-3);
+	height: 2.125rem;
+	padding: 0 var(--sp-3);
+	border-radius: var(--r-md);
+	background: var(--input-bg);
+	border: 1px solid transparent;
+	transition: border-color 0.15s ease;
+}
+.field:focus-within {
+	border-color: var(--border-strong);
+}
+.field input {
+	flex: 1;
+	min-width: 0;
+	background: transparent;
+	border: 0;
+	outline: 0;
+	color: var(--text);
+	font-size: var(--fs-ui);
+}
+.field input::placeholder {
+	color: var(--muted);
+}
+.field__icon {
+	display: flex;
+	color: var(--muted);
+}
+
+/* --- File tree --- */
 .tree {
 	padding: var(--sp-2) 0;
 	overflow-y: auto;
@@ -538,7 +107,6 @@
 	padding: var(--sp-1) var(--sp-3);
 	margin: 1px var(--sp-2);
 	border-radius: var(--r-sm);
-	font-family: var(--font-mono);
 	font-size: var(--fs-caption);
 	color: var(--text-2);
 	cursor: pointer;
@@ -549,8 +117,7 @@
 		background: var(--surface);
 	}
 }
-/* The file currently open is the one accent-FILLED row, matching the
-   active row in the desktop app's list. */
+/* The file currently open is the one accent-filled row. */
 .tree__row[aria-current="true"] {
 	background: var(--accent);
 	color: var(--accent-on);
@@ -569,12 +136,21 @@
 .tree__row--depth-3 {
 	padding-left: 40px;
 }
+.tree__row a {
+	color: inherit;
+	display: flex;
+	align-items: center;
+	gap: var(--sp-2);
+	width: 100%;
+}
 .tree__btn {
 	width: 100%;
 	background: none;
+	border: 0;
 	font: inherit;
 	text-align: left;
 	color: inherit;
+	cursor: pointer;
 }
 .tree__chev {
 	color: var(--faint);
@@ -598,53 +174,54 @@
 	color: var(--muted);
 	display: flex;
 }
-/* Placed after the icon rules above so it outranks them on order as well
-   as specificity: on the accent-filled active row the folder gold and the
-   grey chevrons would otherwise stay put and sit on a bright ground. */
+/* Placed after the icon rules so it wins on order as well as
+   specificity: on the accent-filled active row the folder gold and the
+   grey chevrons would otherwise sit on a bright ground. */
 .tree__row[aria-current="true"] .icon-d,
 .tree__row[aria-current="true"] .icon-f,
 .tree__row[aria-current="true"] .chev,
 .tree__row[aria-current="true"] .tree__chev {
 	color: var(--accent-on);
 }
+.tree__empty {
+	padding: var(--sp-4);
+	color: var(--muted);
+	font-size: var(--fs-caption);
+}
 
-/* Files-toggle button (visible on small viewports only). */
+/* Files-toggle button (small viewports only; revealed in the override
+   sheet at the sheet breakpoint). */
 .viewer__tree-toggle {
 	display: none;
 	align-items: center;
 	gap: var(--sp-1);
-	height: 28px;
+	height: 1.75rem;
 	padding: 0 var(--sp-3);
-	border-radius: var(--r-pill);
-	background: transparent;
-	border: 1px solid var(--border-strong);
+	border: 0;
+	border-radius: var(--r-md);
+	background: var(--surface-deep);
 	color: var(--text-2);
-	font-family: var(--font-mono);
 	font-size: var(--fs-caption);
 	cursor: pointer;
 	transition:
 		color 0.15s ease,
-		background 0.15s ease,
-		border-color 0.15s ease;
+		background 0.15s ease;
 }
 @media (hover: hover) {
 	.viewer__tree-toggle:hover {
 		color: var(--text);
-		background: var(--surface);
-		border-color: var(--outline);
+		background: var(--surface-3);
 	}
 }
 .viewer__tree-toggle svg {
 	width: 12px;
 	height: 12px;
 }
-
 .viewer__tree-backdrop {
 	display: none;
 	position: fixed;
 	inset: 0;
 	background: var(--scrim);
-	backdrop-filter: blur(4px);
 	z-index: 60;
 	border: 0;
 	padding: 0;
@@ -654,28 +231,136 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	display: block;
 }
 
-/* Readme pane */
+/* --- Breadcrumb / toolbar strip --- */
 .viewer__main {
 	overflow: auto;
 	min-width: 0;
 }
+.viewer__topinfo {
+	display: flex;
+	align-items: center;
+	gap: var(--sp-3);
+	padding: var(--sp-3) var(--sp-5);
+	border-bottom: 1px solid var(--border);
+	font-size: var(--fs-caption);
+	color: var(--text-3);
+	background: var(--surface-2);
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	flex-wrap: wrap;
+}
+.viewer__topinfo a {
+	color: var(--text-2);
+}
+@media (hover: hover) {
+	.viewer__topinfo a:hover {
+		color: var(--accent);
+	}
+}
+.viewer__topinfo .sep {
+	color: var(--faint);
+}
+.viewer__crumbs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--sp-1);
+	align-items: center;
+	min-width: 0;
+}
+
+.viewer__dl,
+.viewer__tab {
+	display: inline-flex;
+	align-items: center;
+	height: 1.75rem;
+	padding: 0 var(--sp-3);
+	border: 0;
+	border-radius: var(--r-md);
+	background: var(--surface-deep);
+	color: var(--text-2);
+	font-size: var(--fs-caption);
+	white-space: nowrap;
+	transition:
+		color 0.15s ease,
+		background 0.15s ease;
+}
+@media (hover: hover) {
+	.viewer__dl:hover,
+	.viewer__tab:hover {
+		color: var(--text);
+		background: var(--surface-3);
+	}
+}
+
+/* Recipient-facing branch picker in the toolbar. */
+.branchsw {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--sp-2);
+	font-size: var(--fs-caption);
+	color: var(--text-2);
+}
+.branchsw__label {
+	white-space: nowrap;
+}
+.branchsw__sel {
+	height: 1.75rem;
+	max-width: 180px;
+	background: var(--input-bg);
+	color: var(--text);
+	border: 1px solid transparent;
+	border-radius: var(--r-md);
+	font-size: var(--fs-caption);
+	padding: 0 var(--sp-2);
+	cursor: pointer;
+	transition: border-color 0.15s ease;
+}
+.branchsw__sel:focus {
+	outline: none;
+	border-color: var(--border-strong);
+}
+
+.filebar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--sp-3);
+	padding: var(--sp-3) var(--sp-5);
+	border-bottom: 1px solid var(--border);
+	font-size: var(--fs-caption);
+	color: var(--text-3);
+	flex-wrap: wrap;
+}
+
+/* --- Code block (the ONLY monospace on the site) --- */
+.codeblock {
+	margin: 0;
+}
+.codeblock pre,
+.codeblock pre.shiki {
+	margin: 0;
+	padding: var(--sp-5);
+	font-family: var(--font-mono);
+	font-size: 12.75px;
+	line-height: 1.6;
+	overflow: auto;
+	/* biome-ignore lint/complexity/noImportantStyles: must override Shiki's inline background-color */
+	background: var(--input-bg) !important;
+	border-radius: 0;
+}
+.codeblock--plain pre {
+	color: var(--text-2);
+	white-space: pre;
+}
+
+/* --- Rendered README --- */
 .readme {
 	padding: var(--sp-7);
-	font-family: var(--font-sans);
 	color: var(--text-2);
 	font-size: var(--fs-body);
 	line-height: 1.65;
-	max-width: 780px;
-}
-.readme__eyebrow {
-	display: flex;
-	align-items: center;
-	gap: var(--sp-2);
-	color: var(--muted);
-	font-family: var(--font-mono);
-	font-size: var(--fs-caption);
-	margin-bottom: var(--sp-2);
-	letter-spacing: 0.04em;
+	max-width: 820px;
 }
 .readme h1 {
 	margin: 0 0 var(--sp-4);
@@ -691,55 +376,11 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	color: var(--text);
 	letter-spacing: -0.015em;
 }
-.readme p {
-	margin: 0 0 var(--sp-4);
+.readme h1,
+.readme h2 {
+	padding-bottom: var(--sp-1);
+	border-bottom: 1px solid var(--border);
 }
-.readme .readme__chips {
-	display: flex;
-	gap: var(--sp-2);
-	margin: var(--sp-5) 0 var(--sp-6);
-	flex-wrap: wrap;
-}
-.readme :not(pre) > code,
-.readme .inline-code {
-	font-family: var(--font-mono);
-	background: var(--input-bg);
-	padding: 1px 6px;
-	border-radius: var(--r-xs);
-	color: var(--accent);
-	font-size: 0.88em;
-}
-.readme pre {
-	background: var(--input-bg);
-	border-radius: var(--r-md);
-	padding: var(--sp-4);
-	font-family: var(--font-mono);
-	font-size: 13px;
-	color: var(--text-2);
-	margin: 0 0 var(--sp-5);
-	overflow: auto;
-}
-.readme pre .prompt {
-	color: var(--faint);
-}
-.readme pre code {
-	background: none;
-	padding: 0;
-	border-radius: 0;
-	color: inherit;
-	font-size: inherit;
-}
-
-.readme a {
-	color: var(--accent);
-	text-decoration: none;
-}
-@media (hover: hover) {
-	.readme a:hover {
-		text-decoration: underline;
-	}
-}
-
 .readme h3 {
 	margin: var(--sp-6) 0 var(--sp-3);
 	font-size: var(--fs-h3);
@@ -759,13 +400,42 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	font-weight: 600;
 	color: var(--text-2);
 }
-
-.readme h1,
-.readme h2 {
-	padding-bottom: var(--sp-1);
-	border-bottom: 1px solid var(--border-soft);
+.readme p {
+	margin: 0 0 var(--sp-4);
 }
-
+.readme :not(pre) > code {
+	font-family: var(--font-mono);
+	background: var(--input-bg);
+	padding: 1px 6px;
+	border-radius: var(--r-xs);
+	color: var(--accent);
+	font-size: 0.88em;
+}
+.readme pre {
+	background: var(--input-bg);
+	border-radius: var(--r-md);
+	padding: var(--sp-4);
+	font-family: var(--font-mono);
+	font-size: 13px;
+	color: var(--text-2);
+	margin: 0 0 var(--sp-5);
+	overflow: auto;
+}
+.readme pre code {
+	background: none;
+	padding: 0;
+	border-radius: 0;
+	color: inherit;
+	font-size: inherit;
+}
+.readme a {
+	color: var(--accent);
+}
+@media (hover: hover) {
+	.readme a:hover {
+		text-decoration: underline;
+	}
+}
 .readme ul,
 .readme ol {
 	margin: 0 0 var(--sp-4);
@@ -795,26 +465,22 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	margin-right: var(--sp-2);
 	accent-color: var(--accent);
 }
-
 .readme blockquote {
 	margin: 0 0 var(--sp-4);
 	padding: 2px var(--sp-4);
 	border-left: 3px solid var(--accent);
 	color: var(--text-3);
 }
-
 .readme hr {
 	border: 0;
 	border-top: 1px solid var(--border);
 	margin: var(--sp-6) 0;
 }
-
 .readme img {
 	max-width: 100%;
 	height: auto;
 	border-radius: var(--r-sm);
 }
-
 .readme strong {
 	color: var(--text);
 	font-weight: 600;
@@ -822,7 +488,6 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 .readme em {
 	font-style: italic;
 }
-
 .readme table {
 	border-collapse: collapse;
 	margin: 0 0 var(--sp-5);
@@ -843,285 +508,7 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	font-weight: 600;
 }
 
-/* --- Signed-out / error / notice screens --- */
-/* signin-screen is a page <main> (flex child of .page-shell), so it grows
-   to fill the gap between topbar/footer and centres its content. */
-.signin-screen {
-	flex: 1;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	gap: var(--sp-4);
-	text-align: center;
-	padding: var(--sp-6);
-}
-.signin-screen h1 {
-	font-size: var(--fs-h2);
-	font-weight: 600;
-	color: var(--text);
-	margin: 0;
-}
-.signin-note {
-	color: var(--text-2);
-	font-size: var(--fs-body);
-	max-width: 420px;
-}
-.signin-error {
-	color: var(--red);
-	font-size: var(--fs-body);
-	max-width: 480px;
-}
-.signin-alt {
-	color: var(--text-3);
-	font-size: var(--fs-ui);
-	text-decoration: underline;
-}
-
-/* --- Viewer extras (breadcrumb / code / notice) --- */
-.viewer__topinfo {
-	display: flex;
-	align-items: center;
-	gap: var(--sp-3);
-	padding: var(--sp-3) var(--sp-5);
-	border-bottom: 1px solid var(--border-soft);
-	font-family: var(--font-mono);
-	font-size: var(--fs-caption);
-	color: var(--text-3);
-	background: var(--surface-2);
-	position: sticky;
-	top: 0;
-	z-index: 1;
-	flex-wrap: wrap;
-}
-.viewer__topinfo a {
-	color: var(--text-2);
-}
-@media (hover: hover) {
-	.viewer__topinfo a:hover {
-		color: var(--accent);
-	}
-}
-.viewer__topinfo .sep {
-	color: var(--faint);
-}
-.viewer__crumbs {
-	display: flex;
-	flex-wrap: wrap;
-	gap: var(--sp-1);
-	align-items: center;
-	min-width: 0;
-}
-.tree__row a {
-	color: inherit;
-	display: flex;
-	align-items: center;
-	gap: var(--sp-2);
-	width: 100%;
-}
-.tree__empty {
-	padding: var(--sp-4);
-	color: var(--muted);
-	font-size: var(--fs-caption);
-}
-.codeblock {
-	margin: 0;
-}
-.codeblock pre,
-.codeblock pre.shiki {
-	margin: 0;
-	padding: var(--sp-5);
-	font-family: var(--font-mono);
-	font-size: 12.75px;
-	line-height: 1.6;
-	overflow: auto;
-	/* biome-ignore lint/complexity/noImportantStyles: must override Shiki's inline background-color */
-	background: var(--input-bg) !important;
-	border-radius: 0;
-}
-.codeblock--plain pre {
-	color: var(--text-2);
-	white-space: pre;
-}
-.filebar {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: var(--sp-3);
-	padding: var(--sp-3) var(--sp-5);
-	border-bottom: 1px solid var(--border-soft);
-	font-family: var(--font-mono);
-	font-size: var(--fs-caption);
-	color: var(--text-3);
-	flex-wrap: wrap;
-}
-.notice-screen {
-	min-height: 100vh;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	gap: var(--sp-3);
-	text-align: center;
-	padding: var(--sp-6);
-	background: var(--bg);
-}
-.notice-screen h1 {
-	font-size: var(--fs-h2);
-	font-weight: 600;
-	color: var(--text);
-	margin: 0;
-}
-.notice-screen p {
-	color: var(--text-2);
-	font-size: var(--fs-body);
-	max-width: 460px;
-	margin: 0;
-}
-.notice-screen a {
-	color: var(--accent);
-	font-size: var(--fs-ui);
-	text-decoration: none;
-}
-@media (hover: hover) {
-	.notice-screen a:hover {
-		text-decoration: underline;
-	}
-}
-
-/* --- TTL control (auto-revoke) --- */
-.ttl {
-	display: inline-flex;
-	align-items: center;
-	gap: var(--sp-1);
-}
-.ttl__num,
-.ttl__unit,
-.branch__sel {
-	height: 30px;
-	background: var(--input-bg);
-	color: var(--text);
-	border: 1px solid transparent;
-	border-radius: var(--r-sm);
-	font-family: var(--font-mono);
-	font-size: var(--fs-caption);
-	padding: 0 var(--sp-2);
-	transition: border-color 0.15s ease;
-}
-.ttl__num {
-	width: 54px;
-	text-align: right;
-	-moz-appearance: textfield;
-	appearance: textfield;
-}
-.ttl__num::-webkit-outer-spin-button,
-.ttl__num::-webkit-inner-spin-button {
-	-webkit-appearance: none;
-	margin: 0;
-}
-.ttl__unit {
-	padding-right: var(--sp-1);
-	cursor: pointer;
-}
-.ttl__num:disabled {
-	opacity: 0.4;
-	cursor: not-allowed;
-}
-.ttl__num:focus,
-.ttl__unit:focus,
-.branch__sel:focus {
-	outline: none;
-	border-color: var(--border-strong);
-}
-/* Long branch names must not stretch the row; the full name stays
-   readable in the native dropdown. */
-.branch__sel {
-	max-width: 150px;
-	cursor: pointer;
-}
-.rowtoggle {
-	display: inline-flex;
-	align-items: center;
-	gap: 5px;
-	font-size: var(--fs-caption);
-	color: var(--text-2);
-	cursor: pointer;
-	user-select: none;
-}
-.rowtoggle input {
-	accent-color: var(--accent);
-	cursor: pointer;
-}
-.rowtoggle:has(input:disabled) {
-	opacity: 0.45;
-	cursor: not-allowed;
-}
-.rowtoggle:has(input:disabled) input {
-	cursor: not-allowed;
-}
-
-/* Recipient-facing branch picker in the viewer toolbar. */
-.branchsw {
-	display: inline-flex;
-	align-items: center;
-	gap: var(--sp-2);
-	font-size: var(--fs-caption);
-	color: var(--text-2);
-}
-.branchsw__label {
-	white-space: nowrap;
-}
-.branchsw__sel {
-	height: 28px;
-	max-width: 180px;
-	background: var(--input-bg);
-	color: var(--text);
-	border: 1px solid transparent;
-	border-radius: var(--r-sm);
-	font-family: var(--font-mono);
-	font-size: var(--fs-caption);
-	padding: 0 var(--sp-2);
-	cursor: pointer;
-	transition: border-color 0.15s ease;
-}
-.branchsw__sel:focus {
-	outline: none;
-	border-color: var(--border-strong);
-}
-/* These sit on the topinfo bar, which is only a hair off the surface
-   they would otherwise be filled with, so they take the outlined-pill
-   treatment (same as the nav) rather than a fill nobody can see. */
-.viewer__dl,
-.viewer__tab {
-	display: inline-flex;
-	align-items: center;
-	height: 28px;
-	padding: 0 var(--sp-3);
-	border: 1px solid var(--border-strong);
-	border-radius: var(--r-pill);
-	background: transparent;
-	color: var(--text-2);
-	font-size: var(--fs-caption);
-	white-space: nowrap;
-	transition:
-		color 0.15s ease,
-		background 0.15s ease,
-		border-color 0.15s ease;
-}
-@media (hover: hover) {
-	.viewer__dl:hover,
-	.viewer__tab:hover {
-		color: var(--text);
-		background: var(--surface);
-		border-color: var(--outline);
-	}
-}
-
-/* The releases view has no file tree, so it drops the sidebar column. */
-.viewer--wide {
-	grid-template-columns: 1fr;
-}
-
+/* --- Releases view --- */
 .releases {
 	display: flex;
 	flex-direction: column;
@@ -1149,7 +536,6 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 }
 .release__date {
 	margin-left: auto;
-	font-family: var(--font-mono);
 	font-size: var(--fs-caption);
 	color: var(--text-3);
 }
@@ -1180,7 +566,6 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	border-bottom: none;
 }
 .release__asset-name {
-	font-family: var(--font-mono);
 	overflow-wrap: anywhere;
 }
 .release__asset-size {
@@ -1191,5 +576,39 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 @media (hover: hover) {
 	.release__asset:hover {
 		color: var(--accent);
+	}
+}
+
+/* --- Notice screen (revoked / not found) --- */
+.notice-screen {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: var(--sp-3);
+	text-align: center;
+	padding: var(--sp-6);
+	background: var(--bg);
+}
+.notice-screen h1 {
+	margin: 0;
+	font-size: var(--fs-h2);
+	font-weight: 600;
+	color: var(--text);
+}
+.notice-screen p {
+	color: var(--text-2);
+	font-size: var(--fs-body);
+	max-width: 460px;
+	margin: 0;
+}
+.notice-screen a {
+	color: var(--accent);
+	font-size: var(--fs-ui);
+}
+@media (hover: hover) {
+	.notice-screen a:hover {
+		text-decoration: underline;
 	}
 }

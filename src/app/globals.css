@@ -59,15 +59,23 @@
 	--shadow-dialog: 0 0 45px hsla(0, 0%, 0%, 0.85);
 	--shadow-accent: 0 2px 8px hsl(from var(--accent) h s l / 0.4);
 
-	/* Type families. next/font/local (layout.tsx) supplies --font-gsans
-	   and --font-mono-atk from src/fonts; the fallback chains live here so
-	   the whole stack is readable in one place. */
+	/* Type. Google Sans is the ONLY webfont on the site: next/font/local
+	   (layout.tsx) loads it from src/fonts and exposes --font-gsans, and
+	   the fallback chain is composed here. --font-mono is a system stack
+	   with no download, and is applied in exactly one place: the <pre> in
+	   the viewer's code block. Nothing else on the site is monospaced. */
 	--base-weight: 350;
 	--font-sans:
 		var(--font-gsans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
 		system-ui, sans-serif;
-	--font-mono:
-		var(--font-mono-atk), ui-monospace, "Cascadia Mono", Consolas, monospace;
+	--font-mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+
+	/* Nav control geometry. The pills in the top bar size from these, and
+	   the bar height follows from the pill rather than the other way
+	   round, so the chrome stays as short as the menu allows. */
+	--nav-ctl-h: 1.875rem;
+	--nav-ctl-r: 999px;
+	--nav-ctl-min: 9.6rem;
 
 	/* Fluid type scale. Site-facing font-sizes route through these;
 	   component-internal sizes (icon glyphs, chip text) stay fixed-px.
@@ -105,9 +113,6 @@
 	--r-lg: 10px;
 	--r-xl: 12px;
 	--r-pill: 999px;
-
-	/* Frosted chrome backdrop shared by the nav + footer. */
-	--chrome-backdrop: blur(4px) brightness(134%) grayscale(100%);
 
 	/* Native form controls, select popups and scrollbars follow the app
 	   rather than the OS scheme. */
@@ -193,8 +198,8 @@ body[data-contact="open"] {
 	overflow: hidden;
 }
 
-/* --- Page shell + main + bloom --- */
-/* Every page (marketing + app) is a flex column so <main> fills the gap
+/* --- Page shell + main --- */
+/* Every page (site + viewer) is a flex column so <main> fills the gap
    between the nav and footer and the footer pins to the bottom. */
 .page-shell {
 	position: relative;
@@ -204,19 +209,8 @@ body[data-contact="open"] {
 	min-height: 100vh;
 }
 
-/* Every page <main> carries the base background; the home hero opts out
-   (normal.css) so the bloom only shows through there. */
 main {
 	background: var(--bg);
-}
-
-/* Ambient backdrop image, behind everything, on every page. */
-.bloom {
-	position: fixed;
-	inset: 0;
-	pointer-events: none;
-	z-index: -2;
-	background: url("/bg_svg.svg");
 }
 
 /* Page fade-in. template.tsx remounts this wrapper on every navigation,
@@ -268,61 +262,64 @@ main {
 }
 
 /* --- Unified top navigation (site-wide) --- */
-/* Surface-specific children (.topbar__center / __right / __meta) live in
-   app.css; the marketing sign-in pill (.nav-cta) lives in normal.css. */
+/* Solid, not frosted, and only as tall as one nav pill plus its padding.
+   Surface-specific children (.topbar__center / __right / __meta) live in
+   viewer.css; the sign-in pill (.nav-cta) lives in site.css. */
 .topbar {
 	position: relative;
 	z-index: 5;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: var(--sp-4) var(--sp-6);
+	padding: var(--sp-2) var(--sp-6);
 	gap: var(--sp-4);
-	border-bottom: 1px solid var(--border-soft);
-	backdrop-filter: var(--chrome-backdrop);
+	background: var(--bg);
+	border-bottom: 1px solid var(--border);
 }
 
-/* Inline desktop / tablet navigation. Each item is an outlined pill and
-   the current page is the one accent-FILLED pill, so the active state is
-   carried by shape and fill rather than by an underline. */
+/* Inline desktop / tablet navigation. A single-row grid of equal columns,
+   so every item is the width of the widest one; --nav-ctl-min is the
+   floor. Pills carry no border: the fill is the shape. */
 .nav-links {
-	display: flex;
+	display: grid;
+	grid-auto-flow: column;
+	grid-auto-columns: 1fr;
 	align-items: center;
 	gap: var(--sp-2);
-	font-size: var(--fs-ui);
 }
 .nav-links a {
 	display: inline-flex;
 	align-items: center;
-	gap: var(--sp-1);
-	padding: var(--sp-2) var(--sp-5);
-	border-radius: var(--r-pill);
-	border: 1px solid var(--outline);
+	justify-content: center;
+	gap: 0.375rem;
+	min-width: var(--nav-ctl-min);
+	height: var(--nav-ctl-h);
+	padding: 0 0.875rem;
+	border: 0;
+	border-radius: var(--nav-ctl-r);
+	background: var(--surface-deep);
 	color: var(--text-2);
-	letter-spacing: 0.04em;
+	font-size: 0.875rem;
+	font-weight: 500;
 	white-space: nowrap;
 	transition:
 		color 0.2s ease,
-		background 0.2s ease,
-		border-color 0.2s ease;
+		background 0.2s ease;
 }
 @media (hover: hover) {
 	.nav-links a:hover {
 		color: var(--text);
-		border-color: var(--text-2);
-		background: var(--surface);
+		background: var(--surface-3);
 	}
 }
 .nav-links a.is-active {
 	background: var(--accent);
-	border-color: var(--accent);
 	color: var(--accent-on);
-	font-weight: 500;
+	font-weight: 600;
 }
 @media (hover: hover) {
 	.nav-links a.is-active:hover {
 		background: var(--accent-hover);
-		border-color: var(--accent-hover);
 		color: var(--accent-on);
 	}
 }
@@ -331,18 +328,17 @@ main {
 .site-footer {
 	position: relative;
 	z-index: 5;
-	padding: var(--sp-5) var(--sp-7);
+	padding: var(--sp-2) var(--sp-6);
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	gap: var(--sp-4);
-	font-family: var(--font-mono);
 	font-size: var(--fs-caption);
 	color: var(--muted);
-	letter-spacing: 0.08em;
+	letter-spacing: 0.06em;
 	text-transform: uppercase;
-	border-top: 1px solid var(--border-soft);
-	backdrop-filter: var(--chrome-backdrop);
+	background: var(--bg);
+	border-top: 1px solid var(--border);
 }
 .site-footer a {
 	display: inline-flex;
@@ -351,7 +347,6 @@ main {
 	color: var(--muted);
 }
 .site-footer a .url {
-	font-family: var(--font-sans);
 	text-transform: inherit;
 	color: var(--accent);
 }
@@ -365,32 +360,30 @@ main {
 /* Accent-filled pill, matching the app's primary actions. Restyled here
    rather than reused from normal.css, since the footer is site-wide and
    normal.css is not loaded on app pages. */
+/* Only the nav is pill-shaped, so this is a plain rounded button. */
 .site-footer__contact {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 	gap: var(--sp-2);
-	padding: var(--sp-2) var(--sp-5);
-	border-radius: var(--r-pill);
+	height: var(--nav-ctl-h);
+	padding: 0 0.875rem;
+	border: 0;
+	border-radius: var(--r-md);
 	background: var(--accent);
-	border: 1px solid var(--accent);
 	color: var(--accent-on);
-	font-family: var(--font-sans);
-	font-weight: 500;
-	font-size: var(--fs-btn);
-	letter-spacing: 0.1em;
+	font-weight: 600;
+	font-size: 0.875rem;
+	letter-spacing: 0.06em;
 	text-transform: uppercase;
 	cursor: pointer;
-	transition:
-		background 0.15s ease,
-		border-color 0.15s ease;
+	transition: background 0.15s ease;
 }
 
 .contact-backdrop {
 	position: fixed;
 	inset: 0;
 	background: var(--scrim);
-	backdrop-filter: blur(3px);
 	z-index: 80;
 	border: 0;
 	padding: 0;
@@ -477,7 +470,6 @@ main {
 	border-radius: var(--r-md);
 	padding: var(--sp-3);
 	color: var(--text);
-	font-family: var(--font-sans);
 	font-size: var(--fs-ui);
 	outline: 0;
 	transition: border-color 0.15s ease;
@@ -523,8 +515,7 @@ main {
 	background: var(--accent);
 	border: 1px solid var(--accent);
 	color: var(--accent-on);
-	font-family: var(--font-sans);
-	font-weight: 500;
+	font-weight: 600;
 	font-size: var(--fs-ui);
 	cursor: pointer;
 	transition: background 0.2s ease;
@@ -548,7 +539,6 @@ main {
 @media (hover: hover) {
 	.site-footer__contact:hover {
 		background: var(--accent-hover);
-		border-color: var(--accent-hover);
 	}
 	.contact-modal__close:hover {
 		color: var(--text);
@@ -559,41 +549,34 @@ main {
 	}
 }
 
-/* --- Status indicator dot --- */
-/* Pulsing dot next to STATUS nav links and inside the drawer. Colour
-   modifier driven by CURRENT_STATUS in src/lib/site-status.ts. These
-   three hues are deliberately their own: status must not shift when the
-   brand accent does. */
-.status-dot {
-	display: inline-block;
-	width: 8px;
-	height: 8px;
-	margin-left: var(--sp-1);
-	border-radius: 50%;
-	vertical-align: middle;
-	animation: status-dot-pulse 2.4s ease-in-out infinite;
+/* --- Status indicator --- */
+/* Rides the STATUS nav item, in the inline nav and in the drawer. The
+   GLYPH carries the state (check / exclamation / cross, drawn by
+   <StatusIcon>); the colour only reinforces it, which is what keeps it
+   readable for a colour vision deficiency and on the accent-filled
+   active pill. Colour modifier driven by CURRENT_STATUS in
+   src/lib/site-status.ts, and these three hues are deliberately their
+   own: status must not shift when the brand accent does. */
+.status-icon {
+	flex-shrink: 0;
+	animation: status-icon-pulse 2.4s ease-in-out infinite;
 }
-.status-dot--okay {
-	background: #22c55e;
-	box-shadow: 0 0 8px 1px rgba(34, 197, 94, 0.7);
+.status-icon--okay {
+	color: #22c55e;
 }
-.status-dot--medium {
-	background: #f5b756;
-	box-shadow: 0 0 8px 1px rgba(245, 183, 86, 0.7);
+.status-icon--medium {
+	color: #f5b756;
 }
-.status-dot--critical {
-	background: #ef4444;
-	box-shadow: 0 0 8px 1px rgba(239, 68, 68, 0.7);
+.status-icon--critical {
+	color: #ef4444;
 }
-@keyframes status-dot-pulse {
+@keyframes status-icon-pulse {
 	0%,
 	100% {
 		opacity: 1;
-		transform: scale(1);
 	}
 	50% {
-		opacity: 0.55;
-		transform: scale(0.85);
+		opacity: 0.6;
 	}
 }
 
@@ -606,7 +589,6 @@ main {
 	gap: 5px;
 	padding: 2px 8px;
 	border-radius: 5px;
-	font-family: var(--font-mono);
 	font-size: 10.5px;
 	font-weight: 500;
 	letter-spacing: 0.01em;
@@ -680,7 +662,6 @@ main {
 	position: fixed;
 	inset: 0;
 	background: var(--scrim);
-	backdrop-filter: blur(3px);
 	z-index: 70;
 	border: 0;
 	padding: 0;
@@ -740,20 +721,28 @@ main {
 	height: 14px;
 }
 
-/* Drawer rows are the phone form of the nav pills: same active fill,
-   squared off to the panel width. */
+/* Drawer rows are the nav pills again, laid out two per row so the panel
+   stays short. Same geometry and the same accent-filled active state. */
 .drawer-panel__links {
-	display: flex;
-	flex-direction: column;
-	gap: var(--sp-1);
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: var(--sp-2);
 	padding: var(--sp-3);
 }
 .drawer-panel__links a {
-	padding: var(--sp-3) var(--sp-4);
-	border-radius: var(--r-md);
-	font-size: var(--fs-body);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.375rem;
+	min-width: 0;
+	height: var(--nav-ctl-h);
+	padding: 0 0.75rem;
+	border-radius: var(--nav-ctl-r);
+	background: var(--surface-deep);
 	color: var(--text-2);
-	letter-spacing: 0.02em;
+	font-size: 0.875rem;
+	font-weight: 500;
+	white-space: nowrap;
 	transition:
 		color 0.15s ease,
 		background 0.15s ease;
@@ -761,13 +750,13 @@ main {
 @media (hover: hover) {
 	.drawer-panel__links a:hover {
 		color: var(--text);
-		background: var(--surface-deep);
+		background: var(--surface-3);
 	}
 }
 .drawer-panel__links a.is-active {
 	background: var(--accent);
 	color: var(--accent-on);
-	font-weight: 500;
+	font-weight: 600;
 }
 @media (hover: hover) {
 	.drawer-panel__links a.is-active:hover {
@@ -776,10 +765,10 @@ main {
 	}
 }
 .drawer-panel__links a.is-cta {
-	margin-top: var(--sp-2);
-	border: 1px solid var(--outline);
-	color: var(--text);
-	font-weight: 500;
+	grid-column: 1 / -1;
+	background: var(--accent);
+	color: var(--accent-on);
+	font-weight: 600;
 }
 
 /* --- Reduced motion --- */

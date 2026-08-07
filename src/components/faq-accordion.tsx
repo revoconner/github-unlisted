@@ -68,13 +68,22 @@ const ITEMS: { q: string; a: React.ReactNode }[] = [
 ];
 
 export function FaqAccordion() {
-	const [open, setOpen] = React.useState(0);
-	const total = `/0${ITEMS.length}`;
+	// A set, not a single index: opening one answer must not collapse
+	// another. Collapsing a sibling moves the page under the pointer
+	// between mousedown and mouseup, so the release lands somewhere the
+	// user never aimed at.
+	const [open, setOpen] = React.useState<Set<number>>(() => new Set([0]));
+	const toggle = (i: number) =>
+		setOpen((prev) => {
+			const next = new Set(prev);
+			if (!next.delete(i)) next.add(i);
+			return next;
+		});
 
 	return (
 		<ul className="faq-list">
 			{ITEMS.map((item, i) => {
-				const isOpen = open === i;
+				const isOpen = open.has(i);
 				const qId = `q-${i + 1}`;
 				const aId = `a-${i + 1}`;
 				return (
@@ -85,23 +94,19 @@ export function FaqAccordion() {
 							aria-expanded={isOpen}
 							aria-controls={aId}
 							id={qId}
-							onClick={() => setOpen(isOpen ? -1 : i)}
+							onClick={() => toggle(i)}
 						>
-							<span className="faq-q__index">
-								{String(i + 1).padStart(2, "0")}
-								<span className="total">{total}</span>
-							</span>
 							<span className="faq-q__text">{item.q}</span>
 							<span className="faq-q__icon" aria-hidden="true">
 								<svg
-									viewBox="0 0 12 12"
+									viewBox="0 0 24 24"
 									fill="none"
 									stroke="currentColor"
-									strokeWidth="1.6"
+									strokeWidth="2.5"
 									strokeLinecap="round"
+									strokeLinejoin="round"
 								>
-									<line x1="6" y1="2" x2="6" y2="10" />
-									<line x1="2" y1="6" x2="10" y2="6" />
+									<polyline points="6 9 12 15 18 9" />
 								</svg>
 							</span>
 						</button>

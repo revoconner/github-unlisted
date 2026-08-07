@@ -1,46 +1,32 @@
-/* github unlisted - breakpoint overrides for the normal pages (home,
-   FAQ, privacy, status). Loaded right after normal.css.
+/* github unlisted - breakpoint overrides for the site pages (home, FAQ,
+   privacy, status, dashboard). Loaded right after normal.css.
 
-   Page gutters and type are clamp()-driven in normal.css / globals.css,
-   so nothing here re-tunes a size. What is left is layout switching. */
+   Page gutters and type are clamp-driven in normal.css / globals.css, so
+   nothing here re-tunes a size. What is left is layout switching. */
 
-/* Tablet band - the marketing sign-in pill folds into the drawer
-   alongside the nav pills. */
+/* Tablet band - the sign-in action folds into the drawer alongside the
+   nav pills. */
 @media (max-width: 1250px) {
 	.topbar .nav-cta {
 		display: none;
 	}
 }
 
-/* Phone - shrink the hero to content and stack the CTA. */
+/* Phone - stack the paired hero buttons, tighten the FAQ rows. */
 @media (max-width: 760px) {
-	/* Phone home hero: shrink to content (no flex:1 stretch) and drop the
-	   centering so the title sits near the top. */
-	.hero {
-		flex: 0 0 auto;
-		padding-top: clamp(56px, 14vw, 100px);
-		padding-bottom: var(--sp-9);
-		place-items: start center;
-	}
-	.hero-cta__row {
-		flex-direction: column;
-		gap: var(--sp-5);
-	}
-	.hero-cta__divider {
-		display: none;
+	/* Side by side needs more width than a phone has; the sp-9 gutter
+	   between them would leave each button barely wider than its label. */
+	.hero__actions {
+		grid-template-columns: minmax(0, 1fr);
+		gap: var(--sp-3);
+		max-width: 20rem;
 	}
 
 	.faq-q {
-		grid-template-columns: 28px 1fr 24px;
 		gap: var(--sp-3);
 	}
-	.faq-q__icon {
-		width: 24px;
-		height: 24px;
-	}
 	.faq-a__body {
-		padding-left: 40px;
-		padding-right: var(--sp-1);
+		padding-right: var(--sp-5);
 	}
 
 	/* Log row head stacks: time on top, pills below. */

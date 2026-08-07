@@ -22,8 +22,6 @@ export default async function FaqPage() {
 
 	return (
 		<div className="page-shell">
-			<div className="bloom" aria-hidden="true" />
-
 			<header className="topbar">
 				<a className="wordmark" href="/" aria-label="github unlisted home">
 					<span className="mark" aria-hidden="true">
@@ -83,15 +81,7 @@ export default async function FaqPage() {
 
 			<main className="faq-content">
 				<div className="faq-content__inner">
-					<div className="faq-eyebrow">
-						<span className="rule" aria-hidden="true" />
-						<span className="label-accent">FAQ</span>
-						<span>· Common questions</span>
-					</div>
-
-					<h1 className="faq-title">
-						Questions, <em>answered.</em>
-					</h1>
+					<h1 className="faq-title">Questions, answered</h1>
 
 					<p className="faq-lede">
 						A short list. If you have something else on your mind, the source is

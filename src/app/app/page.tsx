@@ -1,5 +1,5 @@
-import "@/styles/app.css";
-import "@/styles/app_override.css";
+import "@/styles/normal.css";
+import "@/styles/normal_override.css";
 import { DashboardClient } from "@/components/dashboard-client";
 import { SiteFooter } from "@/components/site-footer";
 import { listInstallationRepos } from "@/lib/github-app";
@@ -31,7 +31,6 @@ export default async function AppPage({
 			: null;
 		return (
 			<div className="page-shell">
-				<div className="bloom" aria-hidden="true" />
 				<main className="signin-screen">
 					<h1>Sign in to create a link</h1>
 					{sp.error && <p className="signin-error">{String(sp.error)}</p>}
@@ -41,7 +40,7 @@ export default async function AppPage({
 							Install it and pick the repos to share.
 						</p>
 					)}
-					<a className="btn btn--accent" href="/api/github/login">
+					<a className="btn btn--primary" href="/api/github/login">
 						Sign in with GitHub
 					</a>
 					{installUrl && (
@@ -118,11 +117,10 @@ export default async function AppPage({
 	if (loadError) {
 		return (
 			<div className="page-shell">
-				<div className="bloom" aria-hidden="true" />
 				<main className="signin-screen">
 					<h1>Couldn't load repositories</h1>
 					<p className="signin-error">{loadError}</p>
-					<a className="btn btn--ghost btn--sm" href="/api/github/logout">
+					<a className="btn btn--quiet btn--compact" href="/api/github/logout">
 						Sign out
 					</a>
 				</main>

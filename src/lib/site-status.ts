@@ -30,30 +30,31 @@ export const CURRENT_STATUS: SiteStatus = {
 	startedUtc: "2026-08-06 21:35 UTC",
 };
 
-// Nav dot color class. Three colors map to four status types because
-// "incident" and "maintenance-critical" both signal a critical state.
-export function statusDotClass(s: SiteStatus): string {
+// The nav indicator collapses the four status types into three buckets,
+// because "incident" and "maintenance-critical" both signal the same
+// thing to a visitor. Each bucket has its own GLYPH as well as its own
+// colour (see <StatusIcon>), so the state survives a colour vision
+// deficiency and survives sitting on the accent-filled active pill.
+export type StatusIconKind = "okay" | "medium" | "critical";
+
+export function statusIconKind(s: SiteStatus): StatusIconKind {
 	switch (s.type) {
 		case "okay":
-			return "status-dot--okay";
+			return "okay";
 		case "maintenance-medium":
-			return "status-dot--medium";
+			return "medium";
 		case "maintenance-critical":
 		case "incident":
-			return "status-dot--critical";
+			return "critical";
 	}
 }
 
-export function statusDotAriaLabel(s: SiteStatus): string {
-	switch (s.type) {
-		case "okay":
-			return "Status: okay";
-		case "maintenance-medium":
-			return "Status: medium";
-		case "maintenance-critical":
-		case "incident":
-			return "Status: critical";
-	}
+export function statusIconClass(s: SiteStatus): string {
+	return `status-icon--${statusIconKind(s)}`;
+}
+
+export function statusIconAriaLabel(s: SiteStatus): string {
+	return `Status: ${statusIconKind(s)}`;
 }
 
 // Pill class for the Current Status card on /status. Four distinct
