@@ -37,12 +37,20 @@ interface LogEntry {
 
 const log: LogEntry[] = [
 	{
+		id: "2026-08-07-redesign-css",
+		startedUtc: "2026-08-06 21:35 UTC",
+		endedUtc: "2026-08-07 00:35 UTC",
+		category: "maintenance",
+		severity: "medium",
+		body: "Nothing was affected, just testing things to make sure nothing was broken. All in all, no user or viewer were affected.",	
+	},
+	{
 		id: "2026-08-04-share-controls",
 		startedUtc: "2026-08-04 21:47 UTC",
 		endedUtc: "2026-08-06 21:35 UTC",
 		category: "maintenance",
 		severity: "critical",
-		body: "New optional controls were added for the person sharing a repository. A link can now be locked to a single branch, offer the recipient a branch switcher, allow the branch being shown to be downloaded as a zip, and show a releases tab with release notes and downloadable release files. All four are switched off by default, so every link created before this work keeps behaving exactly as it did and needed no action from anyone. The dashboard and the shared-repository viewer were both changed repeatedly across the window, so the dashboard may have been briefly unavailable, or shown controls that were still settling, while updates were deployed. Existing shared links and repository access were not affected.",
+		body: "While it sure did last for a while, it was just systems upgrade and no user, or viewer were affected. \n System updgrades as described below: \n New optional controls were added for the person sharing a repository. \n A link can now be locked to a single branch, offer the recipient a branch switcher, allow the branch being shown to be downloaded as a zip, and show a releases tab with release notes and downloadable release files. \n All four are switched off by default, so every link created before this work keeps behaving exactly as it did and needed no action from anyone. \n The dashboard and the shared-repository viewer were both changed repeatedly across the window, so the dashboard may have been briefly unavailable, or shown controls that were still settling, while updates were deployed. \n Existing shared links and repository access were not affected.",
 	},
 	{
 		id: "2026-06-02-stylesheet-consolidation",
@@ -50,7 +58,7 @@ const log: LogEntry[] = [
 		endedUtc: "2026-06-02 20:48 UTC",
 		category: "maintenance",
 		severity: "critical",
-		body: "Stylesheet consolidation (single-source design tokens, one site-wide navigation and footer, and the shared-repo viewer restructured). Major internal app refactor for clean future upgrades. Maintenance work also included touch-friendly hover handling and a page fade transition. No major usability disruption occurred, only briefly inconsistent UI (some might have made accessibility or visuals unreadable for a few minutes) during the window. Shared links and repository access, and core functionality were not affected.",
+		body: "Stylesheet consolidation (single-source design tokens, one site-wide navigation and footer, and the shared-repo viewer restructured). \n Major internal app refactor for clean future upgrades. Maintenance work also included touch-friendly hover handling and a page fade transition. No major usability disruption occurred, only briefly inconsistent UI (some might have made accessibility or visuals unreadable for a few minutes) during the window. Shared links and repository access, and core functionality were not affected.",
 	},
 	{
 		id: "2026-06-02-nav-and-reskin",
