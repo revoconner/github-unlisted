@@ -25,6 +25,10 @@ interface Share {
 	showReleases?: boolean;
 }
 
+// The three boolean share options. They are draft-able before the share
+// exists, so they can be set up front and sent with the POST.
+type FlagKey = "showBranches" | "allowDownload" | "showReleases";
+
 type ShareFilter = "shared" | "notshared";
 type VisFilter = "public" | "private";
 
@@ -91,8 +95,10 @@ export function matchesQuery(name: string, query: string): boolean {
 	return name.toLowerCase().includes(q);
 }
 
-// A switch, not a checkbox: the knob position states on/off without relying
-// on the accent fill alone.
+// A switch, not a checkbox. The knob carries a glyph as well as a position
+// (check when on, dash when off), so the state reads at a glance, in
+// greyscale, and for a colour vision deficiency. Colour is the last of the
+// four cues, not the only one.
 function Toggle({
 	checked,
 	disabled,
@@ -114,7 +120,19 @@ function Toggle({
 				onChange={(e) => onChange(e.target.checked)}
 			/>
 			<span className="toggle__track" aria-hidden="true">
-				<span className="toggle__knob" />
+				<span className="toggle__knob">
+					<svg
+						viewBox="0 0 16 16"
+						fill="none"
+						stroke="currentColor"
+						strokeWidth="2.4"
+						strokeLinecap="round"
+						strokeLinejoin="round"
+					>
+						{checked ? <path d="M3.5 8.5 6.5 11.5 12.5 4.5" /> : null}
+						{checked ? null : <line x1="4.5" y1="8" x2="11.5" y2="8" />}
+					</svg>
+				</span>
 			</span>
 		</label>
 	);
@@ -213,6 +231,9 @@ export function DashboardClient({
 	// the control.
 	const [ttlSel, setTtlSel] = React.useState<Record<string, TtlSel>>({});
 	const [refSel, setRefSel] = React.useState<Record<string, string>>({});
+	const [flagSel, setFlagSel] = React.useState<
+		Record<string, Partial<Record<FlagKey, boolean>>>
+	>({});
 
 	const listRef = React.useRef<HTMLDivElement | null>(null);
 	const rowRefs = React.useRef<Record<string, HTMLButtonElement | null>>({});
@@ -279,6 +300,25 @@ export function DashboardClient({
 	const setRef = (key: string, v: string) =>
 		setRefSel((prev) => ({ ...prev, [key]: v }));
 
+	// Draft first, then whatever the share already stores, then off. This is
+	// what lets the switches work on a repo that has not been shared yet:
+	// the value is held locally and sent with the POST, rather than the
+	// control sitting dead until a link exists.
+	const getFlag = (key: string, flag: FlagKey, share?: Share): boolean =>
+		flagSel[key]?.[flag] ?? share?.[flag] ?? false;
+
+	// Flip the draft, and push it immediately if there is already a link to
+	// push it to. Only this key is sent, so nothing else about the share
+	// (notably its auto-revoke window) is disturbed.
+	const applyFlag = (flag: FlagKey, v: boolean) => {
+		if (!active) return;
+		setFlagSel((prev) => ({
+			...prev,
+			[active.fullName]: { ...prev[active.fullName], [flag]: v },
+		}));
+		if (activeShare) patch(activeShare, { [flag]: v });
+	};
+
 	const jumpTo = (letter: string) => {
 		const target = visible.find(
 			(r) => (r.name[0]?.toUpperCase() ?? "") === letter,
@@ -336,6 +376,9 @@ export function DashboardClient({
 					repo: r.name,
 					ttlSeconds: ttlFor(getSel(r.fullName)),
 					ref: getRef(r.fullName) || null,
+					showBranches: getFlag(r.fullName, "showBranches"),
+					allowDownload: getFlag(r.fullName, "allowDownload"),
+					showReleases: getFlag(r.fullName, "showReleases"),
 				}),
 			});
 			if (!res.ok) {
@@ -426,7 +469,11 @@ export function DashboardClient({
 	];
 
 	const lockedRef = active ? getRef(active.fullName, activeShare) : "";
-	const switcherOn = Boolean(!lockedRef && activeShare?.showBranches);
+	const switcherOn = Boolean(
+		active &&
+			!lockedRef &&
+			getFlag(active.fullName, "showBranches", activeShare),
+	);
 
 	return (
 		<div className="page-shell">
@@ -700,10 +747,8 @@ export function DashboardClient({
 											<Toggle
 												label="Recipient can switch branches"
 												checked={switcherOn}
-												disabled={busy || !activeShare || Boolean(lockedRef)}
-												onChange={(v) =>
-													activeShare && patch(activeShare, { showBranches: v })
-												}
+												disabled={busy || Boolean(lockedRef)}
+												onChange={(v) => applyFlag("showBranches", v)}
 											/>
 										</div>
 									</div>
@@ -715,12 +760,13 @@ export function DashboardClient({
 										<div className="setting-row__control">
 											<Toggle
 												label="Allow zip download"
-												checked={Boolean(activeShare?.allowDownload)}
-												disabled={busy || !activeShare}
-												onChange={(v) =>
-													activeShare &&
-													patch(activeShare, { allowDownload: v })
-												}
+												checked={getFlag(
+													active.fullName,
+													"allowDownload",
+													activeShare,
+												)}
+												disabled={busy}
+												onChange={(v) => applyFlag("allowDownload", v)}
 											/>
 										</div>
 									</div>
@@ -730,11 +776,13 @@ export function DashboardClient({
 										<div className="setting-row__control">
 											<Toggle
 												label="Show releases"
-												checked={Boolean(activeShare?.showReleases)}
-												disabled={busy || !activeShare}
-												onChange={(v) =>
-													activeShare && patch(activeShare, { showReleases: v })
-												}
+												checked={getFlag(
+													active.fullName,
+													"showReleases",
+													activeShare,
+												)}
+												disabled={busy}
+												onChange={(v) => applyFlag("showReleases", v)}
 											/>
 										</div>
 									</div>

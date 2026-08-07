@@ -994,8 +994,11 @@
 	cursor: not-allowed;
 }
 
-/* Switch, not a checkbox: the knob's position states on/off, so the
-   accent fill reinforces the state instead of being the only cue. */
+/* Switch, not a checkbox. Four things change between off and on, so the
+   state survives a colour vision deficiency, a greyscale screen, and a
+   glance: the knob MOVES, the track fills, the knob inverts, and the
+   glyph swaps from a dash to a check. Position is the primary cue;
+   colour is only reinforcement. */
 .toggle {
 	display: inline-flex;
 	align-items: center;
@@ -1011,26 +1014,43 @@
 .toggle__track {
 	display: inline-flex;
 	align-items: center;
-	width: 2.75rem;
-	height: 1.375rem;
+	width: 2.875rem;
+	height: 1.5rem;
 	padding: 2px;
 	border-radius: var(--nav-ctl-r);
-	background: var(--surface-3);
-	transition: background 0.2s ease;
+	/* Off reads as a recessed empty channel: an inset well with a rim,
+	   not merely a lighter grey. */
+	background: var(--input-bg);
+	box-shadow: inset 0 0 0 1px var(--surface-3);
+	transition:
+		background 0.2s ease,
+		box-shadow 0.2s ease;
 }
 .toggle__knob {
-	width: 1rem;
-	height: 1rem;
+	display: grid;
+	place-items: center;
+	width: 1.25rem;
+	height: 1.25rem;
 	border-radius: 50%;
-	background: var(--text);
-	transition: transform 0.2s ease;
+	background: var(--muted);
+	color: var(--input-bg);
+	transition:
+		transform 0.2s ease,
+		background 0.2s ease;
+}
+.toggle__knob svg {
+	width: 11px;
+	height: 11px;
 }
 .toggle input:checked + .toggle__track {
 	background: var(--accent);
+	box-shadow: inset 0 0 0 1px var(--accent);
 }
 .toggle input:checked + .toggle__track .toggle__knob {
+	/* Track 2.875rem, minus 2x2px padding, minus the 1.25rem knob. */
 	transform: translateX(1.375rem);
 	background: var(--accent-on);
+	color: var(--accent);
 }
 .toggle input:focus-visible + .toggle__track {
 	outline: 2px solid var(--accent);
