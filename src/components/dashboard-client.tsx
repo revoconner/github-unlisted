@@ -367,41 +367,57 @@ export function DashboardClient({
 		setTimeout(() => setCopied(false), 1500);
 	};
 
-	const filters: {
-		key: ShareFilter | VisFilter;
+	// Two independent groups, each exclusive within itself.
+	const GROUPS: {
 		label: string;
-		n: number;
-		on: boolean;
-		toggle: () => void;
+		items: {
+			key: ShareFilter | VisFilter;
+			label: string;
+			n: number;
+			on: boolean;
+			toggle: () => void;
+		}[];
 	}[] = [
 		{
-			key: "shared",
-			label: "Shared",
-			n: counts.shared,
-			on: shareFilter === "shared",
-			toggle: () => setShareFilter((v) => (v === "shared" ? null : "shared")),
+			label: "Sharing state",
+			items: [
+				{
+					key: "shared",
+					label: "Shared",
+					n: counts.shared,
+					on: shareFilter === "shared",
+					toggle: () =>
+						setShareFilter((v) => (v === "shared" ? null : "shared")),
+				},
+				{
+					key: "notshared",
+					label: "Not shared",
+					n: counts.notshared,
+					on: shareFilter === "notshared",
+					toggle: () =>
+						setShareFilter((v) => (v === "notshared" ? null : "notshared")),
+				},
+			],
 		},
 		{
-			key: "notshared",
-			label: "Not shared",
-			n: counts.notshared,
-			on: shareFilter === "notshared",
-			toggle: () =>
-				setShareFilter((v) => (v === "notshared" ? null : "notshared")),
-		},
-		{
-			key: "public",
-			label: "Public",
-			n: counts.public,
-			on: visFilter === "public",
-			toggle: () => setVisFilter((v) => (v === "public" ? null : "public")),
-		},
-		{
-			key: "private",
-			label: "Private",
-			n: counts.private,
-			on: visFilter === "private",
-			toggle: () => setVisFilter((v) => (v === "private" ? null : "private")),
+			label: "Visibility",
+			items: [
+				{
+					key: "public",
+					label: "Public",
+					n: counts.public,
+					on: visFilter === "public",
+					toggle: () => setVisFilter((v) => (v === "public" ? null : "public")),
+				},
+				{
+					key: "private",
+					label: "Private",
+					n: counts.private,
+					on: visFilter === "private",
+					toggle: () =>
+						setVisFilter((v) => (v === "private" ? null : "private")),
+				},
+			],
 		},
 	];
 
@@ -538,22 +554,34 @@ export function DashboardClient({
 
 							{/* Two filter pairs plus a clear. Each pair is exclusive
 							    within itself; clicking an active one turns it off. */}
+							{/* One row: two segmented controls sharing a track each, then
+							    the clear. Each group is exclusive within itself; clicking
+							    an active segment turns it off, and the cross clears both.
+							    There is no "All" segment, cleared IS all. */}
 							<div className="dash__filters">
-								{filters.map((f) => (
-									<button
-										key={f.key}
-										type="button"
-										className="filter"
-										aria-pressed={f.on}
-										onClick={f.toggle}
+								{GROUPS.map((g) => (
+									<fieldset
+										className="segmented"
+										aria-label={g.label}
+										key={g.label}
 									>
-										{f.label}
-										<span className="filter__count">{f.n}</span>
-									</button>
+										{g.items.map((f) => (
+											<button
+												key={f.key}
+												type="button"
+												className="segmented__item"
+												aria-pressed={f.on}
+												onClick={f.toggle}
+											>
+												{f.label}
+												<span className="segmented__count">{f.n}</span>
+											</button>
+										))}
+									</fieldset>
 								))}
 								<button
 									type="button"
-									className="filter filter--clear"
+									className="filter-clear"
 									aria-label="Clear all filters"
 									title="Clear all filters"
 									disabled={!shareFilter && !visFilter}
@@ -707,22 +735,33 @@ export function DashboardClient({
 										</div>
 									</div>
 
+									{/* The one control that cannot commit on every keystroke: the
+									    unit commits on change and the amount on blur, because each
+									    write restarts the revoke window server-side. */}
 									<div className="setting-row">
 										<span className="setting-row__label">
 											Auto-revoke after
+											{activeShare && (
+												<span className="setting-row__note">
+													Changing this restarts the window
+												</span>
+											)}
 										</span>
-										<div className="setting-row__control setting-row__control--pair">
+										<div className="setting-row__control">
 											<select
 												className="select"
 												aria-label="Auto-revoke unit"
 												value={getSel(active.fullName).unit}
 												disabled={busy}
-												onChange={(e) =>
-													setSel(active.fullName, {
+												onChange={(e) => {
+													const next: TtlSel = {
 														...getSel(active.fullName),
 														unit: e.target.value as Unit,
-													})
-												}
+													};
+													setSel(active.fullName, next);
+													if (activeShare)
+														patch(activeShare, { ttlSeconds: ttlFor(next) });
+												}}
 											>
 												<option value="never">Never</option>
 												<option value="days">Days</option>
@@ -747,6 +786,12 @@ export function DashboardClient({
 															),
 														})
 													}
+													onBlur={() => {
+														if (activeShare)
+															patch(activeShare, {
+																ttlSeconds: ttlFor(getSel(active.fullName)),
+															});
+													}}
 												/>
 											)}
 										</div>

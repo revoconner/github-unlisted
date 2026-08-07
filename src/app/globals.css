@@ -277,6 +277,15 @@ main {
 	border-bottom: 1px solid var(--border);
 }
 
+/* The topbar's right-hand cluster (auth action, avatar, hamburger),
+   shared by the dashboard and the viewer. */
+.topbar__right {
+	display: flex;
+	align-items: center;
+	gap: var(--sp-3);
+	min-width: 0;
+}
+
 /* Inline desktop / tablet navigation. A single-row grid of equal columns,
    so every item is the width of the widest one; --nav-ctl-min is the
    floor. Pills carry no border: the fill is the shape. */

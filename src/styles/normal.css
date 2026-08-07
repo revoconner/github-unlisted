@@ -585,24 +585,40 @@
 	gap: var(--sp-3);
 	min-width: 0;
 }
-/* Three columns: two filters, two filters, then the clear. */
+/* One row, three columns: a segmented control per filter group, then the
+   clear. Each group shares one track, with the active choice as an
+   accent-filled pill inside it. */
 .dash__filters {
 	display: grid;
 	grid-template-columns: 1fr 1fr auto;
-	grid-template-rows: auto auto;
-	grid-auto-flow: column;
 	gap: var(--sp-2);
+	align-items: stretch;
 }
-.filter {
+.segmented {
+	/* A <fieldset> for the grouping semantics, so its UA margin, padding
+	   and border have to be zeroed before it can be a track. */
+	margin: 0;
+	border: 0;
+	display: grid;
+	grid-auto-flow: column;
+	grid-auto-columns: 1fr;
+	gap: 2px;
+	padding: 3px;
+	border-radius: var(--nav-ctl-r);
+	background: var(--surface-deep);
+	min-width: 0;
+}
+.segmented__item {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	gap: var(--sp-2);
+	gap: var(--sp-1);
+	min-width: 0;
 	height: var(--nav-ctl-h);
-	padding: 0 0.875rem;
+	padding: 0 var(--sp-3);
 	border: 0;
 	border-radius: var(--nav-ctl-r);
-	background: var(--surface-deep);
+	background: transparent;
 	color: var(--text-2);
 	font-size: 0.8125rem;
 	font-weight: 500;
@@ -613,34 +629,46 @@
 		color 0.15s ease;
 }
 @media (hover: hover) {
-	.filter:hover {
-		background: var(--surface-3);
+	.segmented__item:hover {
 		color: var(--text);
 	}
 }
-.filter[aria-pressed="true"] {
+.segmented__item[aria-pressed="true"] {
 	background: var(--accent);
 	color: var(--accent-on);
 	font-weight: 600;
 }
 @media (hover: hover) {
-	.filter[aria-pressed="true"]:hover {
+	.segmented__item[aria-pressed="true"]:hover {
 		background: var(--accent-hover);
 		color: var(--accent-on);
 	}
 }
-.filter__count {
+.segmented__count {
 	opacity: 0.6;
 }
-/* Spans both filter rows in the third column. */
-.filter--clear {
-	grid-row: 1 / span 2;
-	min-width: 2.5rem;
-	height: auto;
-	padding: 0 var(--sp-3);
-	align-self: stretch;
+
+/* Third column: one square button, the same height as the tracks. */
+.filter-clear {
+	display: inline-grid;
+	place-items: center;
+	width: 2.5rem;
+	border: 0;
+	border-radius: var(--nav-ctl-r);
+	background: var(--surface-deep);
+	color: var(--text-2);
+	cursor: pointer;
+	transition:
+		background 0.15s ease,
+		color 0.15s ease;
 }
-.filter--clear:disabled {
+@media (hover: hover) {
+	.filter-clear:not(:disabled):hover {
+		background: var(--surface-3);
+		color: var(--text);
+	}
+}
+.filter-clear:disabled {
 	opacity: 0.35;
 	cursor: not-allowed;
 }

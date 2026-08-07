@@ -20,12 +20,7 @@
 }
 
 /* --- Topbar children specific to the viewer --- */
-.topbar__right {
-	display: flex;
-	align-items: center;
-	gap: var(--sp-3);
-	min-width: 0;
-}
+/* .topbar__right is shared with the dashboard, so it lives in globals. */
 .topbar__meta {
 	font-size: var(--fs-caption);
 	color: var(--text-3);
