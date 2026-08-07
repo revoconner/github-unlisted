@@ -45,7 +45,7 @@ export const metadata = pageMetadata({
 
 function Notice({ title, detail }: { title: string; detail?: string }) {
 	return (
-		<div className="notice-screen">
+		<div className="viewer-shell notice-screen">
 			<h1>{title}</h1>
 			{detail && <p>{detail}</p>}
 			<Link href="/">Home</Link>
@@ -104,7 +104,7 @@ function ViewerShell({
 	children: ReactNode;
 }) {
 	return (
-		<div className="page-shell">
+		<div className="viewer-shell page-shell">
 			<header className="topbar">
 				<a className="wordmark" href="/" aria-label="github unlisted home">
 					<span className="mark" aria-hidden="true">

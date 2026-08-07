@@ -79,6 +79,18 @@ function ago(ts?: number): string {
 
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
+// Search matches the repo NAME only, never the `owner/` prefix.
+//
+// Matching the full `owner/name` looks more generous but is actively
+// useless: the owner is your own login on nearly every row, so typing your
+// own name (which people do, since repos get named after their author)
+// matches every repo you have instead of the one you meant.
+export function matchesQuery(name: string, query: string): boolean {
+	const q = query.trim().toLowerCase();
+	if (!q) return true;
+	return name.toLowerCase().includes(q);
+}
+
 // A switch, not a checkbox: the knob position states on/off without relying
 // on the accent fill alone.
 function Toggle({
@@ -211,9 +223,8 @@ export function DashboardClient({
 		return m;
 	}, [shares]);
 
-	// The owner prefix is the same on nearly every row, so it is dropped from
-	// the list label. It stays searchable, and the panel header still shows
-	// the full owner/name.
+	// The owner prefix is dropped from the row label too (see matchesQuery);
+	// the panel header still shows the full owner/name.
 	const visible = React.useMemo(
 		() =>
 			repos.filter((r) => {
@@ -222,14 +233,7 @@ export function DashboardClient({
 				if (shareFilter === "notshared" && isShared) return false;
 				if (visFilter === "public" && r.private) return false;
 				if (visFilter === "private" && !r.private) return false;
-				if (query) {
-					const q = query.toLowerCase();
-					if (
-						!r.name.toLowerCase().includes(q) &&
-						!r.fullName.toLowerCase().includes(q)
-					)
-						return false;
-				}
+				if (!matchesQuery(r.name, query)) return false;
 				return true;
 			}),
 		[repos, shareByRepo, shareFilter, visFilter, query],
