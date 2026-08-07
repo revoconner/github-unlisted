@@ -6,15 +6,6 @@
 
 Live at **[github-unlisted.com](https://github-unlisted.com)**. 
 
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/2218d468-4858-4b59-ad39-8331281c1bf9" /><br>
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/31baed6c-16bf-40d4-9d92-122f1c7e50a5" /><br>
-<img width="1920" height="auto" alt="image" src="https://github.com/user-attachments/assets/d23db581-b3cd-49e7-a9d0-9072f897d5cc" /><br>
-<div align="center">
-<img width="230" height="auto" alt="image" src="https://github.com/user-attachments/assets/0c021683-90ab-4b0d-8ee1-752a244e535f" />
-<img width="230" height="auto" alt="image" src="https://github.com/user-attachments/assets/af679024-26ff-40e5-8100-de629582878e" />
-<img width="230" height="auto" alt="image" src="https://github.com/user-attachments/assets/e3cfcf42-af5d-4c33-8448-27863c7164e3" />
-</div>
-
 ## What it is
 
 Sometimes you need to show someone a private repo — a client, a recruiter, a friend reviewing your work — without adding them as a collaborator or asking them to make a GitHub account. Unlisted Repo gives you a private link to a clean, read-only file browser for that repository. You stay in full control: access is granted and revoked by you, through GitHub.
@@ -29,13 +20,15 @@ Done with it? Revoke the link in one click, or remove the repo's access in your 
 
 ## Features
 
+- **Multi configurations for privacy** Share a particular branch, default branch or show an option to your viewers to select from a dropdown of all available branches.
+- **Allow viewers to download or not** An option enables you to let users clone your repo (no commits or history, just files) from the branch you shared.
+- **Auto-revoke timer.** Optionally set a link to expire after a number of days, weeks, months, or years — or never.
+- **Share releases or not** Your choice, you can show releases and allow users to download the files from release. Or you can choose not to do so and they won't be able to see it (even if they typed `/releases` into the url)
 - **No account for recipients.** They just open the link and read.
 - **Full read-only file browser.** Folders, files, an expandable file tree, and a "find a file" search across the whole repo.
-- **Syntax highlighting** for code and **rendered Markdown** — READMEs display formatted, the way they do on GitHub.
-- **README front and center.** Opening a repo shows its README first.
-- **Auto-revoke timer.** Optionally set a link to expire after a number of days, weeks, months, or years — or never.
+- **Syntax highlighting** for code.
 - **One dashboard.** See every repo, which ones are shared, copy or revoke links, filter and search.
-- **You hold the keys.** Grant or revoke access anytime from GitHub; revoking takes effect right away.
+- **Uninstall the app to remove your access at once** Grant or revoke access anytime from GitHub; revoking takes effect right away.
 
 ## Privacy
 
