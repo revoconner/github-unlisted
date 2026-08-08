@@ -17,7 +17,8 @@ import type { ViewerPayload } from "@/lib/viewer-data";
 
 function Notice({ title, detail }: { title: string; detail?: string }) {
 	return (
-		<div className="notice-screen">
+		// viewer-shell so the notice resolves the viewer's --gh-* tokens.
+		<div className="viewer-shell notice-screen">
 			<h1>{title}</h1>
 			{detail && <p>{detail}</p>}
 			<Link href="/">Home</Link>
@@ -76,8 +77,9 @@ function ViewerShell({
 	children: ReactNode;
 }) {
 	return (
-		<div className="page-shell">
-			<div className="bloom" aria-hidden="true" />
+		// viewer-shell scopes the branch's GitHub-like tokens/theme to this
+		// surface only; page-shell (globals.css) supplies the flex layout.
+		<div className="page-shell viewer-shell">
 			<header className="topbar">
 				<a className="wordmark" href="/" aria-label="github unlisted home">
 					<span className="mark" aria-hidden="true">
@@ -409,7 +411,7 @@ export function ViewerContent({
 
 	if (state.status === "loading") {
 		return (
-			<div className="notice-screen">
+			<div className="viewer-shell notice-screen">
 				<h1>Loading…</h1>
 			</div>
 		);

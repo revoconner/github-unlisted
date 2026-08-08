@@ -1,5 +1,5 @@
-import "@/styles/app.css";
-import "@/styles/app_override.css";
+import "@/styles/viewer.css";
+import "@/styles/viewer_override.css";
 import { ViewerContent } from "@/components/viewer-content";
 import { pageMetadata } from "@/lib/seo";
 

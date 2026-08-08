@@ -1,0 +1,68 @@
+/* github unlisted - breakpoint overrides for the viewer. Loaded right
+   after viewer.css.
+
+   Padding and type are clamp-driven, so nothing here re-tunes a size.
+   What is left is layout switching. */
+
+/* Tablet band - narrow the file tree. */
+@media (max-width: 1250px) {
+	.viewer {
+		grid-template-columns: 240px 1fr;
+	}
+}
+
+/* Sheet breakpoint - the sidebar leaves the grid and becomes a fixed
+   overlay opened via the .viewer__tree-toggle button. It opens from the
+   left to match the toggle, which sits left in the topinfo bar. */
+@media (max-width: 900px) {
+	.viewer {
+		grid-template-columns: 1fr;
+	}
+	.viewer__sidebar {
+		position: fixed;
+		top: 0;
+		left: 0;
+		bottom: 0;
+		width: 320px;
+		max-width: 86vw;
+		z-index: 61;
+		background: var(--gh-canvas);
+		border-right: 1px solid var(--gh-border);
+		box-shadow: var(--shadow-menu);
+		transform: translateX(-100%);
+		transition: transform 0.25s ease;
+	}
+	body[data-viewer-tree="open"] .viewer__sidebar {
+		transform: translateX(0);
+	}
+	.viewer__tree-toggle {
+		display: inline-flex;
+	}
+}
+
+/* Phone - the content card loses its side gutters so a code line gets
+   the full width, and the file/readme boxes go edge to edge. */
+@media (max-width: 760px) {
+	.filebar {
+		margin: 0;
+		border-radius: 0;
+		border-left: 0;
+		border-right: 0;
+	}
+	.codeblock {
+		margin: 0;
+		border-radius: 0;
+		border-left: 0;
+		border-right: 0;
+	}
+	.readme {
+		margin: 0;
+		padding: var(--sp-5);
+		border-radius: 0;
+		border-left: 0;
+		border-right: 0;
+	}
+	.releases {
+		padding: var(--sp-4) var(--sp-3);
+	}
+}

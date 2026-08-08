@@ -1,0 +1,686 @@
+/* github unlisted - the VIEWER stylesheet. This is the one surface that
+   deliberately departs from the site language: the recipient's read-only
+   file browser. Everything else (home, FAQ, privacy, status, dashboard)
+   shares normal.css.
+
+   WHY IT LOOKS LIKE GITHUB: the recipient is the owner's customer, not
+   ours. They did not ask for our product and may never see it again, so
+   the fastest thing we can give them is an interface they already know
+   how to read. This is a family resemblance, not a clone: GitHub's
+   proportions, borders and surface logic, on our own accent and type.
+
+   That means the viewer inverts two of the site's rules on purpose:
+   - Surfaces are BORDERED. GitHub separates panels with a visible
+     1px line rather than a surface step, and that line is what makes a
+     dense file listing scannable.
+   - Radii are a flat 6px, GitHub's single corner value, rather than the
+     site's 6/8/10/12 ladder.
+
+   Monospace also appears HERE and nowhere else on the site, and only on
+   actual code: the code block's <pre>, and <pre>/<code> inside a
+   rendered README.
+
+   Adopted from the style-update-aug26 branch and imported ONLY by the
+   viewer route ([...slug]); no other page loads it. The reset, page shell
+   and site-wide tokens still come from globals.css; the few tokens that
+   branch kept in globals but this file needs are redefined, scoped to
+   .viewer-shell, in the block below so no other page is affected.
+   Breakpoint overrides live in viewer_override.css. */
+
+/* Scoped to .viewer-shell rather than :root so nothing here can leak into
+   the site pages, which share the same document and the same globals. */
+.viewer-shell {
+	/* The canvas the recipient sees, and the ramp around it. */
+	--gh-canvas: hsl(212, 18.5%, 15.9%);
+	--gh-inset: hsl(212, 20%, 12.5%);
+	--gh-raised: hsl(212, 16%, 19%);
+	--gh-raised-hover: hsl(212, 15%, 23%);
+	/* Deliberately light. On a canvas this dark a timid border disappears,
+	   and the border is doing the structural work here. */
+	--gh-border: hsl(212, 11%, 32%);
+	--gh-border-muted: hsl(212, 12%, 25%);
+
+	--gh-fg: hsl(210, 30%, 92%);
+	--gh-fg-muted: hsl(212, 9%, 61%);
+	--gh-fg-subtle: hsl(212, 9%, 48%);
+
+	/* One corner value everywhere, GitHub-style. */
+	--gh-r: 6px;
+	/* Control height for the toolbar row. */
+	--gh-ctl-h: 2rem;
+
+	/* Tokens this stylesheet needs that the site's globals.css does not
+	   define. On the style-update-aug26 branch these live in globals.css;
+	   here they are scoped to .viewer-shell so the viewer can adopt that
+	   branch's look without changing any other page. --font-mono matches
+	   that branch's deliberate viewer choice: a system stack, no webfont,
+	   applied only to the code block's <pre>. */
+	--font-mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+	--scrim: hsla(0, 0%, 0%, 0.6);
+	--shadow-menu: 0 8px 24px hsla(0, 0%, 0%, 0.5);
+	--sp-1: clamp(4px, 0.1vw + 0.2rem, 6px);
+	--sp-2: clamp(6px, 0.15vw + 0.3rem, 9px);
+	--sp-3: clamp(8px, 0.2vw + 0.4rem, 12px);
+	--sp-4: clamp(10px, 0.3vw + 0.5rem, 16px);
+	--sp-5: clamp(14px, 0.45vw + 0.62rem, 22px);
+	--sp-6: clamp(18px, 0.65vw + 0.75rem, 28px);
+	--sp-7: clamp(22px, 1vw + 0.9rem, 40px);
+
+	background: var(--gh-canvas);
+	color: var(--gh-fg);
+}
+
+/* The global chrome sits on the viewer canvas too, so the page reads as
+   one surface rather than our nav bolted onto someone else's app. */
+.viewer-shell .topbar,
+.viewer-shell .site-footer {
+	background: var(--gh-canvas);
+	border-color: var(--gh-border-muted);
+}
+.viewer-shell main {
+	background: var(--gh-canvas);
+}
+.viewer-shell .wordmark .mark {
+	background: var(--gh-raised);
+	border-color: var(--gh-border);
+}
+
+.topbar__meta {
+	font-size: var(--fs-caption);
+	color: var(--gh-fg-muted);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	min-width: 0;
+}
+
+/* --- Viewer shell --- */
+/* The viewer <main> grows to fill the gap between topbar and footer;
+   min-height:0 lets the inner panes own their scroll. */
+.viewer {
+	flex: 1;
+	min-height: 0;
+	display: grid;
+	grid-template-columns: 300px 1fr;
+}
+/* The releases view has no file tree, so it drops the sidebar column. */
+.viewer--wide {
+	grid-template-columns: 1fr;
+}
+
+.viewer__sidebar {
+	border-right: 1px solid var(--gh-border-muted);
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	overflow: hidden;
+}
+.viewer__sidebar-search {
+	padding: var(--sp-3);
+}
+
+/* GitHub's field: an inset well inside a visible border. */
+.field {
+	display: flex;
+	align-items: center;
+	gap: var(--sp-2);
+	height: var(--gh-ctl-h);
+	padding: 0 var(--sp-3);
+	border-radius: var(--gh-r);
+	background: var(--gh-inset);
+	border: 1px solid var(--gh-border);
+	transition:
+		border-color 0.15s ease,
+		box-shadow 0.15s ease;
+}
+.field:focus-within {
+	border-color: var(--accent);
+	box-shadow: 0 0 0 3px rgb(from var(--accent) r g b / 0.25);
+}
+.field input {
+	flex: 1;
+	min-width: 0;
+	background: transparent;
+	border: 0;
+	outline: 0;
+	color: var(--gh-fg);
+	font-size: var(--fs-caption);
+}
+.field input::placeholder {
+	color: var(--gh-fg-subtle);
+}
+.field__icon {
+	display: flex;
+	color: var(--gh-fg-muted);
+}
+
+/* --- File tree --- */
+.tree {
+	padding: 0 var(--sp-2) var(--sp-3);
+	overflow-y: auto;
+	flex: 1;
+}
+.tree__row {
+	display: flex;
+	align-items: center;
+	gap: var(--sp-2);
+	padding: 5px var(--sp-2);
+	border-radius: var(--gh-r);
+	font-size: var(--fs-caption);
+	color: var(--gh-fg);
+	cursor: pointer;
+	transition: background 0.1s ease;
+}
+@media (hover: hover) {
+	.tree__row:hover {
+		background: var(--gh-raised);
+	}
+}
+/* GitHub tints the open file rather than filling it, so a long tree does
+   not turn into a stripe of solid colour. */
+.tree__row[aria-current="true"] {
+	background: rgb(from var(--accent) r g b / 0.16);
+	font-weight: 600;
+}
+@media (hover: hover) {
+	.tree__row[aria-current="true"]:hover {
+		background: rgb(from var(--accent) r g b / 0.22);
+	}
+}
+.tree__row--highlight {
+	color: var(--accent);
+}
+.tree__row--depth-2 {
+	padding-left: 24px;
+}
+.tree__row--depth-3 {
+	padding-left: 38px;
+}
+.tree__row a {
+	color: inherit;
+	display: flex;
+	align-items: center;
+	gap: var(--sp-2);
+	width: 100%;
+}
+.tree__btn {
+	width: 100%;
+	background: none;
+	border: 0;
+	font: inherit;
+	text-align: left;
+	color: inherit;
+	cursor: pointer;
+}
+.tree__chev {
+	color: var(--gh-fg-muted);
+	display: flex;
+	margin-left: -3px;
+	transition: transform 0.12s ease;
+}
+.tree__chev.is-open {
+	transform: rotate(90deg);
+}
+.tree__row .chev {
+	color: var(--gh-fg-muted);
+	margin-left: -3px;
+	display: flex;
+}
+/* GitHub's folder and file glyphs are both muted; the folder is not
+   coloured, which keeps a deep tree calm. */
+.tree__row .icon-d,
+.tree__row .icon-f {
+	color: var(--gh-fg-muted);
+	display: flex;
+}
+.tree__empty {
+	padding: var(--sp-4) var(--sp-2);
+	color: var(--gh-fg-muted);
+	font-size: var(--fs-caption);
+}
+
+/* --- Buttons (the GitHub button: raised fill, visible border, 6px) --- */
+.viewer__dl,
+.viewer__tab,
+.viewer__tree-toggle,
+.branchsw__sel {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--sp-2);
+	height: var(--gh-ctl-h);
+	padding: 0 var(--sp-3);
+	border: 1px solid var(--gh-border);
+	border-radius: var(--gh-r);
+	background: var(--gh-raised);
+	color: var(--gh-fg);
+	font-size: var(--fs-caption);
+	font-weight: 500;
+	white-space: nowrap;
+	cursor: pointer;
+	transition:
+		background 0.15s ease,
+		border-color 0.15s ease;
+}
+@media (hover: hover) {
+	.viewer__dl:hover,
+	.viewer__tab:hover,
+	.viewer__tree-toggle:hover,
+	.branchsw__sel:hover {
+		background: var(--gh-raised-hover);
+	}
+}
+.viewer__tree-toggle {
+	display: none;
+}
+.viewer__tree-toggle svg {
+	width: 12px;
+	height: 12px;
+}
+.viewer__tree-backdrop {
+	display: none;
+	position: fixed;
+	inset: 0;
+	background: var(--scrim);
+	z-index: 60;
+	border: 0;
+	padding: 0;
+	cursor: pointer;
+}
+body[data-viewer-tree="open"] .viewer__tree-backdrop {
+	display: block;
+}
+
+/* --- Breadcrumb / toolbar strip --- */
+.viewer__main {
+	overflow: auto;
+	min-width: 0;
+}
+.viewer__topinfo {
+	display: flex;
+	align-items: center;
+	gap: var(--sp-3);
+	padding: var(--sp-3) var(--sp-5);
+	border-bottom: 1px solid var(--gh-border-muted);
+	font-size: var(--fs-ui);
+	color: var(--gh-fg-muted);
+	background: var(--gh-canvas);
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	flex-wrap: wrap;
+}
+.viewer__topinfo a {
+	color: var(--accent);
+	font-weight: 600;
+}
+@media (hover: hover) {
+	.viewer__topinfo a:hover {
+		text-decoration: underline;
+	}
+}
+.viewer__topinfo .sep {
+	color: var(--gh-fg-subtle);
+	font-weight: 400;
+}
+.viewer__crumbs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--sp-1);
+	align-items: center;
+	min-width: 0;
+}
+
+.branchsw {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--sp-2);
+	font-size: var(--fs-caption);
+	color: var(--gh-fg-muted);
+}
+.branchsw__label {
+	white-space: nowrap;
+}
+.branchsw__sel {
+	max-width: 180px;
+}
+.branchsw__sel:focus,
+.viewer__dl:focus-visible,
+.viewer__tab:focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: -1px;
+}
+
+/* --- Content card ---
+   GitHub wraps a file (or a README) in a bordered, rounded box with its
+   own header strip. That box is what makes the content read as a
+   document rather than as page background. */
+.filebar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--sp-3);
+	padding: var(--sp-3) var(--sp-4);
+	background: var(--gh-raised);
+	border: 1px solid var(--gh-border-muted);
+	border-radius: var(--gh-r) var(--gh-r) 0 0;
+	border-bottom: 1px solid var(--gh-border-muted);
+	margin: var(--sp-4) var(--sp-5) 0;
+	font-size: var(--fs-caption);
+	color: var(--gh-fg-muted);
+	flex-wrap: wrap;
+}
+
+/* --- Code block (the ONLY monospace on the site) --- */
+.codeblock {
+	margin: 0 var(--sp-5) var(--sp-5);
+	border: 1px solid var(--gh-border-muted);
+	border-top: 0;
+	border-radius: 0 0 var(--gh-r) var(--gh-r);
+	overflow: hidden;
+}
+.codeblock pre,
+.codeblock pre.shiki {
+	margin: 0;
+	padding: var(--sp-4);
+	font-family: var(--font-mono);
+	font-size: 12.75px;
+	line-height: 1.5;
+	overflow: auto;
+	/* biome-ignore lint/complexity/noImportantStyles: must override Shiki's inline background-color */
+	background: var(--gh-inset) !important;
+	border-radius: 0;
+}
+.codeblock--plain pre {
+	color: var(--gh-fg);
+	white-space: pre;
+}
+
+/* --- Rendered README --- */
+/* GitHub's README pane: the same bordered card, generous inner padding,
+   and a max measure so long prose does not run the full width. */
+.readme {
+	margin: var(--sp-5);
+	padding: var(--sp-7);
+	background: var(--gh-canvas);
+	border: 1px solid var(--gh-border-muted);
+	border-radius: var(--gh-r);
+	color: var(--gh-fg);
+	font-size: var(--fs-body);
+	line-height: 1.6;
+	max-width: 1012px;
+}
+.readme h1 {
+	margin: 0 0 var(--sp-4);
+	font-size: var(--fs-h1);
+	font-weight: 600;
+	color: var(--gh-fg);
+}
+.readme h2 {
+	margin: var(--sp-7) 0 var(--sp-4);
+	font-size: var(--fs-h2);
+	font-weight: 600;
+	color: var(--gh-fg);
+}
+.readme h1,
+.readme h2 {
+	padding-bottom: 0.3em;
+	border-bottom: 1px solid var(--gh-border-muted);
+}
+.readme h3 {
+	margin: var(--sp-6) 0 var(--sp-3);
+	font-size: var(--fs-h3);
+	font-weight: 600;
+	color: var(--gh-fg);
+}
+.readme h4,
+.readme h5,
+.readme h6 {
+	margin: var(--sp-5) 0 var(--sp-2);
+	font-size: var(--fs-body);
+	font-weight: 600;
+	color: var(--gh-fg);
+}
+.readme h6 {
+	color: var(--gh-fg-muted);
+}
+.readme p {
+	margin: 0 0 var(--sp-4);
+}
+.readme :not(pre) > code {
+	font-family: var(--font-mono);
+	background: rgb(from var(--gh-fg) r g b / 0.1);
+	padding: 0.2em 0.4em;
+	border-radius: var(--gh-r);
+	color: var(--gh-fg);
+	font-size: 0.85em;
+}
+.readme pre {
+	background: var(--gh-inset);
+	border-radius: var(--gh-r);
+	padding: var(--sp-4);
+	font-family: var(--font-mono);
+	font-size: 13px;
+	line-height: 1.45;
+	color: var(--gh-fg);
+	margin: 0 0 var(--sp-4);
+	overflow: auto;
+}
+.readme pre code {
+	background: none;
+	padding: 0;
+	border-radius: 0;
+	color: inherit;
+	font-size: inherit;
+}
+.readme a {
+	color: var(--accent);
+}
+@media (hover: hover) {
+	.readme a:hover {
+		text-decoration: underline;
+	}
+}
+.readme ul,
+.readme ol {
+	margin: 0 0 var(--sp-4);
+	padding-left: 2em;
+}
+.readme ul {
+	list-style: disc;
+}
+.readme ol {
+	list-style: decimal;
+}
+.readme li {
+	margin: 0.25em 0;
+}
+.readme li > ul,
+.readme li > ol {
+	margin: 0.25em 0 0.5em;
+}
+.readme li::marker {
+	color: var(--gh-fg-muted);
+}
+.readme li.task-list-item {
+	list-style: none;
+	margin-left: -1.4em;
+}
+.readme li.task-list-item input {
+	margin-right: var(--sp-2);
+	accent-color: var(--accent);
+}
+/* GitHub's blockquote: a muted bar and muted text, not an accent bar. */
+.readme blockquote {
+	margin: 0 0 var(--sp-4);
+	padding: 0 1em;
+	border-left: 0.25em solid var(--gh-border);
+	color: var(--gh-fg-muted);
+}
+.readme hr {
+	border: 0;
+	height: 0.25em;
+	background: var(--gh-border-muted);
+	margin: var(--sp-6) 0;
+}
+.readme img {
+	max-width: 100%;
+	height: auto;
+	border-radius: var(--gh-r);
+}
+.readme strong {
+	color: var(--gh-fg);
+	font-weight: 600;
+}
+.readme em {
+	font-style: italic;
+}
+.readme table {
+	border-collapse: collapse;
+	margin: 0 0 var(--sp-4);
+	display: block;
+	width: max-content;
+	max-width: 100%;
+	overflow: auto;
+}
+.readme th,
+.readme td {
+	border: 1px solid var(--gh-border);
+	padding: 6px 13px;
+	text-align: left;
+}
+.readme th {
+	background: var(--gh-raised);
+	color: var(--gh-fg);
+	font-weight: 600;
+}
+/* GitHub zebra-stripes long tables, which is the thing that makes a wide
+   one readable without vertical rules doing all the work. */
+.readme tr:nth-child(2n) td {
+	background: var(--gh-raised);
+}
+
+/* --- Releases view --- */
+.releases {
+	display: flex;
+	flex-direction: column;
+	gap: var(--sp-4);
+	padding: var(--sp-5);
+}
+.release {
+	border: 1px solid var(--gh-border-muted);
+	border-radius: var(--gh-r);
+	background: var(--gh-canvas);
+	padding: var(--sp-5);
+}
+.release__head {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: var(--sp-2);
+	margin-bottom: var(--sp-3);
+	padding-bottom: var(--sp-3);
+	border-bottom: 1px solid var(--gh-border-muted);
+}
+.release__name {
+	font-size: var(--fs-h3);
+	font-weight: 600;
+	color: var(--gh-fg);
+	margin: 0 var(--sp-1) 0 0;
+}
+.release__tag {
+	font-family: var(--font-mono);
+	color: var(--gh-fg-muted);
+}
+.release__date {
+	margin-left: auto;
+	font-size: var(--fs-caption);
+	color: var(--gh-fg-muted);
+}
+.release__body {
+	margin-bottom: var(--sp-4);
+}
+.release__empty {
+	color: var(--gh-fg-muted);
+	font-size: var(--fs-caption);
+	margin: 0 0 var(--sp-4) 0;
+}
+/* Assets are their own bordered box under the notes, as on GitHub. */
+.release__assets {
+	display: flex;
+	flex-direction: column;
+	border: 1px solid var(--gh-border-muted);
+	border-radius: var(--gh-r);
+	overflow: hidden;
+}
+.release__asset {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--sp-3);
+	padding: var(--sp-3) var(--sp-4);
+	border-bottom: 1px solid var(--gh-border-muted);
+	color: var(--accent);
+	font-size: var(--fs-ui);
+	font-weight: 500;
+}
+.release__asset:last-child {
+	border-bottom: none;
+}
+.release__asset-name {
+	overflow-wrap: anywhere;
+}
+.release__asset-size {
+	color: var(--gh-fg-muted);
+	font-size: var(--fs-caption);
+	font-weight: 400;
+	white-space: nowrap;
+}
+@media (hover: hover) {
+	.release__asset:hover {
+		background: var(--gh-raised);
+	}
+	.release__asset:hover .release__asset-name {
+		text-decoration: underline;
+	}
+}
+
+/* --- Notice screen (revoked / not found) --- */
+.notice-screen {
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: var(--sp-3);
+	text-align: center;
+	padding: var(--sp-6);
+}
+.notice-screen h1 {
+	margin: 0;
+	font-size: var(--fs-h2);
+	font-weight: 600;
+	color: var(--gh-fg);
+}
+.notice-screen p {
+	color: var(--gh-fg-muted);
+	font-size: var(--fs-body);
+	max-width: 460px;
+	margin: 0;
+}
+.notice-screen a {
+	color: var(--accent);
+	font-size: var(--fs-ui);
+}
+@media (hover: hover) {
+	.notice-screen a:hover {
+		text-decoration: underline;
+	}
+}
+
+/* Kept last on purpose. It is more specific than the plain `a` rules
+   above (.tree__row a, .readme a, ...), so ordering it here stops it
+   from shadowing them in the cascade. */
+.viewer-shell .site-footer,
+.viewer-shell .site-footer a {
+	color: var(--gh-fg-muted);
+}
