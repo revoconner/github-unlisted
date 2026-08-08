@@ -115,13 +115,6 @@
 	opacity: 0.55;
 }
 .bracket-word .word {
-	font-family: var(--font-sans);
-	font-style: italic;
-	font-weight: 400;
-	color: var(--accent);
-	line-height: 1;
-	letter-spacing: -0.025em;
-	text-shadow: 0 0 10px rgb(from var(--accent) r g b / 0.4);
 }
 
 .hero-cta {
