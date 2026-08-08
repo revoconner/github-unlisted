@@ -5,12 +5,9 @@ import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import * as React from "react";
 import { BranchSwitcher } from "@/components/branch-switcher";
-import { NavLinks } from "@/components/nav-links";
 import { ReleasesList } from "@/components/releases-list";
 import { RepoTree } from "@/components/repo-tree";
 import { SidebarTree } from "@/components/sidebar-tree";
-import { SiteDrawer } from "@/components/site-drawer";
-import { SiteFooter } from "@/components/site-footer";
 import { ViewerTreeToggle } from "@/components/viewer-tree-toggle";
 import { buildHref, buildReleasesHref } from "@/lib/repo-path";
 import type { ViewerPayload } from "@/lib/viewer-data";
@@ -64,16 +61,16 @@ function FileIcon() {
 	);
 }
 
-// Chrome shared by the file view and the releases view: wordmark, primary nav, the repo/ref readout, and the footer.
+// Chrome shared by the file view and the releases view. The viewer carries
+// none of the site's own navigation: recipients get an attribution line and
+// the repo/ref readout, nothing else.
 function ViewerShell({
 	fullName,
 	refName,
-	signedIn,
 	children,
 }: {
 	fullName: string;
 	refName: string;
-	signedIn: boolean;
 	children: ReactNode;
 }) {
 	return (
@@ -81,60 +78,87 @@ function ViewerShell({
 		// surface only; page-shell (globals.css) supplies the flex layout.
 		<div className="page-shell viewer-shell">
 			<header className="topbar">
-				<a className="wordmark" href="/" aria-label="github unlisted home">
-					<span className="mark" aria-hidden="true">
-						<svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-							<title>unlisted</title>
-							<line
-								x1="2"
-								y1="11"
-								x2="11"
-								y2="2"
-								stroke="currentColor"
-								strokeWidth="1.6"
-								strokeLinecap="round"
-							/>
-							<line
-								x1="5"
-								y1="14"
-								x2="14"
-								y2="5"
-								stroke="currentColor"
-								strokeWidth="1.6"
-								strokeLinecap="round"
-								opacity="0.55"
-							/>
-							<line
-								x1="8"
-								y1="17"
-								x2="17"
-								y2="8"
-								stroke="currentColor"
-								strokeWidth="1.6"
-								strokeLinecap="round"
-								opacity="0.25"
-							/>
-						</svg>
-					</span>
-					<span className="word">
-						<span className="pre">github</span>{" "}
-						<span className="post">unlisted</span>
-					</span>
-				</a>
-
-				<NavLinks signedIn={signedIn} />
-
-				<div className="topbar__right">
-					<span className="topbar__meta">
-						{fullName} · {refName}
-					</span>
-					<SiteDrawer signedIn={signedIn} />
-				</div>
+				<span className="viewer-attrib">
+					Private repo shared using{" "}
+					<a
+						href="https://github-unlisted.com"
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						Github-Unlisted
+					</a>{" "}
+					by{" "}
+					<a
+						href="https://revoconner.com"
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						Rév
+					</a>
+				</span>
+				<span className="topbar__meta">
+					{fullName} · {refName}
+				</span>
 			</header>
 
 			{children}
-			<SiteFooter />
 		</div>
+	);
+}
+
+// Rendered markdown with the repo-relative links repaired. The HTML arrives
+// with the hrefs the author wrote ("LICENSE", "docs/setup.md"); the browser
+// resolves those against the current /owner/repo/blob/ref/... URL, which is
+// the right path but LOSES the ?s= share query — so every relative link died
+// on a "share link required" screen. Same-origin links get the share id
+// appended; external links open in a new tab.
+function RepoHtml({
+	html,
+	className,
+	shareId,
+}: {
+	html: string;
+	className: string;
+	shareId: string;
+}) {
+	const ref = React.useRef<HTMLDivElement>(null);
+
+	// html is a real dependency even though the body never reads it: a new
+	// html string replaces the markup, re-creating the anchors, and the
+	// rewrite has to run again over that fresh DOM.
+	// biome-ignore lint/correctness/useExhaustiveDependencies: html drives the DOM this effect mutates
+	React.useEffect(() => {
+		const root = ref.current;
+		if (!root) return;
+		for (const a of Array.from(root.querySelectorAll("a[href]"))) {
+			const raw = a.getAttribute("href") ?? "";
+			// In-page anchors stay as they are.
+			if (raw.startsWith("#")) continue;
+			let url: URL;
+			try {
+				// a.href would also work, but going through the attribute keeps
+				// this robust if the effect ever re-runs over rewritten links.
+				url = new URL(raw, window.location.href);
+			} catch {
+				continue;
+			}
+			if (url.origin !== window.location.origin) {
+				a.setAttribute("target", "_blank");
+				a.setAttribute("rel", "noopener noreferrer");
+				continue;
+			}
+			if (!url.searchParams.has("s")) url.searchParams.set("s", shareId);
+			a.setAttribute("href", `${url.pathname}${url.search}${url.hash}`);
+		}
+	}, [html, shareId]);
+
+	return (
+		<div
+			ref={ref}
+			className={className}
+			// biome-ignore lint/security/noDangerouslySetInnerHtml: GitHub-sanitized HTML (or markdown-it html:false fallback)
+			dangerouslySetInnerHTML={{ __html: html }}
+		/>
 	);
 }
 
@@ -145,11 +169,7 @@ function ReleasesView({
 }) {
 	const { owner, repo, shareId, refName } = payload;
 	return (
-		<ViewerShell
-			fullName={payload.fullName}
-			refName={refName}
-			signedIn={payload.signedIn}
-		>
+		<ViewerShell fullName={payload.fullName} refName={refName}>
 			<main className="viewer viewer--wide">
 				<section className="viewer__main">
 					<div className="viewer__topinfo">
@@ -193,8 +213,33 @@ function FileOrDirView({
 		fullName,
 	} = payload;
 
+	// Soft wrap for code — the highlighted file view AND fenced blocks inside a
+	// markdown preview (the CSS keys off data-wrap on the content pane). The
+	// choice is remembered across files and visits.
+	const [wrap, setWrap] = React.useState(
+		() =>
+			typeof window !== "undefined" &&
+			window.localStorage.getItem("viewer:wrap") === "1",
+	);
+	const toggleWrap = () =>
+		setWrap((w) => {
+			try {
+				window.localStorage.setItem("viewer:wrap", w ? "0" : "1");
+			} catch {
+				// Private-mode storage failures just lose the persistence.
+			}
+			return !w;
+		});
+
+	// A markdown file with both renderings gets Preview/Code tabs, preview
+	// first. The component is keyed by path at the call site, so the tab
+	// resets to Preview on every navigation.
+	const hasMdTabs = Boolean(mdHtml && codeHtml);
+	const [mdTab, setMdTab] = React.useState<"preview" | "code">("preview");
+	const showPreview = Boolean(mdHtml) && (!hasMdTabs || mdTab === "preview");
+
 	return (
-		<ViewerShell fullName={fullName} refName={ref} signedIn={payload.signedIn}>
+		<ViewerShell fullName={fullName} refName={ref}>
 			<main className="viewer">
 				<aside className="viewer__sidebar">
 					{fullTree ? (
@@ -219,9 +264,19 @@ function FileOrDirView({
 					)}
 				</aside>
 
-				<section className="viewer__main">
+				<section className="viewer__main" data-wrap={wrap ? "on" : undefined}>
 					<div className="viewer__topinfo">
 						<ViewerTreeToggle />
+						{contents.kind === "file" && !contents.isBinary && (
+							<button
+								type="button"
+								className="viewer__tab viewer__wrap"
+								aria-pressed={wrap}
+								onClick={toggleWrap}
+							>
+								Soft wrap
+							</button>
+						)}
 						{branches && branches.length > 1 && (
 							<BranchSwitcher
 								owner={owner}
@@ -304,6 +359,32 @@ function FileOrDirView({
 								<span>
 									{contents.name} · {contents.size} bytes
 								</span>
+								{hasMdTabs && (
+									<div
+										className="filebar__tabs"
+										role="tablist"
+										aria-label="Markdown view"
+									>
+										<button
+											type="button"
+											role="tab"
+											className="filebar__tab"
+											aria-selected={mdTab === "preview"}
+											onClick={() => setMdTab("preview")}
+										>
+											Preview
+										</button>
+										<button
+											type="button"
+											role="tab"
+											className="filebar__tab"
+											aria-selected={mdTab === "code"}
+											onClick={() => setMdTab("code")}
+										>
+											Code
+										</button>
+									</div>
+								)}
 								<a
 									href={`https://github.com/${fullName}/blob/${ref}/${path}`}
 									target="_blank"
@@ -314,12 +395,8 @@ function FileOrDirView({
 							</div>
 							{contents.isBinary ? (
 								<div className="tree__empty">Binary file not shown.</div>
-							) : mdHtml ? (
-								<div
-									className="readme"
-									// biome-ignore lint/security/noDangerouslySetInnerHtml: GitHub-sanitized HTML (or markdown-it html:false fallback)
-									dangerouslySetInnerHTML={{ __html: mdHtml }}
-								/>
+							) : showPreview && mdHtml ? (
+								<RepoHtml className="readme" html={mdHtml} shareId={shareId} />
 							) : codeHtml ? (
 								<div
 									className="codeblock"
@@ -358,7 +435,7 @@ export function ViewerContent({
 	const router = useRouter();
 	const [state, setState] = React.useState<FetchState>({ status: "loading" });
 
-	const slugKey = slug.join(" ");
+	const slugKey = slug.join("\u0000");
 	// Keep the freshest slug for the request without making the array itself an
 	// effect dependency (a new array every render would refetch in a loop).
 	const slugRef = React.useRef(slug);
@@ -446,5 +523,12 @@ export function ViewerContent({
 	if (payload.kind === "releases") {
 		return <ReleasesView payload={payload} />;
 	}
-	return <FileOrDirView payload={payload} />;
+	// Keyed by ref+path so per-file state (the markdown Preview/Code tab)
+	// resets on every navigation instead of leaking to the next file.
+	return (
+		<FileOrDirView
+			key={`${payload.refName}:${payload.path}`}
+			payload={payload}
+		/>
+	);
 }

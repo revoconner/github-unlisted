@@ -239,6 +239,10 @@ export async function resolveViewer(
 	let codeHtml: string | null = null;
 	let mdHtml: string | null = null;
 	if (contents.kind === "file" && !contents.isBinary && contents.text) {
+		// Every text file gets highlighted source. A markdown file gets the
+		// rendered preview AS WELL, so the client can offer Preview/Code tabs
+		// (preview is the default; both present = show the tabs).
+		codeHtml = await highlight(contents.text, contents.name);
 		if (isMarkdown(contents.name)) {
 			mdHtml =
 				(await renderMarkdownGitHub(
@@ -247,8 +251,6 @@ export async function resolveViewer(
 					target.repo,
 					contents.text,
 				)) ?? renderMarkdown(contents.text);
-		} else {
-			codeHtml = await highlight(contents.text, contents.name);
 		}
 	}
 

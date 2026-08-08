@@ -44,6 +44,10 @@
 	--gh-fg-muted: hsl(212, 9%, 61%);
 	--gh-fg-subtle: hsl(212, 9%, 48%);
 
+	/* GitHub dark's link blue replaces the site's orange accent inside the
+	   viewer. Scoped here, every rgb(from var(--accent) ...) tint follows. */
+	--accent: #4493f8;
+
 	/* One corner value everywhere, GitHub-style. */
 	--gh-r: 6px;
 	/* Control height for the toolbar row. */
@@ -70,19 +74,31 @@
 	color: var(--gh-fg);
 }
 
-/* The global chrome sits on the viewer canvas too, so the page reads as
-   one surface rather than our nav bolted onto someone else's app. */
-.viewer-shell .topbar,
-.viewer-shell .site-footer {
+/* The topbar (globals.css supplies its layout) sits on the viewer canvas
+   so the page reads as one surface. The viewer carries no site nav or
+   footer — the bar holds only the attribution line and the repo readout. */
+.viewer-shell .topbar {
 	background: var(--gh-canvas);
 	border-color: var(--gh-border-muted);
 }
 .viewer-shell main {
 	background: var(--gh-canvas);
 }
-.viewer-shell .wordmark .mark {
-	background: var(--gh-raised);
-	border-color: var(--gh-border);
+
+/* "Private repo shared using Github-Unlisted by Rév" */
+.viewer-attrib {
+	font-size: var(--fs-caption);
+	color: var(--gh-fg-muted);
+	min-width: 0;
+}
+.viewer-attrib a {
+	color: var(--accent);
+	font-weight: 500;
+}
+@media (hover: hover) {
+	.viewer-attrib a:hover {
+		text-decoration: underline;
+	}
 }
 
 .topbar__meta {
@@ -677,10 +693,52 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	}
 }
 
-/* Kept last on purpose. It is more specific than the plain `a` rules
-   above (.tree__row a, .readme a, ...), so ordering it here stops it
-   from shadowing them in the cascade. */
-.viewer-shell .site-footer,
-.viewer-shell .site-footer a {
+/* --- Soft wrap --- */
+/* The toggle sets data-wrap on the content pane; these rules then wrap
+   every code surface inside it — the highlighted file view, the plain
+   fallback <pre>, and fenced blocks embedded in a markdown preview. */
+.viewer__wrap[aria-pressed="true"] {
+	border-color: var(--accent);
+	color: var(--accent);
+	background: rgb(from var(--accent) r g b / 0.12);
+}
+.viewer__main[data-wrap="on"] pre,
+.viewer__main[data-wrap="on"] pre.shiki,
+.viewer__main[data-wrap="on"] pre code {
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+	word-break: break-word;
+}
+
+/* --- Markdown Preview/Code tabs (in the filebar) --- */
+.filebar__tabs {
+	display: inline-flex;
+	border: 1px solid var(--gh-border);
+	border-radius: var(--gh-r);
+	overflow: hidden;
+}
+.filebar__tab {
+	padding: 3px var(--sp-3);
+	background: transparent;
+	border: 0;
 	color: var(--gh-fg-muted);
+	font-size: var(--fs-caption);
+	font-weight: 500;
+	cursor: pointer;
+	transition:
+		background 0.15s ease,
+		color 0.15s ease;
+}
+.filebar__tab + .filebar__tab {
+	border-left: 1px solid var(--gh-border);
+}
+.filebar__tab[aria-selected="true"] {
+	background: var(--gh-raised-hover);
+	color: var(--gh-fg);
+	font-weight: 600;
+}
+@media (hover: hover) {
+	.filebar__tab:hover {
+		color: var(--gh-fg);
+	}
 }
