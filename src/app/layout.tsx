@@ -3,8 +3,10 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
 import { JsonLd } from "@/components/json-ld";
 import { SITE, siteGraphLd } from "@/lib/seo";
-import "./globals.css";
-import "./globals_override.css";
+// No CSS here on purpose: the root layout wraps EVERY route, and the viewer
+// must stay style-isolated from the site. Each page imports its own sheet:
+// global.css (site pages), global.css + dashboard.css (/app), viewer.css
+// ([...slug]).
 
 const sans = Geist({ subsets: ["latin"], variable: "--font-sans" });
 const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" });

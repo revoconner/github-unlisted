@@ -1,5 +1,4 @@
-import "@/styles/normal.css";
-import "@/styles/normal_override.css";
+import "@/styles/global.css";
 import { JsonLd } from "@/components/json-ld";
 import { NavLinks } from "@/components/nav-links";
 import { SiteDrawer } from "@/components/site-drawer";

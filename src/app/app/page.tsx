@@ -1,5 +1,5 @@
-import "@/styles/app.css";
-import "@/styles/app_override.css";
+import "@/styles/global.css";
+import "@/styles/dashboard.css";
 import { DashboardClient } from "@/components/dashboard-client";
 import { SiteFooter } from "@/components/site-footer";
 import { listInstallationRepos } from "@/lib/github-app";

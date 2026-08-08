@@ -1,0 +1,5 @@
+/* github unlisted - DASHBOARD stylesheet. Intentionally empty: the old
+   dashboard styles were dropped during the style consolidation because
+   the dashboard is being redesigned from scratch. The dashboard route
+   loads global.css (site chrome) plus this file; new dashboard-only
+   styles go here. */
