@@ -31,7 +31,6 @@ export default async function AppPage({
 			: null;
 		return (
 			<div className="page-shell">
-				<div className="bloom" aria-hidden="true" />
 				<main className="signin-screen">
 					<h1>Sign in to create a link</h1>
 					{sp.error && <p className="signin-error">{String(sp.error)}</p>}
@@ -118,7 +117,6 @@ export default async function AppPage({
 	if (loadError) {
 		return (
 			<div className="page-shell">
-				<div className="bloom" aria-hidden="true" />
 				<main className="signin-screen">
 					<h1>Couldn't load repositories</h1>
 					<p className="signin-error">{loadError}</p>

@@ -388,7 +388,6 @@ export function DashboardClient({
 
 	return (
 		<div className="page-shell">
-			<div className="bloom" aria-hidden="true" />
 			<header className="topbar">
 				<a className="wordmark" href="/" aria-label="github unlisted home">
 					<span className="mark" aria-hidden="true">
