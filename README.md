@@ -6,6 +6,13 @@
 
 Live at **[github-unlisted.com](https://github-unlisted.com)**. 
 
+<img width="1179" height="2240" alt="image" src="https://github.com/user-attachments/assets/31442188-71ed-4c6c-aadb-37bb311a5afd" />
+
+
+
+<img width="2196" height="1178" alt="image" src="https://github.com/user-attachments/assets/041dbf7e-cdd1-459a-86e6-b654388bdfe6" />
+
+
 ## What it is
 
 Sometimes you need to show someone a private repo — a client, a recruiter, a friend reviewing your work — without adding them as a collaborator or asking them to make a GitHub account. Unlisted Repo gives you a private link to a clean, read-only file browser for that repository. You stay in full control: access is granted and revoked by you, through GitHub.
