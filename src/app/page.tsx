@@ -72,19 +72,13 @@ export default async function Page() {
 			<main className="hero">
 				<div className="hero__inner">
 					<h1 className="hero__title">
-						Share Github private repository as
-						<br />
-						<span className="bracket-word">
-							<span className="word">unlisted</span>
-						</span>{" "}
-						repo.
+						Github-Unlisted
 					</h1>
 					<p className="hero__sub">
-						Share a private repo with a read-only link. No GitHub account needed
-						for the recipient. You retain all control.
+						Share a private repo with a read-only link. No GitHub account needed for the recipient. You retain all control. The service is free for use and open source.
 					</p>
 				</div>
-			</main>
+
 
 			<div className="hero-cta">
 				<div className="hero-cta__row">
@@ -106,21 +100,19 @@ export default async function Page() {
 							Install on GitHub
 						</a>
 					)}
-					<span className="hero-cta__divider" aria-hidden="true" />
 					<a
-						className="hero-cta__label"
+						className="btn hero-cta__label"
 						href="https://github.com/revoconner/github-unlisted"
 						target="_blank"
 						rel="noopener"
 					>
-						Source code
+						View Source Code
 					</a>
 				</div>
-				<div className="hero-cta__tagline">
-					Free and open source \ no hidden cost
-				</div>
-			</div>
 
+				
+			</div>
+			</main>
 			<SiteFooter />
 		</div>
 	);

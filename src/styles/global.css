@@ -14,7 +14,7 @@
 	   r g b / a) for tints, hsl(from var(--accent) h s l) for shades.
 	   Build-time OG/icon images can't read CSS vars - their source is
 	   ACCENT in src/lib/brand.ts; keep the two in sync. */
-	--accent: #4493f8;
+	--accent:  hsl(88.4, 46.4%, 64.41%);
 
 	/* Surfaces (shared site-wide) */
 	--bg: #0f0f0f;
@@ -25,11 +25,11 @@
 	--border-strong: #363a47;
 
 	/* Text - desaturated greyscale neutral scale */
-	--text: #f3f3f3;
-	--text-2: #bababa;
-	--text-3: #989898;
-	--muted: #7f7f7f;
-	--faint: #555555;
+	--text: hsl(0, 0%, 95%);
+	--text-2: hsl(0, 0%, 85%);
+	--text-3: hsl(0, 0%, 72%);
+	--text-muted: hsl(0, 0%, 65%);
+	--text-faint: hsl(0, 0%, 60%);
 
 	/* Type families */
 	--font-sans:
@@ -278,7 +278,7 @@ main {
 	justify-content: space-between;
 	font-family: var(--font-mono);
 	font-size: var(--fs-caption);
-	color: var(--muted);
+	color: var(--text-muted);
 	letter-spacing: 0.08em;
 	text-transform: uppercase;
 	border-top: 1px solid var(--border-soft);
@@ -288,7 +288,7 @@ main {
 	display: inline-flex;
 	align-items: center;
 	gap: 8px;
-	color: var(--muted);
+	color: var(--text-muted);
 }
 .site-footer a .url {
 	font-family: var(--font-sans);
@@ -416,7 +416,7 @@ main {
 	outline: 0;
 }
 .contact-input::placeholder {
-	color: var(--muted);
+	color: var(--text-muted);
 }
 .contact-input:focus {
 	border-color: var(--border-strong);
@@ -713,20 +713,24 @@ main {
 		border-color 0.15s ease,
 		color 0.15s ease;
 }
-.btn--outline-accent {
+.btn--outline-accent,
+.hero-cta__label
+ {
 	padding: 14px 28px;
 	border-radius: 75px;
-	background: transparent;
-	border-color: rgb(159, 159, 159);
-	color: var(--accent);
+	background: var(--accent);
+	color: var(--bg);
 	font-size: var(--fs-btn);
 	letter-spacing: 0.15em;
+	font-weight: 600;
 	text-transform: uppercase;
 }
 @media (hover: hover) {
-	.btn--outline-accent:hover {
-		background: rgb(from var(--accent) r g b / 0.08);
+	.btn--outline-accent:hover,
+	.hero-cta__label:hover {
+		background: var(--bg);
 		border-color: var(--accent);
+		color: var(--accent);
 	}
 }
 
@@ -745,7 +749,6 @@ main {
 
 .hero__inner {
 	text-align: center;
-	max-width: 920px;
 }
 
 .hero__title {
@@ -754,22 +757,21 @@ main {
 	font-weight: 400;
 	font-size: var(--fs-display);
 	line-height: 1.05;
-	letter-spacing: 0.2px;
+	letter-spacing: 10.2px;
 	color: var(--text);
 	text-wrap: balance;
 	text-shadow: var(--shadow-hero);
-	max-width: 926px;
 	margin-left: auto;
 	margin-right: auto;
 }
 
 .hero__sub {
 	margin: 36px auto 0;
-	max-width: 580px;
 	font-size: var(--fs-body);
 	line-height: 1.6;
-	color: var(--text-2);
+	color: var(--text-muted);
 	text-wrap: pretty;
+	max-width: 920px;
 }
 
 .bracket-word {
@@ -801,28 +803,15 @@ main {
 	gap: 18px;
 	padding-bottom: 100px;
 }
+.hero-cta__row  .btn {
+	min-width: 310px;
+}
 .hero-cta__divider {
 	width: 50px;
 	height: 1px;
 	background: var(--border-strong);
 }
-.hero-cta__label {
-	font-family: var(--font-sans);
-	font-size: var(--fs-caption);
-	font-weight: 700;
-	letter-spacing: 0.18em;
-	text-transform: uppercase;
-	/* Darker, muted accent - keeps the hue, drops saturation + lightness
-	   so it reads as a recessed label. Derives from --accent. */
-	color: hsl(from var(--accent) h 64% 46%);
-}
-.hero-cta__tagline {
-	font-family: var(--font-mono);
-	font-size: var(--fs-caption);
-	color: var(--muted);
-	letter-spacing: 0.14em;
-	text-transform: uppercase;
-}
+
 
 /* ----- FAQ page ---------------------------------------------------- */
 .faq-content {
@@ -844,7 +833,7 @@ main {
 	gap: 14px;
 	font-family: var(--font-mono);
 	font-size: var(--fs-caption);
-	color: var(--muted);
+	color: var(--text-muted);
 	letter-spacing: 0.22em;
 	text-transform: uppercase;
 	margin-bottom: 22px;
@@ -911,12 +900,12 @@ main {
 .faq-q__index {
 	font-family: var(--font-mono);
 	font-size: var(--fs-caption);
-	color: var(--faint);
+	color: var(--text-faint);
 	letter-spacing: 0.08em;
 	transition: color 0.2s ease;
 }
 .faq-q__index .total {
-	color: var(--faint);
+	color: var(--text-faint);
 }
 
 .faq-q__text {
@@ -1017,7 +1006,7 @@ main {
 	margin: 0 0 6px;
 }
 .legal .legal-updated {
-	color: var(--muted);
+	color: var(--text-muted);
 	font-size: var(--fs-caption);
 	margin: 0 0 30px;
 }
@@ -1076,7 +1065,7 @@ main {
 	gap: 14px;
 	font-family: var(--font-mono);
 	font-size: var(--fs-caption);
-	color: var(--muted);
+	color: var(--text-muted);
 	letter-spacing: 0.22em;
 	text-transform: uppercase;
 	margin-bottom: 22px;
@@ -1369,14 +1358,6 @@ main {
 	}
 	.hero-cta__divider {
 		display: none;
-	}
-	/* Geist Mono's larger x-height makes the tagline read bigger than its
-	   px on phone; scale --fs-caption down ~15% (still token-derived). */
-	.hero-cta__tagline {
-		font-size: calc(var(--fs-caption) * 0.85);
-	}
-	.btn--outline-accent {
-		padding: 13px 24px;
 	}
 
 	.faq-content {
