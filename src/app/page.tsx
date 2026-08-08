@@ -12,7 +12,6 @@ export default async function Page() {
 
 	return (
 		<div className="page-shell">
-			<div className="bloom" aria-hidden="true" />
 
 			<header className="topbar">
 				<a className="wordmark" href="/" aria-label="github unlisted home">
