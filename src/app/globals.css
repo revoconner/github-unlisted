@@ -12,7 +12,7 @@
 	   r g b / a) for tints, hsl(from var(--accent) h s l) for shades.
 	   Build-time OG/icon images can't read CSS vars — their source is
 	   ACCENT in src/lib/brand.ts; keep the two in sync. */
-	--accent: #ff960f;
+	--accent: #4493f8;
 
 	/* Surfaces (shared site-wide) */
 	--bg: #0f0f0f;
