@@ -77,6 +77,8 @@ function ViewerShell({
 		// viewer-shell scopes the branch's GitHub-like tokens/theme to this
 		// surface only; page-shell (globals.css) supplies the flex layout.
 		<div className="page-shell viewer-shell">
+			{/* Universal header: attribution only, on a darker strip so it reads
+			    as our chrome, not part of the shared repo's content. */}
 			<header className="topbar">
 				<span className="viewer-attrib">
 					Private repo shared using{" "}
@@ -96,10 +98,14 @@ function ViewerShell({
 						Rév
 					</a>
 				</span>
-				<span className="topbar__meta">
-					{fullName} · {refName}
-				</span>
 			</header>
+
+			{/* The repo's content starts here: owner/repo on its own row, with
+			    the ref as a muted readout beside it. */}
+			<div className="viewer-repohead">
+				<span className="viewer-repohead__name">{fullName}</span>
+				<span className="viewer-repohead__ref">{refName}</span>
+			</div>
 
 			{children}
 		</div>
@@ -173,12 +179,14 @@ function ReleasesView({
 			<main className="viewer viewer--wide">
 				<section className="viewer__main">
 					<div className="viewer__topinfo">
-						<Link
-							className="viewer__tab"
-							href={buildHref(owner, repo, "tree", refName, "", shareId)}
-						>
-							Files
-						</Link>
+						<div className="viewer__row">
+							<Link
+								className="viewer__tab"
+								href={buildHref(owner, repo, "tree", refName, "", shareId)}
+							>
+								Files
+							</Link>
+						</div>
 						<div className="viewer__crumbs">
 							<span>{repo}</span>
 							<span className="sep"> / </span>
@@ -266,42 +274,50 @@ function FileOrDirView({
 
 				<section className="viewer__main" data-wrap={wrap ? "on" : undefined}>
 					<div className="viewer__topinfo">
-						<ViewerTreeToggle />
-						{contents.kind === "file" && !contents.isBinary && (
-							<button
-								type="button"
-								className="viewer__tab viewer__wrap"
-								aria-pressed={wrap}
-								onClick={toggleWrap}
-							>
-								Soft wrap
-							</button>
+						{/* Row: files sheet toggle. Mobile only — on wide viewports
+						    the sidebar is already visible, so the row disappears. */}
+						<div className="viewer__row viewer__row--files">
+							<ViewerTreeToggle />
+						</div>
+						{/* Row: branch picker left; Releases / download right on wide
+						    viewports, their own row on phones. Skipped entirely when
+						    the share enables none of them. */}
+						{((branches && branches.length > 1) ||
+							payload.showReleases ||
+							payload.allowDownload) && (
+							<div className="viewer__row viewer__row--actions">
+								{branches && branches.length > 1 && (
+									<BranchSwitcher
+										owner={owner}
+										repo={repo}
+										branches={branches}
+										current={ref}
+										shareId={shareId}
+									/>
+								)}
+								{(payload.showReleases || payload.allowDownload) && (
+									<div className="viewer__actions">
+										{payload.showReleases && (
+											<Link
+												className="viewer__tab"
+												href={buildReleasesHref(owner, repo, shareId)}
+											>
+												Releases
+											</Link>
+										)}
+										{payload.allowDownload && (
+											<a
+												className="viewer__dl"
+												href={`/api/download?s=${encodeURIComponent(shareId)}&ref=${encodeURIComponent(ref)}`}
+											>
+												Download as ZIP
+											</a>
+										)}
+									</div>
+								)}
+							</div>
 						)}
-						{branches && branches.length > 1 && (
-							<BranchSwitcher
-								owner={owner}
-								repo={repo}
-								branches={branches}
-								current={ref}
-								shareId={shareId}
-							/>
-						)}
-						{payload.showReleases && (
-							<Link
-								className="viewer__tab"
-								href={buildReleasesHref(owner, repo, shareId)}
-							>
-								Releases
-							</Link>
-						)}
-						{payload.allowDownload && (
-							<a
-								className="viewer__dl"
-								href={`/api/download?s=${encodeURIComponent(shareId)}&ref=${encodeURIComponent(ref)}`}
-							>
-								Download ZIP
-							</a>
-						)}
+						{/* Row: breadcrumb. */}
 						<div className="viewer__crumbs">
 							<Link href={buildHref(owner, repo, "tree", ref, "", shareId)}>
 								{repo}
@@ -385,13 +401,16 @@ function FileOrDirView({
 										</button>
 									</div>
 								)}
-								<a
-									href={`https://github.com/${fullName}/blob/${ref}/${path}`}
-									target="_blank"
-									rel="noopener noreferrer"
-								>
-									on GitHub
-								</a>
+								{!contents.isBinary && (
+									<button
+										type="button"
+										className="viewer__tab viewer__wrap"
+										aria-pressed={wrap}
+										onClick={toggleWrap}
+									>
+										Soft wrap
+									</button>
+								)}
 							</div>
 							{contents.isBinary ? (
 								<div className="tree__empty">Binary file not shown.</div>

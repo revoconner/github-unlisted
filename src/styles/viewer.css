@@ -74,11 +74,12 @@
 	color: var(--gh-fg);
 }
 
-/* The topbar (globals.css supplies its layout) sits on the viewer canvas
-   so the page reads as one surface. The viewer carries no site nav or
-   footer — the bar holds only the attribution line and the repo readout. */
+/* The universal header (globals.css supplies the topbar layout) holds only
+   the attribution line. It sits on the darker inset shade, one step below
+   the canvas, so it reads as OUR chrome — clearly separate from the shared
+   repo's content that starts underneath. */
 .viewer-shell .topbar {
-	background: var(--gh-canvas);
+	background: var(--gh-inset);
 	border-color: var(--gh-border-muted);
 }
 .viewer-shell main {
@@ -101,13 +102,27 @@
 	}
 }
 
-.topbar__meta {
+/* First row of the repo's content: owner/repo, left aligned, a step up in
+   size, with the ref as a muted readout beside it. */
+.viewer-repohead {
+	display: flex;
+	align-items: baseline;
+	flex-wrap: wrap;
+	gap: var(--sp-2) var(--sp-3);
+	padding: var(--sp-4) var(--sp-5);
+	border-bottom: 1px solid var(--gh-border-muted);
+	background: var(--gh-canvas);
+}
+.viewer-repohead__name {
+	font-size: var(--fs-h3);
+	font-weight: 600;
+	color: var(--gh-fg);
+	overflow-wrap: anywhere;
+	min-width: 0;
+}
+.viewer-repohead__ref {
 	font-size: var(--fs-caption);
 	color: var(--gh-fg-muted);
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	min-width: 0;
 }
 
 /* --- Viewer shell --- */
@@ -311,9 +326,12 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	overflow: auto;
 	min-width: 0;
 }
+/* The toolbar is a stack of rows: [files toggle (mobile only)], [branch +
+   actions], [breadcrumb]. Each row lays itself out; the stack just spaces
+   them. */
 .viewer__topinfo {
 	display: flex;
-	align-items: center;
+	flex-direction: column;
 	gap: var(--sp-3);
 	padding: var(--sp-3) var(--sp-5);
 	border-bottom: 1px solid var(--gh-border-muted);
@@ -323,7 +341,26 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	position: sticky;
 	top: 0;
 	z-index: 1;
+}
+.viewer__row {
+	display: flex;
+	align-items: center;
+	gap: var(--sp-3);
 	flex-wrap: wrap;
+	min-width: 0;
+}
+/* Files sheet toggle row: only exists on viewports where the sidebar is
+   hidden (viewer_override.css shows it under the sheet breakpoint). */
+.viewer__row--files {
+	display: none;
+}
+/* Releases / download group: right-aligned on wide viewports; the phone
+   breakpoint stacks it onto its own row (viewer_override.css). */
+.viewer__actions {
+	display: flex;
+	align-items: center;
+	gap: var(--sp-3);
+	margin-left: auto;
 }
 .viewer__topinfo a {
 	color: var(--accent);

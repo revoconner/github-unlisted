@@ -38,11 +38,27 @@
 	.viewer__tree-toggle {
 		display: inline-flex;
 	}
+	.viewer__row--files {
+		display: flex;
+	}
+	/* The stacked toolbar is several rows tall here; pinning it would eat
+	   half a phone screen, so it scrolls with the content instead. */
+	.viewer__topinfo {
+		position: static;
+	}
 }
 
 /* Phone - the content card loses its side gutters so a code line gets
-   the full width, and the file/readme boxes go edge to edge. */
+   the full width, and the file/readme boxes go edge to edge. The branch
+   picker and the releases/download group split onto their own rows. */
 @media (max-width: 760px) {
+	.viewer__row--actions {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+	.viewer__actions {
+		margin-left: 0;
+	}
 	.filebar {
 		margin: 0;
 		border-radius: 0;
