@@ -89,7 +89,7 @@ function ViewerShell({
 					>
 						Github-Unlisted
 					</a>{" "}
-					by{" "}
+					hosted by{" "}
 					<a
 						href="https://revoconner.com"
 						target="_blank"
