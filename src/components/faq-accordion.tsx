@@ -57,12 +57,12 @@ const ITEMS: { q: string; a: React.ReactNode }[] = [
 		q: "What other projects have you made?",
 		a: (
 			<>
-				Most of my work relates to computer graphics, which you can read about on{" "}
+				Most of my work relates to computer graphics, which you can read about
+				on{" "}
 				<a href="https://www.revoconner.com" target="_blank" rel="noopener">
 					www.revoconner.com
 				</a>
-				. <br />
-				I also host another website for a photo recognition offline app {" "}
+				. <br />I also host another website for a photo recognition offline app{" "}
 				<a href="https://felicity-app.com" target="_blank" rel="noopener">
 					felicity-app.com
 				</a>
@@ -73,7 +73,6 @@ const ITEMS: { q: string; a: React.ReactNode }[] = [
 
 export function FaqAccordion() {
 	const [open, setOpen] = React.useState(0);
-	const total = `/0${ITEMS.length}`;
 
 	return (
 		<ul className="faq-list">
@@ -91,7 +90,6 @@ export function FaqAccordion() {
 							id={qId}
 							onClick={() => setOpen(isOpen ? -1 : i)}
 						>
-
 							<span className="faq-q__text">{item.q}</span>
 							<span className="faq-q__icon" aria-hidden="true">
 								<svg

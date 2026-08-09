@@ -1,10 +1,29 @@
 import "@/styles/global.css";
+import { getImageProps } from "next/image";
 import { NavLinks } from "@/components/nav-links";
 import { SiteDrawer } from "@/components/site-drawer";
 import { SiteFooter } from "@/components/site-footer";
+import shotDesktop from "@/images/1080p.png";
+import shotMobile from "@/images/mobile.png";
 import { getSession } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
+
+// Art-directed hero screenshot: one <picture> that serves the phone
+// capture at 480px and below and the desktop capture above it, so only
+// the matching file is downloaded (two <Image>s hidden by CSS would
+// fetch both).
+function HeroShot() {
+	const alt = "Screenshot of the Github-Unlisted app";
+	const mobile = getImageProps({ alt, src: shotMobile });
+	const desktop = getImageProps({ alt, src: shotDesktop, priority: true });
+	return (
+		<picture className="hero__shot">
+			<source media="(max-width: 760px)" srcSet={mobile.props.srcSet} />
+			<img {...desktop.props} alt={alt} />
+		</picture>
+	);
+}
 
 export default async function Page() {
 	const session = await getSession();
@@ -70,13 +89,15 @@ export default async function Page() {
 
 			<main className="hero">
 				<div className="hero__inner">
-					<h1 className="hero__title">Github-Unlisted</h1>
+					<h1 className="hero__title">Github Unlisted</h1>
 					<p className="hero__sub">
 						Share a private repo with a read-only link. No GitHub account needed
 						for the recipient. You retain all control. The service is free for
 						use and open source.
 					</p>
 				</div>
+
+				<HeroShot />
 
 				<div className="hero-cta">
 					<div className="hero-cta__row">

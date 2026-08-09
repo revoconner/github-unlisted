@@ -58,11 +58,11 @@
 	   and the hierarchy holds at every width. */
 	--fs-display: clamp(36px, 2.875vw + 22.2px, 59px);
 	--fs-h1: clamp(26px, 1.25vw + 20px, 36px);
-	--fs-h2: clamp(20px, 0.75vw + 16.4px, 26px);
-	--fs-h3: clamp(15px, 0.625vw + 12px, 20px);
-	--fs-body: clamp(14px, 0.625vw + 11px, 19px);
+	--fs-h2: clamp(22px, 0.75vw + 16.4px, 28px);
+	--fs-h3: clamp(18.5px, 0.625vw + 12px, 22px);
+	--fs-body: clamp(16px, 0.625vw + 11px, 19px);
 	--fs-ui: clamp(12px, 0.375vw + 10.2px, 15px);
-	--fs-caption: clamp(10.5px, 0.3125vw + 9px, 13px);
+	--fs-caption: clamp(12px, 0.3125vw + 9px, 13px);
 	--fs-btn: clamp(12px, 0.375vw + 10.2px, 15px);
 
 	/* Frosted chrome backdrop shared by the nav + footer. */
@@ -257,9 +257,9 @@ main {
 }
 .nav-links a,
 .nav-links .nav-contact {
-padding: 0.5rem 0rem;
-/* box-shadow: inset 0 0 1px 1px hsl(from var(--text-muted) h s l / 0.4); */
-background: var(--surface-2);
+	padding: 0.5rem 0rem;
+	/* box-shadow: inset 0 0 1px 1px hsl(from var(--text-muted) h s l / 0.4); */
+	background: var(--surface-2);
 	border-radius: 999px;
 	color: var(--text-2);
 	text-align: center;
@@ -544,7 +544,7 @@ background: var(--surface-2);
 	padding: 2px 8px;
 	border-radius: 5px;
 	font-family: var(--font-mono);
-	font-size: .75rem;
+	font-size: 0.75rem;
 	font-weight: 500;
 	white-space: nowrap;
 	border: 1px solid transparent;
@@ -748,7 +748,7 @@ background: var(--surface-2);
 	flex: 1;
 	display: grid;
 	place-items: center;
-	padding: clamp(22px, 4.75vw - 0.8px, 60px);
+	padding: clamp(22px, 4.75vw - 0.8px, 60px) clamp(10px, 4.5vw + 10.2px, 60px);
 	position: relative;
 	z-index: 2;
 	background: transparent;
@@ -759,12 +759,20 @@ background: var(--surface-2);
 }
 
 .hero__title {
+	/* Fluid variable-font weight: 440 at a 460px viewport up to 660 at
+	   1280px, linear in between (slope 220/820 per px). tan(atan2()) turns
+	   the viewport width into a unitless number so it can feed
+	   font-weight; the direct calc(100vw / 1px) division needs Chrome
+	   140 / Safari 18.2 typed arithmetic and Firefox lacks it, which
+	   left the whole declaration invalid and the weight at 400. */
+	--vw-n: tan(atan2(100vw, 1px));
+	--fluid-weight: calc(316.59 + 0.26829 * var(--vw-n));
+	font-weight: clamp(500, var(--fluid-weight), 660);
 	margin: 0;
 	font-family: var(--font-sans);
-	font-weight: 400;
 	font-size: var(--fs-display);
 	line-height: 1.05;
-	letter-spacing: 10.2px;
+	letter-spacing: clamp(0.325rem, calc(0.126rem + 0.662vw), 0.656rem);
 	color: var(--text);
 	text-wrap: balance;
 	text-shadow: var(--shadow-hero);
@@ -777,8 +785,32 @@ background: var(--surface-2);
 	font-size: var(--fs-body);
 	line-height: 1.6;
 	color: var(--text-muted);
-	text-wrap:  balance;
+	text-wrap: balance;
 	max-width: 920px;
+}
+
+/* Hero screenshot between the sub text and the CTA. One <picture>: the
+   phone capture serves at 480px and below, the desktop capture above.
+   Sizing stays fluid over the same 480-1280 window as everything else;
+   the 480px query only swaps the source and narrows the frame to suit
+   the portrait image. */
+.hero__shot {
+	display: block;
+	margin: clamp(24px, 2vw + 27.4px, 65px) auto;
+	width: 100%;
+	max-width: min(70vw, 1280px);
+}
+.hero__shot img {
+	width: 100%;
+	height: auto;
+	border: 1px solid var(--border);
+	border-radius: var(--radius-md);
+	box-shadow: var(--shadow-hero);
+}
+@media (max-width: 760px) {
+	.hero__shot {
+		max-width: min(300px, 65vw);
+	}
 }
 
 .bracket-word {
@@ -802,7 +834,6 @@ background: var(--surface-2);
 	flex-direction: column;
 	align-items: center;
 	gap: 14px;
-	padding: 0 0 clamp(40px, 3.75vw + 22px, 70px);
 }
 .hero-cta__row {
 	display: flex;
@@ -832,8 +863,6 @@ background: var(--surface-2);
 	width: 100%;
 	max-width: 880px;
 }
-
-
 
 .faq-title {
 	margin: 0 0 14px;
@@ -875,7 +904,7 @@ background: var(--surface-2);
 	width: 100%;
 	padding: 28px 8px;
 	display: grid;
-	grid-template-columns: .9fr .1fr;
+	grid-template-columns: 0.9fr 0.1fr;
 	align-items: center;
 	gap: 16px;
 	background: transparent;
@@ -884,8 +913,6 @@ background: var(--surface-2);
 	color: var(--text);
 	cursor: pointer;
 }
-
-
 
 .faq-q__text {
 	font-size: var(--fs-h2);
@@ -898,17 +925,20 @@ background: var(--surface-2);
 }
 
 .faq-q__icon {
-  width: 26px;
-  height: 26px;
-  border-radius: var(--radius-pill);
-  border: 1px solid var(--accent);
-  color: var(--bg);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  justify-self: end;
-  transition: color 0.25s ease, background 0.25s ease, transform 0.25s ease;
-  background: var(--accent);
+	width: 26px;
+	height: 26px;
+	border-radius: var(--radius-pill);
+	border: 1px solid var(--accent);
+	color: var(--bg);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	justify-self: end;
+	transition:
+		color 0.25s ease,
+		background 0.25s ease,
+		transform 0.25s ease;
+	background: var(--accent);
 }
 .faq-q__icon svg {
 	width: 12px;
@@ -940,15 +970,15 @@ background: var(--surface-2);
 	overflow: hidden;
 }
 .faq-a__body {
-  padding-left: 54px;
-  padding-right: 50px;
-  padding-bottom: 0;
-  color: var(--text-muted);
-  font-size: var(--fs-body);
-  line-height: 1.6;
-  text-wrap: balance;
-  transition: padding-bottom 0.3s ease;
-  font-weight: 350;
+	padding-left: 54px;
+	padding-right: 50px;
+	padding-bottom: 0;
+	color: var(--text-muted);
+	font-size: var(--fs-body);
+	line-height: 1.6;
+	text-wrap: balance;
+	transition: padding-bottom 0.3s ease;
+	font-weight: 350;
 }
 .faq-q[aria-expanded="true"] + .faq-a .faq-a__body {
 	padding-bottom: 30px;
@@ -1038,16 +1068,15 @@ background: var(--surface-2);
 	max-width: 1250px;
 }
 .status-eyebrow {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  font-family: var(--font-sans);
-  font-size: var(--fs-h2);
-  color: var(--text-3);
-  margin-bottom: 22px;
-  font-weight: 500;
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	font-family: var(--font-sans);
+	font-size: var(--fs-h2);
+	color: var(--text-3);
+	margin-bottom: 22px;
+	font-weight: 500;
 }
-
 
 .status-title {
 	margin: 0 0 32px;
@@ -1121,11 +1150,11 @@ background: var(--surface-2);
 	border-bottom: 0;
 }
 .status-log-row__head {
-  display: flex;
-  flex-direction: column;
-  align-items: baseline;
-  gap: 12px;
-  flex-wrap: wrap;
+	display: flex;
+	flex-direction: column;
+	align-items: baseline;
+	gap: 12px;
+	flex-wrap: wrap;
 }
 .status-log-row__pills {
 	display: flex;
@@ -1134,11 +1163,11 @@ background: var(--surface-2);
 }
 
 .status-time {
-  font-family: var(--font-mono);
-  font-size: var(--fs-caption);
-  color: var(--text-3);
-  letter-spacing: 0.12em;
-  font-weight: bold;
+	font-family: var(--font-mono);
+	font-size: var(--fs-caption);
+	color: var(--text-3);
+	letter-spacing: 0.12em;
+	font-weight: bold;
 }
 
 .status-current-row__body,
@@ -1194,16 +1223,16 @@ background: var(--surface-2);
    indicator (the "open" glyph is U+2212 so it optically matches the
    plus, reproduced from the previous stylesheet). */
 .status-help-collapsible {
-  margin-top: 18px;
-  background: var(--surface);
-  padding: 20px;
-  border-radius: 12px;
+	margin-top: 18px;
+	background: var(--surface);
+	padding: 20px;
+	border-radius: 12px;
 }
 
 .status-help-collapsible summary {
 	font-family: var(--font-sans);
-  font-size: var(--fs-h3);
-  color: var(--text-3);
+	font-size: var(--fs-h3);
+	color: var(--text-3);
 	list-style: none;
 	cursor: pointer;
 	padding: 14px 4px;
