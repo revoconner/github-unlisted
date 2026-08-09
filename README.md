@@ -6,12 +6,15 @@
 
 Live at **[github-unlisted.com](https://github-unlisted.com)**. 
 
-<img width="1179" height="2240" alt="image" src="https://github.com/user-attachments/assets/31442188-71ed-4c6c-aadb-37bb311a5afd" />
-
+<img width="1920" height="auto" alt="image" src="https://github.com/user-attachments/assets/ac0d2c11-b338-43b1-ac55-37394abe6427" />
 
 
 <img width="2196" height="1178" alt="image" src="https://github.com/user-attachments/assets/041dbf7e-cdd1-459a-86e6-b654388bdfe6" />
 
+<details>
+  <summary> Phone View</summary>
+<img width="300" height="auto" alt="image" src="https://github.com/user-attachments/assets/31442188-71ed-4c6c-aadb-37bb311a5afd" />  
+</details>
 
 ## What it is
 
