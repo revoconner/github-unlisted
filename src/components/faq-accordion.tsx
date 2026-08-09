@@ -5,7 +5,7 @@ import * as React from "react";
 const ITEMS: { q: string; a: React.ReactNode }[] = [
 	{
 		q: "How is it free?",
-		a: "I already pay for Vercel for my own personal website. I also needed a solution to share private GitHub repositories online, hence this was created. I incur no extra cost hosting this, other than the domain name — which I am more than happy to bear.",
+		a: "I already pay for Vercel for my own personal website. I also needed a solution to share private GitHub repositories online, hence this was created. The extra cost for this is $20 per month for enhanced firewall on viewer's page so your shared repositories never gets scraped by bots, and the domain cost per year. It's not a lot, so I don't see the loss in it.",
 	},
 	{
 		q: "How do you plan to monetize it?",
@@ -57,11 +57,15 @@ const ITEMS: { q: string; a: React.ReactNode }[] = [
 		q: "What other projects have you made?",
 		a: (
 			<>
-				You can read about all of my work on my website{" "}
+				Most of my work relates to computer graphics, which you can read about on{" "}
 				<a href="https://www.revoconner.com" target="_blank" rel="noopener">
 					www.revoconner.com
 				</a>
-				.
+				. <br />
+				I also host another website for a photo recognition offline app {" "}
+				<a href="https://felicity-app.com" target="_blank" rel="noopener">
+					felicity-app.com
+				</a>
 			</>
 		),
 	},
@@ -87,10 +91,7 @@ export function FaqAccordion() {
 							id={qId}
 							onClick={() => setOpen(isOpen ? -1 : i)}
 						>
-							<span className="faq-q__index">
-								{String(i + 1).padStart(2, "0")}
-								<span className="total">{total}</span>
-							</span>
+
 							<span className="faq-q__text">{item.q}</span>
 							<span className="faq-q__icon" aria-hidden="true">
 								<svg

@@ -25,12 +25,12 @@
 	   r g b / a) for tints, hsl(from var(--accent) h s l) for shades.
 	   Build-time OG/icon images can't read CSS vars - their source is
 	   ACCENT in src/lib/brand.ts; keep the two in sync. */
-	--accent: hsl(88.4, 46.4%, 64.41%);
+	--accent: hsl(248, 46%, 64%);
 
 	/* Surfaces (shared site-wide) */
 	--bg: hsl(0, 0%, 4%);
-	--surface: hsl(0, 0%, 9%);
-	--surface-2: hsl(222, 19%, 14%);
+	--surface: hsl(0, 0%, 7%);
+	--surface-2: hsl(222, 0%, 13%);
 	--border: hsl(224, 16%, 18%);
 	--border-soft: hsl(225, 16%, 15%);
 	--border-strong: hsl(226, 14%, 25%);
@@ -231,6 +231,7 @@ main {
 
 /* ----- Unified top navigation (site-wide) -------------------------- */
 .topbar {
+	background: var(--surface);
 	position: relative;
 	z-index: 5;
 	display: flex;
@@ -238,8 +239,6 @@ main {
 	justify-content: space-between;
 	padding: 16px 28px;
 	gap: 16px;
-	border-bottom: 1px solid var(--border-soft);
-	backdrop-filter: var(--chrome-backdrop);
 }
 
 /* Inline desktop / tablet navigation links. */
@@ -259,8 +258,8 @@ main {
 .nav-links a,
 .nav-links .nav-contact {
 padding: 0.5rem 0rem;
-box-shadow: inset 0 0 1px 1px hsl(from var(--text-muted) h s l / 0.4);
-background: var(--surface);
+/* box-shadow: inset 0 0 1px 1px hsl(from var(--text-muted) h s l / 0.4); */
+background: var(--surface-2);
 	border-radius: 999px;
 	color: var(--text-2);
 	text-align: center;
@@ -278,7 +277,7 @@ background: var(--surface);
 @media (hover: hover) {
 	.nav-links a:hover,
 	.nav-links .nav-contact:hover {
-		background: var(--surface-2);
+		background: var(--surface);
 	}
 }
 .nav-links a.is-active {
@@ -310,13 +309,10 @@ background: var(--surface);
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	font-family: var(--font-mono);
+	font-family: var(--font-sans);
 	font-size: var(--fs-caption);
 	color: var(--text-muted);
-	letter-spacing: 0.08em;
-	text-transform: uppercase;
-	border-top: 1px solid var(--border-soft);
-	backdrop-filter: var(--chrome-backdrop);
+	background: var(--surface);
 }
 .site-footer a {
 	display: inline-flex;
@@ -548,15 +544,15 @@ background: var(--surface);
 	padding: 2px 8px;
 	border-radius: 5px;
 	font-family: var(--font-mono);
-	font-size: 10.5px;
+	font-size: .75rem;
 	font-weight: 500;
-	letter-spacing: 0.01em;
 	white-space: nowrap;
 	border: 1px solid transparent;
+	text-transform: uppercase;
+	letter-spacing: 0.2em;
 }
 .chip--md {
 	padding: 3px 9px;
-	font-size: 11.5px;
 }
 .chip--okay {
 	background: rgba(34, 197, 94, 0.14);
@@ -564,12 +560,12 @@ background: var(--surface);
 	color: #22c55e;
 }
 .chip--medium {
-	background: rgba(245, 183, 86, 0.14);
+	background: rgba(245, 183, 86, 0);
 	border-color: rgba(245, 183, 86, 0.32);
 	color: #f5b756;
 }
 .chip--critical {
-	background: rgba(239, 68, 68, 0.14);
+	background: rgba(239, 68, 68, 0);
 	border-color: rgba(239, 68, 68, 0.32);
 	color: #ef4444;
 }
@@ -577,14 +573,14 @@ background: var(--surface);
    border so they read as category labels, distinct from the severity
    pills (--medium / --critical) beside them. */
 .chip--incident {
-	background: #00000075;
+	background: #00000000;
 	border-color: #565656;
 	color: #ef4444;
 }
 .chip--maintenance {
 	background: #00000075;
 	border-color: #565656;
-	color: #f5b756;
+	color: #a9a9a9;
 }
 
 /* ----- Hamburger + slide-in drawer --------------------------------- */
@@ -837,25 +833,7 @@ background: var(--surface);
 	max-width: 880px;
 }
 
-.faq-eyebrow {
-	display: flex;
-	align-items: center;
-	gap: 14px;
-	font-family: var(--font-mono);
-	font-size: var(--fs-caption);
-	color: var(--text-muted);
-	letter-spacing: 0.22em;
-	text-transform: uppercase;
-	margin-bottom: 22px;
-}
-.faq-eyebrow .rule {
-	width: 28px;
-	height: 1px;
-	background: var(--border-strong);
-}
-.faq-eyebrow .label-accent {
-	color: var(--accent);
-}
+
 
 .faq-title {
 	margin: 0 0 14px;
@@ -875,11 +853,11 @@ background: var(--surface);
 
 .faq-lede {
 	margin: 0 0 44px;
-	max-width: 540px;
 	font-size: var(--fs-body);
 	line-height: 1.6;
-	color: var(--text-2);
-	text-wrap: pretty;
+	color: var(--text-faint);
+	text-wrap: balance;
+	font-weight: 400;
 }
 
 .faq-list {
@@ -897,7 +875,7 @@ background: var(--surface);
 	width: 100%;
 	padding: 28px 8px;
 	display: grid;
-	grid-template-columns: 38px 1fr 28px;
+	grid-template-columns: .9fr .1fr;
 	align-items: center;
 	gap: 16px;
 	background: transparent;
@@ -907,16 +885,7 @@ background: var(--surface);
 	cursor: pointer;
 }
 
-.faq-q__index {
-	font-family: var(--font-mono);
-	font-size: var(--fs-caption);
-	color: var(--text-faint);
-	letter-spacing: 0.08em;
-	transition: color 0.2s ease;
-}
-.faq-q__index .total {
-	color: var(--text-faint);
-}
+
 
 .faq-q__text {
 	font-size: var(--fs-h2);
@@ -929,26 +898,23 @@ background: var(--surface);
 }
 
 .faq-q__icon {
-	width: 26px;
-	height: 26px;
-	border-radius: var(--radius-pill);
-	border: 1px solid rgba(255, 255, 255, 0.18);
-	color: var(--text-2);
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	justify-self: end;
-	transition:
-		border-color 0.25s ease,
-		color 0.25s ease,
-		transform 0.25s ease;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--accent);
+  color: var(--bg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: end;
+  transition: color 0.25s ease, background 0.25s ease, transform 0.25s ease;
+  background: var(--accent);
 }
 .faq-q__icon svg {
 	width: 12px;
 	height: 12px;
 }
 
-.faq-q[aria-expanded="true"] .faq-q__index,
 .faq-q[aria-expanded="true"] .faq-q__icon {
 	color: var(--accent);
 }
@@ -956,7 +922,8 @@ background: var(--surface);
 	color: var(--text);
 }
 .faq-q[aria-expanded="true"] .faq-q__icon {
-	border-color: var(--accent);
+	color: var(--accent);
+	background: transparent;
 	transform: rotate(45deg);
 }
 
@@ -973,15 +940,15 @@ background: var(--surface);
 	overflow: hidden;
 }
 .faq-a__body {
-	padding-left: 54px;
-	padding-right: 50px;
-	padding-bottom: 0;
-	color: var(--text-2);
-	font-size: var(--fs-body);
-	line-height: 1.6;
-	max-width: 660px;
-	text-wrap: pretty;
-	transition: padding-bottom 0.3s ease;
+  padding-left: 54px;
+  padding-right: 50px;
+  padding-bottom: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  text-wrap: balance;
+  transition: padding-bottom 0.3s ease;
+  font-weight: 350;
 }
 .faq-q[aria-expanded="true"] + .faq-a .faq-a__body {
 	padding-bottom: 30px;
@@ -1068,27 +1035,20 @@ background: var(--surface);
 }
 .status-content__inner {
 	width: 100%;
-	max-width: 880px;
+	max-width: 1250px;
 }
 .status-eyebrow {
-	display: flex;
-	align-items: center;
-	gap: 14px;
-	font-family: var(--font-mono);
-	font-size: var(--fs-caption);
-	color: var(--text-muted);
-	letter-spacing: 0.22em;
-	text-transform: uppercase;
-	margin-bottom: 22px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--font-sans);
+  font-size: var(--fs-h2);
+  color: var(--text-3);
+  margin-bottom: 22px;
+  font-weight: 500;
 }
-.status-eyebrow .rule {
-	width: 28px;
-	height: 1px;
-	background: var(--border-strong);
-}
-.status-eyebrow .label-accent {
-	color: var(--accent);
-}
+
+
 .status-title {
 	margin: 0 0 32px;
 	font-family: var(--font-sans);
@@ -1122,7 +1082,6 @@ background: var(--surface);
    Status Log. */
 .status-card {
 	background: var(--surface);
-	border: 1px solid var(--border);
 	border-radius: 12px;
 	overflow: hidden;
 }
@@ -1155,30 +1114,31 @@ background: var(--surface);
 	display: grid;
 	grid-template-columns: 1fr;
 	gap: 12px;
-	padding: 20px 24px;
+	padding: 38px 24px;
 	border-bottom: 1px solid var(--border-soft);
 }
 .status-log-row:last-child {
 	border-bottom: 0;
 }
 .status-log-row__head {
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	gap: 12px;
-	flex-wrap: wrap;
+  display: flex;
+  flex-direction: column;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 .status-log-row__pills {
 	display: flex;
-	gap: 6px;
+	gap: 26px;
 	flex-wrap: wrap;
 }
 
 .status-time {
-	font-family: var(--font-mono);
-	font-size: var(--fs-caption);
-	color: var(--text-3);
-	letter-spacing: 0.02em;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-3);
+  letter-spacing: 0.12em;
+  font-weight: bold;
 }
 
 .status-current-row__body,
@@ -1186,7 +1146,7 @@ background: var(--surface);
 	font-size: var(--fs-body);
 	color: var(--text-2);
 	line-height: 1.6;
-	text-wrap: pretty;
+	text-wrap: stable;
 }
 .status-current-row__contact {
 	color: var(--accent);
@@ -1234,18 +1194,22 @@ background: var(--surface);
    indicator (the "open" glyph is U+2212 so it optically matches the
    plus, reproduced from the previous stylesheet). */
 .status-help-collapsible {
-	margin-top: 18px;
-	border-bottom: 1px solid var(--border-soft);
+  margin-top: 18px;
+  background: var(--surface);
+  padding: 20px;
+  border-radius: 12px;
 }
+
 .status-help-collapsible summary {
+	font-family: var(--font-sans);
+  font-size: var(--fs-h3);
+  color: var(--text-3);
 	list-style: none;
 	cursor: pointer;
 	padding: 14px 4px;
 	display: flex;
 	align-items: center;
 	gap: 12px;
-	color: var(--text-2);
-	font-size: var(--fs-h2);
 	font-weight: 500;
 	letter-spacing: 0.01em;
 	transition: color 0.15s ease;
@@ -1348,7 +1312,7 @@ background: var(--surface);
 		height: 24px;
 	}
 	.faq-a__body {
-		padding-left: 40px;
+		padding-left: 5px;
 		padding-right: 4px;
 	}
 

@@ -80,14 +80,9 @@ export default async function FaqPage() {
 
 			<main className="faq-content">
 				<div className="faq-content__inner">
-					<div className="faq-eyebrow">
-						<span className="rule" aria-hidden="true" />
-						<span className="label-accent">FAQ</span>
-						<span>· Common questions</span>
-					</div>
 
 					<h1 className="faq-title">
-						Questions, <em>answered.</em>
+						Questions?
 					</h1>
 
 					<p className="faq-lede">

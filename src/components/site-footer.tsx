@@ -26,7 +26,7 @@ export function SiteFooter() {
 				</svg>
 			</a>
 			<a href="https://www.revoconner.com" target="_blank" rel="noopener">
-				Visit <span className="url">www.revoconner.com</span>
+				The service is provided by R&eacute;v <span className="url">www.revoconner.com</span>
 				<svg
 					width="11"
 					height="11"
