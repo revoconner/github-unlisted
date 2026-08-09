@@ -1,19 +1,26 @@
 import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
+import { Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import { JsonLd } from "@/components/json-ld";
 import { SITE, siteGraphLd } from "@/lib/seo";
-import "./globals.css";
-import "./globals_override.css";
 
-const sans = Geist({ subsets: ["latin"], variable: "--font-sans" });
-const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" });
-const serif = Instrument_Serif({
-	subsets: ["latin"],
-	weight: "400",
-	style: ["normal", "italic"],
-	variable: "--font-serif",
+// No CSS here on purpose: the root layout wraps EVERY route, and the viewer
+// must stay style-isolated from the site. Each page imports its own sheet:
+// global.css (site pages), global.css + dashboard.css (/app), viewer.css
+// ([...slug]).
+
+// gsans is a variable font; the full 100-900 weight range is available,
+// so weights are picked freely in CSS. It replaces both the old sans
+// (Geist) and serif (Instrument Serif); --font-serif aliases --font-sans
+// in global.css. Mono stays Geist Mono.
+const sans = localFont({
+	src: "../fonts/gsans.ttf",
+	variable: "--font-sans",
+	weight: "100 900",
+	display: "swap",
 });
+const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
 	metadataBase: new URL(SITE.url),
@@ -62,10 +69,7 @@ export default function RootLayout({
 	children: React.ReactNode;
 }) {
 	return (
-		<html
-			lang="en"
-			className={`${sans.variable} ${mono.variable} ${serif.variable}`}
-		>
+		<html lang="en" className={`${sans.variable} ${mono.variable}`}>
 			<body>
 				{children}
 				<JsonLd data={siteGraphLd()} />

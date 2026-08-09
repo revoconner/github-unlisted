@@ -1,5 +1,4 @@
-import "@/styles/normal.css";
-import "@/styles/normal_override.css";
+import "@/styles/global.css";
 import { JsonLd } from "@/components/json-ld";
 import { NavLinks } from "@/components/nav-links";
 import { SiteDrawer } from "@/components/site-drawer";
@@ -50,7 +49,7 @@ const log: LogEntry[] = [
 		endedUtc: "2026-08-06 21:35 UTC",
 		category: "maintenance",
 		severity: "critical",
-		body: "While it sure did last for a while, it was just systems upgrade and no user, or viewer were affected. \n System updgrades as described below: \n New optional controls were added for the person sharing a repository. \n A link can now be locked to a single branch, offer the recipient a branch switcher, allow the branch being shown to be downloaded as a zip, and show a releases tab with release notes and downloadable release files. \n All four are switched off by default, so every link created before this work keeps behaving exactly as it did and needed no action from anyone. \n The dashboard and the shared-repository viewer were both changed repeatedly across the window, so the dashboard may have been briefly unavailable, or shown controls that were still settling, while updates were deployed. \n Existing shared links and repository access were not affected.",
+		body: "While it sure did last for a while, it was just systems upgrade and no user, or viewer were affected. \n System updgrades as described below: \n New optional controls were added for the person sharing a repository. \n A link can now be locked to a single branch, offer the recipient a branch switcher, allow the branch being shown to be downloaded as a zip, and show a releases tab with release notes and downloadable release files. \n All four are switched off by default, so every link created before this work keeps behaving exactly as it did and needed no action from anyone. \n No user or viewer were affected.",
 	},
 	{
 		id: "2026-06-02-stylesheet-consolidation",
@@ -180,7 +179,6 @@ export default async function StatusPage() {
 					    CURRENT_STATUS in src/lib/site-status.ts. */}
 					<section className="status-section">
 						<div className="status-eyebrow">
-							<span className="rule" aria-hidden="true" />
 							<span className="label-accent">Current status</span>
 						</div>
 						<div className="status-card">
@@ -240,7 +238,6 @@ export default async function StatusPage() {
 
 					<section className="status-section">
 						<div className="status-eyebrow">
-							<span className="rule" aria-hidden="true" />
 							<span className="label-accent">Historical status log</span>
 						</div>
 						<div className="status-card">

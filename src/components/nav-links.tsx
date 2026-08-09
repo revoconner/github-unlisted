@@ -1,3 +1,4 @@
+import { ContactButton } from "@/components/contact-button";
 import { NAV_ITEMS, type NavActive } from "@/lib/nav";
 import {
 	CURRENT_STATUS,
@@ -39,6 +40,9 @@ export function NavLinks({
 					</a>
 				),
 			)}
+			{/* Contact opens the modal rather than navigating, so it lives
+			    outside NAV_ITEMS but renders as one more nav pill. */}
+			<ContactButton className="nav-contact" label="CONTACT" />
 		</nav>
 	);
 }

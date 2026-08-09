@@ -1,0 +1,461 @@
+/* github unlisted - DASHBOARD stylesheet. Loaded by /app together with
+   global.css, which supplies the tokens, reset, and chrome (topbar, nav,
+   drawer, footer). Desktop-first by design; phone adaptation comes as a
+   separate pass. Layout is a single column of rows: welcome, stats,
+   search + filters, the selectable repo list, and the control panel
+   below it (above the footer). */
+
+/* The dashboard page never scrolls as a document: the shell is pinned to
+   the viewport and only the repo list scrolls internally, so the welcome,
+   stats, filters, and the control panel stay visible at all times. */
+.page-shell:has(.dashboard) {
+	min-height: 100vh;
+}
+.dashboard {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 28px;
+	width: 100%;
+	max-width: 1280px;
+	margin: 0 auto;
+	padding: 40px 44px 0;
+}
+
+/* ----- Row 1: welcome ---------------------------------------------- */
+.dash-welcome__hi {
+	font-size: var(--fs-h3);
+	color: var(--text-muted);
+}
+.dash-welcome__name {
+	font-size: var(--fs-h1);
+	font-weight: 650;
+	color: var(--text);
+	letter-spacing: 0.01em;
+}
+
+/* ----- Row 2: stats ------------------------------------------------ */
+.dash-stats {
+	display: grid;
+	grid-template-columns: repeat(5, minmax(0, 1fr));
+	gap: 0;
+}
+.dash-stat {
+	display: flex;
+	flex-direction: row;
+	gap: 6px;
+	padding: 0 7px;
+	border-radius: var(--radius-md);
+	align-items: center;
+}
+.dash-stat__label {
+	font-size: var(--fs-caption);
+	color: var(--text-muted);
+	letter-spacing: 0.08em;
+}
+.dash-stat__value {
+	font-size: var(--fs-h3);
+	font-weight: 350;
+	color: var(--accent);
+	font-variant-numeric: tabular-nums;
+}
+
+/* ----- Row 3: search + filter toggles ------------------------------ */
+.dash-filters {
+	display: grid;
+	grid-template-columns: 1fr auto auto;
+	gap: 14px;
+	align-items: center;
+}
+
+.dash-search {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	height: 40px;
+	padding: 0 18px;
+	background: var(--surface);
+	border: 1px solid hsl(from var(--text) h s l / 0.2);
+	border-radius: var(--radius-pill);
+	transition: border-color 0.15s ease;
+}
+.dash-search:focus-within {
+	border-color: var(--accent);
+}
+.dash-search__icon {
+	display: flex;
+	color: var(--text-muted);
+}
+.dash-search input {
+	flex: 1;
+	min-width: 0;
+	background: transparent;
+	border: 0;
+	outline: 0;
+	color: var(--text);
+	font-size: var(--fs-ui);
+}
+.dash-search input::placeholder {
+	color: var(--text-faint);
+}
+
+/* Filter toggles mirror the nav pill bar: bordered pill container, one
+   option filled with the accent. */
+.seg {
+	background: var(--bg);
+	border: 1px solid hsl(from var(--text) h s l / 0.2);
+	border-radius: var(--radius-pill);
+	display: grid;
+	grid-auto-flow: column;
+	grid-auto-columns: 1fr;
+	gap: 0.25rem;
+	padding: 0.25rem;
+}
+.seg__opt {
+	padding: 0.5rem 0;
+	min-width: 108px;
+	border-radius: var(--radius-pill);
+	background: var(--surface-2);
+	color: var(--text-2);
+	font-size: 0.875rem;
+	font-weight: 600;
+	text-align: center;
+	white-space: nowrap;
+	transition:
+		background 0.2s,
+		color 0.2s;
+}
+@media (hover: hover) {
+	.seg__opt:hover {
+		background: var(--surface);
+	}
+}
+.seg__opt[aria-selected="true"] {
+	background: var(--accent);
+	color: var(--bg);
+}
+
+/* ----- Row 4: repo list -------------------------------------------- */
+.dash-repos {
+	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	padding-right: 4px;
+	border: 1px solid var(--border-soft);
+	padding: 10px;
+	border-radius: 12px;
+	max-height: min(600px, 80vh);
+}
+.dash-repos__empty {
+	padding: 24px 4px;
+	color: var(--text-muted);
+	font-size: var(--fs-body);
+}
+
+/* A whole row is one selection button; inner rows stack inside it. */
+.repo-card {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	text-align: left;
+	padding: 16px 20px;
+	background: var(--surface);
+	border: 1px solid var(--border-soft);
+	border-radius: var(--radius-md);
+	cursor: pointer;
+	transition:
+		border-color 0.15s ease,
+		background 0.15s ease;
+}
+@media (hover: hover) {
+	.repo-card:hover {
+		border-color: var(--border-strong);
+	}
+}
+.repo-card[aria-pressed="true"] {
+	border-color: var(--accent);
+	background: hsl(from var(--accent) h s l / 0.08);
+}
+.repo-card__name {
+	font-size: var(--fs-h3);
+	font-weight: 400;
+	color: var(--text);
+	overflow-wrap: anywhere;
+}
+/* One line: share meta (or "unshared") on the left, visibility pinned to
+   the right edge. */
+.repo-card__state {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 16px;
+	margin-top: 15px;
+	font-size: var(--fs-ui);
+	color: var(--text-muted);
+}
+.repo-card__vis {
+	margin-left: auto;
+	white-space: nowrap;
+}
+.repo-card__meta {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	font-size: var(--fs-caption);
+	color: var(--accent);
+	font-weight: bold;
+}
+
+/* ----- Final row: control panel ------------------------------------ */
+.dash-panel {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	margin-top: auto;
+	padding: 16px 24px 20px;
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-bottom: 0;
+	border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+.dash-panel__hint {
+	color: var(--text-muted);
+	font-size: var(--fs-body);
+	text-align: center;
+	padding: 8px 0;
+}
+.dash-panel__repo {
+	display: flex;
+	gap: 8px;
+	font-size: var(--fs-ui);
+	font-weight: 600;
+	color: var(--text);
+}
+.dash-panel__repo .sep {
+	color: var(--text-faint);
+}
+.dash-panel__repo span:last-child {
+	color: var(--text-muted);
+	font-weight: 400;
+}
+
+.dash-panel__controls {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px 28px;
+	align-items: center;
+}
+.dash-ctl {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+.dash-ctl__label {
+	font-size: var(--fs-ui);
+	color: var(--text-2);
+}
+.dash-hint {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 15px;
+	height: 15px;
+	margin-left: 6px;
+	border: 1px solid var(--border-strong);
+	border-radius: 50%;
+	font-size: 10px;
+	color: var(--text-muted);
+	cursor: help;
+	vertical-align: middle;
+}
+
+/* Yes/No pair, style cue from the viewer's markdown Preview/Code tabs:
+   joined buttons inside one border, the active side filled. */
+.yesno {
+	display: inline-flex;
+	border: 1px solid var(--border-strong);
+	border-radius: 8px;
+	overflow: hidden;
+}
+.yesno__opt {
+	padding: 4px 14px;
+	background: transparent;
+	color: var(--text-muted);
+	font-size: var(--fs-caption);
+	font-weight: 500;
+	transition:
+		background 0.15s ease,
+		color 0.15s ease;
+}
+.yesno__opt + .yesno__opt {
+	border-left: 1px solid var(--border-strong);
+}
+.yesno__opt[aria-selected="true"] {
+	background: var(--accent);
+	color: var(--bg);
+	font-weight: 600;
+}
+@media (hover: hover) {
+	.yesno__opt:not([aria-selected="true"]):hover {
+		color: var(--text);
+	}
+}
+.yesno__opt:disabled {
+	opacity: 0.55;
+	cursor: not-allowed;
+}
+
+/* Auto-revoke amount + unit. */
+.ttl {
+	display: inline-flex;
+	gap: 8px;
+}
+.ttl__num {
+	width: 64px;
+	height: 32px;
+	padding: 0 10px;
+	background: var(--bg);
+	border: 1px solid var(--border-strong);
+	border-radius: 8px;
+	color: var(--text);
+	font-size: var(--fs-caption);
+	outline: 0;
+}
+.ttl__unit {
+	height: 32px;
+	padding: 0 10px;
+	background: var(--bg);
+	border: 1px solid var(--border-strong);
+	border-radius: 8px;
+	color: var(--text);
+	font-size: var(--fs-caption);
+	outline: 0;
+	cursor: pointer;
+}
+.ttl__num:focus,
+.ttl__unit:focus {
+	border-color: var(--accent);
+}
+.ttl__num:disabled,
+.ttl__unit:disabled {
+	opacity: 0.55;
+	cursor: not-allowed;
+}
+
+/* Action buttons under the controls. */
+.dash-panel__actions {
+	display: flex;
+	gap: 10px;
+	padding-top: 2px;
+	border-top: 1px solid var(--border-soft);
+}
+.dash-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	margin-top: 10px;
+	padding: 8px 24px;
+	border-radius: var(--radius-pill);
+	background: var(--surface-2);
+	border: 1px solid hsl(from var(--text) h s l / 0.14);
+	color: var(--text-2);
+	font-size: var(--fs-ui);
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	cursor: pointer;
+	transition:
+		background 0.15s ease,
+		color 0.15s ease,
+		border-color 0.15s ease;
+}
+@media (hover: hover) {
+	.dash-btn:hover {
+		color: var(--text);
+		border-color: var(--border-strong);
+	}
+}
+.dash-btn--accent {
+	background: var(--accent);
+	border-color: transparent;
+	color: var(--bg);
+}
+@media (hover: hover) {
+	.dash-btn--accent:hover {
+		background: var(--bg);
+		border-color: var(--accent);
+		color: var(--accent);
+	}
+}
+.dash-btn--danger {
+	background: hsl(0, 62%, 52%, 0.14);
+	border-color: hsl(0, 62%, 52%, 0.4);
+}
+.dash-btn--set  {
+	background: hsla(123, 62%, 52%, 0.14);
+	border-color: hsla(120, 62%, 52%, 0.4);
+}
+
+@media (hover: hover) {
+	.dash-btn--danger:hover {
+		background: hsl(0, 62%, 52%, 0.26);
+		color: hsl(0, 80%, 76%);
+	}
+}
+.dash-btn:disabled {
+	opacity: 0.55;
+	cursor: not-allowed;
+}
+
+/* ----- Phone (480) ------------------------------------------------- */
+/* Stats and filters stack into rows, the repo list grows to 80vh (the
+   document scrolls again instead of the pinned-viewport layout), panel
+   controls stack, action buttons sit two per row and lose height, and
+   every margin/padding tightens. */
+@media (max-width: 480px) {
+	.dashboard {
+		padding: 16px 14px 0;
+		gap: 16px;
+	}
+	.dash-stats {
+		grid-template-columns: 1fr;
+		grid-template-rows: repeat(5, minmax(0, 1fr));
+	}
+	.dash-filters {
+		grid-template-columns: 1fr;
+		grid-template-rows: 1fr auto auto;
+		gap: 10px;
+	}
+	.dash-repos {
+		min-height: 80vh;
+		padding: 6px;
+	}
+	.repo-card {
+		padding: 12px 14px;
+	}
+	.repo-card__state {
+		margin-top: 8px;
+	}
+	.dash-ctl {
+		flex-direction: column;
+		align-items: start;
+		gap: 6px;
+	}
+	.dash-panel {
+		padding: 10px 12px 12px;
+		gap: 10px;
+	}
+	.dash-panel__actions {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 8px;
+		padding-top: 0;
+	}
+	.dash-btn {
+		margin-top: 5px;
+		padding: 5px 18px;
+	}
+}

@@ -1,0 +1,1388 @@
+/* github unlisted - GLOBAL stylesheet: every page except the viewer
+   (home, FAQ, privacy, status, and the app chrome). The viewer route
+   loads its own self-contained viewer.css and never loads this file.
+
+   Consolidated from the old globals.css + globals_override.css +
+   normal.css + normal_override.css. Layout: tokens + reset + shared
+   chrome first, marketing page sections next, breakpoint overrides
+   (1250 tablet / 760 phone) at the end. Dashboard-specific styles live
+   in dashboard.css (being redesigned; intentionally empty for now). */
+
+/* gsans, the site sans (variable, weights 100-900). Registered here as a
+   plain @font-face because the next/font injection in layout.tsx loses
+   the custom-property tie against this file's :root and never applied;
+   "gsans" leads the --font-sans stack below so this copy always wins. */
+@font-face {
+	font-family: "gsans";
+	src: url("../fonts/gsans.ttf") format("truetype-variations");
+	font-weight: 100 900;
+	font-display: swap;
+}
+
+:root {
+	/* Brand accent - THE single CSS source. Every accent colour in the
+	   browser derives from this via relative color: rgb(from var(--accent)
+	   r g b / a) for tints, hsl(from var(--accent) h s l) for shades.
+	   Build-time OG/icon images can't read CSS vars - their source is
+	   ACCENT in src/lib/brand.ts; keep the two in sync. */
+	--accent: hsl(248, 46%, 64%);
+
+	/* Surfaces (shared site-wide) */
+	--bg: hsl(0, 0%, 4%);
+	--surface: hsl(0, 0%, 7%);
+	--surface-2: hsl(222, 0%, 13%);
+	--border: hsl(224, 16%, 18%);
+	--border-soft: hsl(225, 16%, 15%);
+	--border-strong: hsl(226, 14%, 25%);
+
+	/* Text - desaturated greyscale neutral scale */
+	--text: hsl(0, 0%, 95%);
+	--text-2: hsl(0, 0%, 85%);
+	--text-3: hsl(0, 0%, 72%);
+	--text-muted: hsl(0, 0%, 65%);
+	--text-faint: hsl(0, 0%, 60%);
+
+	/* Type families. gsans comes from the @font-face above; serif is
+	   retired and aliases sans. Mono stays. */
+	--font-sans:
+		"gsans", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
+		sans-serif;
+	--font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+	--font-serif: var(--font-sans);
+
+	/* Fluid type scale. Site-facing font-sizes route through these;
+	   component-internal sizes (icon glyphs, chip text) stay fixed-px.
+	   Every token interpolates linearly across the SAME 480px-1280px
+	   viewport window (preferred = (max-min)/8 vw + min - 0.6(max-min)),
+	   so the sizes ramp together, no tier ever jumps at a breakpoint,
+	   and the hierarchy holds at every width. */
+	--fs-display: clamp(36px, 2.875vw + 22.2px, 59px);
+	--fs-h1: clamp(26px, 1.25vw + 20px, 36px);
+	--fs-h2: clamp(22px, 0.75vw + 16.4px, 28px);
+	--fs-h3: clamp(18.5px, 0.625vw + 12px, 22px);
+	--fs-body: clamp(16px, 0.625vw + 11px, 19px);
+	--fs-ui: clamp(12px, 0.375vw + 10.2px, 15px);
+	--fs-caption: clamp(12px, 0.3125vw + 9px, 13px);
+	--fs-btn: clamp(12px, 0.375vw + 10.2px, 15px);
+
+	/* Frosted chrome backdrop shared by the nav + footer. */
+	--chrome-backdrop: blur(4px) brightness(134%) grayscale(100%);
+
+	/* Viewport width as a unitless number, for fluid variable-font
+	   weights (tan(atan2()) because plain length division is not
+	   supported in Firefox; see the hero title/sub rules). */
+	--vw-n: tan(atan2(100vw, 1px));
+
+	/* Marketing radii + hero shadow */
+	--radius-pill: 999px;
+	--radius-md: 12px;
+	--shadow-hero: 0 0 22px 2px hsl(from var(--accent) h s l / 0.4);
+}
+
+/* ----- Reset ------------------------------------------------------- */
+/* Tailwind is gone; the parts of its preflight this site actually relied
+   on are replicated here so nothing shifts: zeroed heading/paragraph/list
+   margins, headings inheriting size and weight, unstyled lists, block
+   media, and form controls inheriting the page font. */
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+html,
+body {
+	margin: 0;
+	padding: 0;
+	min-height: 100vh;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	margin: 0;
+	font-size: inherit;
+	font-weight: inherit;
+}
+p,
+blockquote,
+figure {
+	margin: 0;
+}
+ul,
+ol {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+img,
+svg,
+video {
+	display: block;
+	max-width: 100%;
+}
+body {
+	font-family: var(--font-sans);
+	background: var(--bg);
+	color: var(--text);
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
+	letter-spacing: -0.005em;
+	font-feature-settings: "ss01", "cv11";
+	position: relative;
+	overflow-x: hidden;
+}
+a {
+	color: inherit;
+	text-decoration: none;
+}
+button,
+input,
+select,
+textarea {
+	font: inherit;
+	color: inherit;
+	letter-spacing: inherit;
+}
+button {
+	background: transparent;
+	border: 0;
+	padding: 0;
+	cursor: pointer;
+}
+
+/* Lock background scroll while the nav drawer or the viewer tree sheet
+   is open. */
+body[data-drawer="open"],
+body[data-viewer-tree="open"],
+body[data-contact="open"] {
+	overflow: hidden;
+}
+
+/* ----- Page shell + main + bloom ----------------------------------- */
+/* Every page (marketing + app) is a flex column so <main> fills the
+   gap between the nav and footer and the footer pins to the bottom. */
+.page-shell {
+	position: relative;
+	z-index: 1;
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+
+/* Every page <main> carries the base background; the home hero opts
+   out (below) so the bloom only shows through there. */
+main {
+	background: var(--bg);
+}
+
+/* Ambient backdrop image, behind everything, on every page. */
+.bloom {
+	position: fixed;
+	inset: 0;
+	pointer-events: none;
+	z-index: -2;
+	background: url("/bg_svg.svg");
+}
+
+/* Page fade-in. template.tsx remounts this wrapper on every navigation,
+   replaying the animation (reduced-motion users get it near-instant via
+   the prefers-reduced-motion block below). */
+.page-fade {
+	animation: page-fade-in 0.28s ease;
+}
+@keyframes page-fade-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+/* ----- Wordmark (shared) ------------------------------------------- */
+.wordmark {
+	display: inline-flex;
+	align-items: center;
+	gap: 9px;
+	color: var(--text);
+	font-weight: 500;
+	min-width: 0;
+}
+/* .mark also drives the SVG slash strokes (stroke="currentColor"); the
+   svg inherits this color so we avoid a bare-svg selector clashing with
+   the hamburger / drawer svg rules. */
+.wordmark .mark {
+	width: 26px;
+	height: 26px;
+	display: inline-grid;
+	place-items: center;
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: 7px;
+	flex-shrink: 0;
+	color: var(--accent);
+}
+.wordmark .word {
+	font-size: var(--fs-ui);
+}
+.wordmark .word .pre {
+	color: var(--text-3);
+}
+.wordmark .word .post {
+	color: var(--accent);
+}
+
+/* ----- Unified top navigation (site-wide) -------------------------- */
+.topbar {
+	background: var(--surface);
+	position: relative;
+	z-index: 5;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 16px 28px;
+	gap: 16px;
+}
+
+/* Inline desktop / tablet navigation links. */
+.nav-links {
+	background: var(--bg);
+	border: 1px solid hsl(from var(--text) h s l / 0.2);
+	border-radius: 999px;
+	grid-auto-columns: 1fr;
+	grid-auto-flow: column;
+	justify-self: start;
+	align-items: stretch;
+	gap: 0.25rem;
+	width: fit-content;
+	padding: 0.25rem;
+	display: grid;
+}
+.nav-links a,
+.nav-links .nav-contact {
+	padding: 0.5rem 0rem;
+	/* box-shadow: inset 0 0 1px 1px hsl(from var(--text-muted) h s l / 0.4); */
+	background: var(--surface-2);
+	border-radius: 999px;
+	color: var(--text-2);
+	text-align: center;
+	white-space: nowrap;
+	justify-content: center;
+	align-items: center;
+	font-size: 0.875rem;
+	font-weight: 600;
+	transition:
+		background 0.2s,
+		color 0.2s;
+	display: flex;
+	min-width: 150px;
+}
+@media (hover: hover) {
+	.nav-links a:hover,
+	.nav-links .nav-contact:hover {
+		background: var(--surface);
+	}
+}
+.nav-links a.is-active {
+	color: var(--bg);
+	background: var(--accent);
+}
+
+/* Marketing sign-in pill (nav child). */
+.topbar .nav-cta {
+	padding: 8px 18px;
+	border-radius: var(--radius-pill);
+	border: 1px solid var(--border);
+	background: rgba(255, 255, 255, 0.02);
+	color: var(--text);
+	font-size: var(--fs-ui);
+	font-weight: 500;
+}
+@media (hover: hover) {
+	.topbar .nav-cta:hover {
+		background: rgba(255, 255, 255, 0.05);
+	}
+}
+
+/* ----- Footer (shared) --------------------------------------------- */
+.site-footer {
+	position: relative;
+	z-index: 5;
+	padding: 20px 44px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	font-family: var(--font-sans);
+	font-size: var(--fs-caption);
+	color: var(--text-muted);
+	background: var(--surface);
+}
+.site-footer a {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	color: var(--text-muted);
+}
+.site-footer a .url {
+	font-family: var(--font-sans);
+	text-transform: inherit;
+	color: var(--accent);
+}
+@media (hover: hover) {
+	.site-footer a:hover .url {
+		color: var(--text);
+	}
+}
+
+/* ----- Contact modal ----------------------------------------------- */
+/* The trigger lives in the nav (.nav-contact pill, styled with the
+   .nav-links rules above) and in the drawer (.drawer-contact row, styled
+   with the .drawer-panel__links rules); only the modal is styled here. */
+.contact-backdrop {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.55);
+	backdrop-filter: blur(2px);
+	z-index: 80;
+	border: 0;
+	padding: 0;
+	cursor: pointer;
+}
+.contact-modal {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: min(92vw, 460px);
+	max-height: 88vh;
+	overflow-y: auto;
+	z-index: 81;
+	padding: 22px;
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: 14px;
+	animation: contact-in 0.18s ease;
+}
+@keyframes contact-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+.contact-modal__head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 16px;
+}
+.contact-modal__title {
+	margin: 0;
+	font-size: var(--fs-h3);
+	font-weight: 600;
+	color: var(--text);
+}
+.contact-modal__close {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	background: transparent;
+	border: 1px solid var(--border);
+	border-radius: 8px;
+	color: var(--text-2);
+	cursor: pointer;
+	padding: 0;
+}
+.contact-modal__close svg {
+	width: 14px;
+	height: 14px;
+}
+
+.contact-form {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+}
+.contact-field {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+.contact-label {
+	font-size: var(--fs-caption);
+	color: var(--text-3);
+	letter-spacing: 0.02em;
+}
+.contact-input {
+	width: 100%;
+	background: var(--bg);
+	border: 1px solid var(--border);
+	border-radius: 8px;
+	padding: 9px 11px;
+	color: var(--text);
+	font-family: var(--font-sans);
+	font-size: var(--fs-ui);
+	outline: 0;
+}
+.contact-input::placeholder {
+	color: var(--text-muted);
+}
+.contact-input:focus {
+	border-color: var(--border-strong);
+}
+.contact-textarea {
+	resize: vertical;
+	min-height: 96px;
+	line-height: 1.5;
+}
+.contact-select {
+	appearance: none;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	padding-right: 34px;
+	cursor: pointer;
+	background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23bababa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right 11px center;
+	background-size: 12px;
+}
+.contact-hp {
+	position: absolute;
+	left: -9999px;
+	width: 1px;
+	height: 1px;
+	opacity: 0;
+	pointer-events: none;
+}
+.contact-error {
+	margin: 0;
+	font-size: var(--fs-caption);
+	color: #ef4444;
+}
+.contact-submit {
+	margin-top: 2px;
+	height: 40px;
+	border-radius: 8px;
+	background: rgb(from var(--accent) r g b / 0.14);
+	border: 1px solid rgb(from var(--accent) r g b / 0.4);
+	color: var(--accent);
+	font-family: var(--font-sans);
+	font-weight: 500;
+	font-size: var(--fs-ui);
+	cursor: pointer;
+	transition: background 0.15s ease;
+}
+.contact-submit:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+.contact-sent {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+.contact-sent p {
+	margin: 0;
+	font-size: var(--fs-body);
+	line-height: 1.6;
+	color: var(--text-2);
+}
+
+@media (hover: hover) {
+	.contact-modal__close:hover {
+		color: var(--text);
+		border-color: var(--border-strong);
+	}
+	.contact-submit:not(:disabled):hover {
+		background: rgb(from var(--accent) r g b / 0.2);
+	}
+}
+
+/* ----- Status indicator dot ---------------------------------------- */
+/* Pulsing dot next to STATUS nav links and inside the drawer. Color
+   modifier driven by CURRENT_STATUS in src/lib/site-status.ts. */
+.status-dot {
+	display: inline-block;
+	width: 8px;
+	height: 8px;
+	margin-left: 6px;
+	border-radius: 50%;
+	vertical-align: middle;
+	animation: status-dot-pulse 2.4s ease-in-out infinite;
+}
+.status-dot--okay {
+	background: #22c55e;
+	box-shadow: 0 0 8px 1px rgba(34, 197, 94, 0.7);
+}
+.status-dot--medium {
+	background: #f5b756;
+	box-shadow: 0 0 8px 1px rgba(245, 183, 86, 0.7);
+}
+.status-dot--critical {
+	background: #ef4444;
+	box-shadow: 0 0 8px 1px rgba(239, 68, 68, 0.7);
+}
+@keyframes status-dot-pulse {
+	0%,
+	100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+	50% {
+		opacity: 0.55;
+		transform: scale(0.85);
+	}
+}
+
+/* ----- Chip / pill primitive --------------------------------------- */
+/* Base + status-page variants. Dashboard variants will live in
+   dashboard.css when it is rebuilt. */
+.chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	padding: 2px 8px;
+	border-radius: 5px;
+	font-family: var(--font-mono);
+	font-size: 0.75rem;
+	font-weight: 500;
+	white-space: nowrap;
+	border: 1px solid transparent;
+	text-transform: uppercase;
+	letter-spacing: 0.2em;
+}
+.chip--md {
+	padding: 3px 9px;
+}
+.chip--okay {
+	background: rgba(34, 197, 94, 0.14);
+	border-color: rgba(34, 197, 94, 0.32);
+	color: #22c55e;
+}
+.chip--medium {
+	background: rgba(245, 183, 86, 0);
+	border-color: rgba(245, 183, 86, 0.32);
+	color: #f5b756;
+}
+.chip--critical {
+	background: rgba(239, 68, 68, 0);
+	border-color: rgba(239, 68, 68, 0.32);
+	color: #ef4444;
+}
+/* Category pills (historical log): dark transparent background + neutral
+   border so they read as category labels, distinct from the severity
+   pills (--medium / --critical) beside them. */
+.chip--incident {
+	background: #00000000;
+	border-color: #565656;
+	color: #ef4444;
+}
+.chip--maintenance {
+	background: #00000075;
+	border-color: #565656;
+	color: #a9a9a9;
+}
+
+/* ----- Hamburger + slide-in drawer --------------------------------- */
+.hamburger {
+	display: none;
+	align-items: center;
+	justify-content: center;
+	width: 40px;
+	height: 40px;
+	background: transparent;
+	border: 1px solid var(--border);
+	border-radius: 10px;
+	color: var(--text);
+	cursor: pointer;
+	padding: 0;
+	transition:
+		border-color 0.15s ease,
+		background 0.15s ease;
+}
+@media (hover: hover) {
+	.hamburger:hover {
+		border-color: var(--border-strong);
+		background: rgba(255, 255, 255, 0.03);
+	}
+}
+.hamburger svg {
+	width: 18px;
+	height: 18px;
+}
+
+.drawer-backdrop {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.55);
+	backdrop-filter: blur(2px);
+	z-index: 70;
+	border: 0;
+	padding: 0;
+	cursor: pointer;
+}
+
+.drawer-panel {
+	position: fixed;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	width: 280px;
+	max-width: 86vw;
+	background: var(--surface);
+	border-left: 1px solid var(--border);
+	z-index: 71;
+	display: flex;
+	flex-direction: column;
+	transform: translateX(100%);
+	transition: transform 0.25s ease;
+}
+.drawer-panel[data-open="true"] {
+	transform: translateX(0);
+}
+
+.drawer-panel__head {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	padding: 16px 18px;
+	border-bottom: 1px solid var(--border-soft);
+}
+.drawer-panel__close {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 36px;
+	height: 36px;
+	background: transparent;
+	border: 1px solid var(--border);
+	border-radius: 8px;
+	color: var(--text-2);
+	cursor: pointer;
+	padding: 0;
+}
+@media (hover: hover) {
+	.drawer-panel__close:hover {
+		color: var(--text);
+		border-color: var(--border-strong);
+	}
+}
+.drawer-panel__close svg {
+	width: 14px;
+	height: 14px;
+}
+
+.drawer-panel__links {
+	display: flex;
+	flex-direction: column;
+	padding: 6px 0;
+}
+.drawer-panel__links a,
+.drawer-panel__links .drawer-contact {
+	text-align: left;
+	padding: 14px 22px;
+	font-size: var(--fs-body);
+	color: var(--text-2);
+	border-bottom: 1px solid var(--border-soft);
+	letter-spacing: 0.04em;
+	transition:
+		color 0.15s ease,
+		background 0.15s ease;
+}
+@media (hover: hover) {
+	.drawer-panel__links a:hover,
+	.drawer-panel__links .drawer-contact:hover {
+		color: var(--text);
+		background: rgba(255, 255, 255, 0.025);
+	}
+}
+.drawer-panel__links a.is-active {
+	color: var(--accent);
+}
+.drawer-panel__links a.is-cta {
+	color: var(--accent);
+	font-weight: 500;
+	background: rgb(from var(--accent) r g b / 0.04);
+}
+
+/* ----- Buttons (marketing) ----------------------------------------- */
+.btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	border: 1.5px solid transparent;
+	cursor: pointer;
+	font-family: var(--font-sans);
+	font-weight: 500;
+	white-space: nowrap;
+	transition:
+		background 0.15s ease,
+		border-color 0.15s ease,
+		color 0.15s ease;
+}
+.btn--outline-accent {
+	padding: 14px 28px;
+	border-radius: 75px;
+	background: var(--accent);
+	color: var(--bg);
+	font-size: var(--fs-btn);
+	letter-spacing: 0.15em;
+	font-weight: 600;
+	text-transform: uppercase;
+}
+@media (hover: hover) {
+	.btn--outline-accent:hover {
+		background: var(--bg);
+		border-color: var(--accent);
+		color: var(--accent);
+	}
+}
+
+/* ----- Landing hero ------------------------------------------------ */
+/* The home hero is the one <main> that stays transparent so the bloom
+   shows through here only (every other main carries var(--bg)).
+   Purely fluid: no breakpoint rules; every size interpolates over the
+   same 480-1280 viewport window as the type scale. */
+.hero {
+	flex: 1;
+	display: grid;
+	place-items: center;
+	padding: clamp(22px, 4.75vw - 0.8px, 60px) clamp(10px, 4.5vw + 10.2px, 60px);
+	position: relative;
+	z-index: 2;
+	background: transparent;
+}
+
+.hero__inner {
+	text-align: center;
+}
+
+.hero__title {
+	/* Fluid variable-font weight over the 460-1280 window (slope 220/820
+	   per px); --vw-n comes from :root. */
+	--fluid-weight: calc(316.59 + 0.26829 * var(--vw-n));
+	font-weight: clamp(500, var(--fluid-weight), 660);
+	margin: 0;
+	font-family: var(--font-sans);
+	font-size: var(--fs-display);
+	line-height: 1.05;
+	letter-spacing: clamp(0.325rem, calc(0.126rem + 0.662vw), 0.656rem);
+	color: var(--text);
+	text-wrap: balance;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.hero__sub {
+	/* Fluid weight like the title: 400 at 460px up to 525 at 1280px
+	   (slope 125/820 per px). */
+	--fluid-weight: calc(329.88 + 0.15244 * var(--vw-n));
+	font-weight: clamp(400, var(--fluid-weight), 525);
+	margin: clamp(18px, 2.25vw + 7.2px, 36px) auto 0;
+	font-size: var(--fs-body);
+	line-height: 1.6;
+	color: var(--text-muted);
+	text-wrap: balance;
+	max-width: 920px;
+}
+
+/* Hero screenshot between the sub text and the CTA. One <picture>: the
+   phone capture serves at 480px and below, the desktop capture above.
+   Sizing stays fluid over the same 480-1280 window as everything else;
+   the 480px query only swaps the source and narrows the frame to suit
+   the portrait image. */
+.hero__shot {
+	display: block;
+	margin: clamp(24px, 2vw + 27.4px, 65px) auto;
+	width: 100%;
+	max-width: min(70vw, 1280px);
+}
+.hero__shot img {
+	width: 100%;
+	height: auto;
+	border: 1px solid var(--border);
+	border-radius: var(--radius-md);
+	box-shadow: var(--shadow-hero);
+}
+@media (max-width: 760px) {
+	.hero__shot {
+		max-width: min(300px, 65vw);
+	}
+}
+
+.bracket-word {
+	display: inline-flex;
+	align-items: baseline;
+	gap: 6px;
+	vertical-align: baseline;
+}
+.bracket-word .bracket {
+	font-family: var(--font-sans);
+	font-weight: 300;
+	font-size: 0.82em;
+	color: var(--accent);
+	line-height: 1;
+	opacity: 0.55;
+}
+.hero-cta {
+	position: relative;
+	z-index: 2;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 14px;
+}
+.hero-cta__row {
+	display: flex;
+	align-items: center;
+	gap: clamp(16px, 0.25vw + 14.8px, 18px);
+	padding-bottom: clamp(40px, 7.5vw + 4px, 100px);
+}
+.hero-cta__row .btn {
+	min-width: 310px;
+}
+.hero-cta__divider {
+	width: 50px;
+	height: 1px;
+	background: var(--border-strong);
+}
+
+/* ----- FAQ page ---------------------------------------------------- */
+.faq-content {
+	flex: 1;
+	display: flex;
+	justify-content: center;
+	padding: 60px 60px 80px;
+	position: relative;
+	z-index: 2;
+}
+.faq-content__inner {
+	width: 100%;
+	max-width: 880px;
+}
+
+.faq-title {
+	margin: 0 0 14px;
+	font-family: var(--font-sans);
+	font-weight: 400;
+	font-size: var(--fs-display);
+	line-height: 1.02;
+	letter-spacing: -0.028em;
+	color: var(--text);
+	text-wrap: balance;
+}
+.faq-title em {
+	color: var(--accent);
+	font-style: italic;
+}
+
+.faq-lede {
+	margin: 0 0 44px;
+	font-size: var(--fs-body);
+	line-height: 1.6;
+	color: var(--text-faint);
+	text-wrap: balance;
+	font-weight: 400;
+}
+
+.faq-list {
+	border-top: 1px solid var(--border-soft);
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+.faq-item {
+	border-bottom: 1px solid var(--border-soft);
+	list-style: none;
+}
+
+.faq-q {
+	width: 100%;
+	padding: 28px 8px;
+	display: grid;
+	grid-template-columns: 0.9fr 0.1fr;
+	align-items: center;
+	gap: 16px;
+	background: transparent;
+	border: 0;
+	text-align: left;
+	color: var(--text);
+	cursor: pointer;
+}
+
+.faq-q__text {
+	font-size: var(--fs-h2);
+	font-weight: 500;
+	letter-spacing: -0.015em;
+	color: rgba(243, 241, 238, 0.88);
+	line-height: 1.3;
+	text-wrap: balance;
+	transition: color 0.2s ease;
+}
+
+.faq-q__icon {
+	width: 26px;
+	height: 26px;
+	border-radius: var(--radius-pill);
+	border: 1px solid var(--accent);
+	color: var(--bg);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	justify-self: end;
+	transition:
+		color 0.25s ease,
+		background 0.25s ease,
+		transform 0.25s ease;
+	background: var(--accent);
+}
+.faq-q__icon svg {
+	width: 12px;
+	height: 12px;
+}
+
+.faq-q[aria-expanded="true"] .faq-q__icon {
+	color: var(--accent);
+}
+.faq-q[aria-expanded="true"] .faq-q__text {
+	color: var(--text);
+}
+.faq-q[aria-expanded="true"] .faq-q__icon {
+	color: var(--accent);
+	background: transparent;
+	transform: rotate(45deg);
+}
+
+.faq-a {
+	display: grid;
+	grid-template-rows: 0fr;
+	transition: grid-template-rows 0.3s ease;
+}
+.faq-q[aria-expanded="true"] + .faq-a {
+	grid-template-rows: 1fr;
+}
+
+.faq-a__inner {
+	overflow: hidden;
+}
+.faq-a__body {
+	padding-left: 54px;
+	padding-right: 50px;
+	padding-bottom: 0;
+	color: var(--text-muted);
+	font-size: var(--fs-body);
+	line-height: 1.6;
+	text-wrap: balance;
+	transition: padding-bottom 0.3s ease;
+	font-weight: 350;
+}
+.faq-q[aria-expanded="true"] + .faq-a .faq-a__body {
+	padding-bottom: 30px;
+}
+
+.faq-a__body a {
+	color: var(--accent);
+	border-bottom: 1px dashed rgb(from var(--accent) r g b / 0.4);
+}
+@media (hover: hover) {
+	.faq-a__body a:hover {
+		border-bottom-style: solid;
+	}
+}
+
+/* ----- Legal pages (privacy) --------------------------------------- */
+.legal-content {
+	flex: 1;
+	display: flex;
+	justify-content: center;
+	padding: 60px 60px 80px;
+}
+.legal-content__inner {
+	width: 100%;
+	max-width: 820px;
+	color: var(--text-2);
+}
+.legal h1 {
+	font-size: var(--fs-h1);
+	font-weight: 600;
+	letter-spacing: -0.02em;
+	color: var(--text);
+	margin: 0 0 6px;
+}
+.legal .legal-updated {
+	color: var(--text-muted);
+	font-size: var(--fs-caption);
+	margin: 0 0 30px;
+}
+.legal h2 {
+	font-size: var(--fs-h3);
+	font-weight: 600;
+	color: var(--text);
+	margin: 32px 0 10px;
+}
+.legal p {
+	color: var(--text-muted);
+	font-size: var(--fs-body);
+	line-height: 1.7;
+	margin: 0 0 12px;
+}
+.legal ul {
+	margin: 0 0 14px;
+	padding-left: 22px;
+	list-style: disc;
+}
+.legal li {
+	color: var(--text-muted);
+	font-size: var(--fs-body);
+	line-height: 1.7;
+	margin: 5px 0;
+}
+.legal a {
+	color: var(--accent);
+}
+@media (hover: hover) {
+	.legal a:hover {
+		text-decoration: underline;
+	}
+}
+.legal strong {
+	color: var(--text);
+	font-weight: 600;
+}
+
+/* ----- Status page ------------------------------------------------- */
+.status-content {
+	flex: 1;
+	display: flex;
+	justify-content: center;
+	padding: 60px 60px 80px;
+	position: relative;
+	z-index: 2;
+}
+.status-content__inner {
+	width: 100%;
+	max-width: 1250px;
+}
+.status-eyebrow {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	font-family: var(--font-sans);
+	font-size: var(--fs-h2);
+	color: var(--text-3);
+	margin-bottom: 22px;
+	font-weight: 500;
+}
+
+.status-title {
+	margin: 0 0 32px;
+	font-family: var(--font-sans);
+	font-weight: 400;
+	font-size: var(--fs-display);
+	line-height: 1.02;
+	letter-spacing: -0.028em;
+	color: var(--text);
+	text-wrap: balance;
+}
+
+/* Section wrapper. h2 lives only inside .status-section so no global
+   h2 typography is introduced for the rest of the site. */
+.status-section {
+	margin-bottom: 36px;
+}
+.status-section:last-child {
+	margin-bottom: 0;
+}
+.status-section h2 {
+	margin: 0 0 14px;
+	font-family: var(--font-sans);
+	font-size: var(--fs-h2);
+	font-weight: 600;
+	letter-spacing: -0.015em;
+	color: var(--text);
+}
+
+/* Card chrome shared by the Current Status section and the Historical
+   Status Log. */
+.status-card {
+	background: var(--surface);
+	border-radius: 12px;
+	overflow: hidden;
+}
+
+/* Current status: single-column grid; head is a horizontal flex row
+   (pill + start-time) anchored on its center so pill and mono text line
+   up regardless of which is taller. */
+.status-current-row {
+	display: grid;
+	grid-template-columns: 1fr;
+	align-items: center;
+	gap: 12px;
+	padding: 20px 24px;
+	border-bottom: 1px solid var(--border-soft);
+}
+.status-current-row:last-child {
+	border-bottom: 0;
+}
+.status-current-row__head {
+	display: flex;
+	flex-direction: row;
+	gap: 12px;
+	align-items: anchor-center;
+	flex-wrap: wrap;
+}
+
+/* Historical log: single column always. Time + the two pills sit in a
+   horizontal row on tablet/desktop, stacking on phone (phone @media). */
+.status-log-row {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 12px;
+	padding: 38px 24px;
+	border-bottom: 1px solid var(--border-soft);
+}
+.status-log-row:last-child {
+	border-bottom: 0;
+}
+.status-log-row__head {
+	display: flex;
+	flex-direction: column;
+	align-items: baseline;
+	gap: 12px;
+	flex-wrap: wrap;
+}
+.status-log-row__pills {
+	display: flex;
+	gap: 26px;
+	flex-wrap: wrap;
+}
+
+.status-time {
+	font-family: var(--font-mono);
+	font-size: var(--fs-caption);
+	color: var(--text-3);
+	letter-spacing: 0.12em;
+	font-weight: bold;
+}
+
+.status-current-row__body,
+.status-log-row__body {
+	font-size: var(--fs-body);
+	color: var(--text-2);
+	line-height: 1.6;
+	text-wrap: stable;
+}
+.status-current-row__contact {
+	color: var(--accent);
+	text-decoration: underline;
+	text-underline-offset: 3px;
+	text-decoration-thickness: 1px;
+}
+@media (hover: hover) {
+	.status-current-row__contact:hover {
+		color: var(--accent);
+		opacity: 0.85;
+	}
+}
+
+/* Quick helpsheet: plain bullet list, no card. */
+.status-helpsheet {
+	margin: 0;
+	padding-left: 22px;
+	font-size: var(--fs-body);
+	color: var(--text-2);
+	line-height: 1.65;
+	list-style: disc;
+}
+.status-helpsheet > li {
+	margin: 8px 0;
+}
+.status-helpsheet > li::marker {
+	color: var(--accent);
+}
+.status-helpsheet ul {
+	margin: 8px 0 4px;
+	padding-left: 22px;
+	list-style: disc;
+}
+.status-helpsheet ul > li::marker {
+	color: var(--text-3);
+}
+.status-helpsheet strong {
+	color: var(--text);
+	font-weight: 600;
+}
+
+/* Collapsible terminology help below the current status card. Native
+   <details>; default arrow stripped, replaced with a plus/minus
+   indicator (the "open" glyph is U+2212 so it optically matches the
+   plus, reproduced from the previous stylesheet). */
+.status-help-collapsible {
+	margin-top: 18px;
+	background: var(--surface);
+	padding: 20px;
+	border-radius: 12px;
+}
+
+.status-help-collapsible summary {
+	font-family: var(--font-sans);
+	font-size: var(--fs-h3);
+	color: var(--text-3);
+	list-style: none;
+	cursor: pointer;
+	padding: 14px 4px;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	font-weight: 500;
+	letter-spacing: 0.01em;
+	transition: color 0.15s ease;
+}
+.status-help-collapsible summary::-webkit-details-marker {
+	display: none;
+}
+.status-help-collapsible summary::after {
+	content: "+";
+	margin-left: auto;
+	font-family: var(--font-mono);
+	font-size: var(--fs-body);
+	color: var(--text-2);
+	line-height: 1;
+}
+.status-help-collapsible[open] summary::after {
+	content: "\2212";
+}
+.status-help-collapsible[open] summary {
+	color: var(--text);
+}
+@media (hover: hover) {
+	.status-help-collapsible summary:hover {
+		color: var(--text);
+	}
+}
+.status-help-collapsible[open] .status-helpsheet {
+	padding-bottom: 18px;
+}
+
+/* ----- Breakpoint overrides ---------------------------------------- */
+/* Tablet and below (1250): inline nav collapses into the drawer, the
+   hamburger surfaces, chrome padding tightens, page gutters shrink,
+   the marketing sign-in pill folds into the drawer. */
+@media (max-width: 1250px) {
+	.nav-links {
+		display: none;
+	}
+	.hamburger {
+		display: inline-flex;
+	}
+	.topbar {
+		padding: 14px 24px;
+	}
+	.site-footer {
+		padding: 18px 32px;
+	}
+	.topbar .nav-cta {
+		display: none;
+	}
+	.faq-content {
+		padding: 50px 32px 70px;
+	}
+	.legal-content {
+		padding: 50px 32px 70px;
+	}
+	.status-content {
+		padding: 50px 32px 70px;
+	}
+}
+
+/* Desktop only: keep the hamburger out of the layout entirely. */
+@media (min-width: 1251px) {
+	.hamburger {
+		display: none;
+	}
+}
+
+/* Phone (760): pack the nav, stack the footer, tighten every page
+   gutter. Type is NOT re-tuned here anymore - the fluid tokens above
+   cover the whole 480-1280 range without breakpoint jumps. */
+@media (max-width: 760px) {
+	.topbar {
+		padding: 12px 18px;
+		gap: 10px;
+	}
+	/* The mark icon alone carries the brand on phone; drop the wordmark
+	   text so the packed nav fits. */
+	.topbar .wordmark .word {
+		display: none;
+	}
+	.site-footer {
+		padding: 16px 22px;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 10px;
+		margin-top: auto;
+	}
+
+	.faq-content {
+		padding: 22px 22px 50px;
+	}
+	.faq-q {
+		grid-template-columns: 28px 1fr 24px;
+		padding: 22px 4px;
+		gap: 12px;
+	}
+	.faq-q__icon {
+		width: 24px;
+		height: 24px;
+	}
+	.faq-a__body {
+		padding-left: 5px;
+		padding-right: 4px;
+	}
+
+	.legal-content {
+		padding: 22px 22px 50px;
+	}
+	.legal h2 {
+		margin-top: 26px;
+	}
+
+	.status-content {
+		padding: 22px 22px 50px;
+	}
+	.status-current-row,
+	.status-log-row {
+		padding: 16px 18px;
+	}
+	/* Log row head stacks: time on top, pills below. */
+	.status-log-row__head {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+}
+
+/* ----- Reduced motion ---------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		/* biome-ignore lint/complexity/noImportantStyles: canonical
+		   prefers-reduced-motion override pattern */
+		animation-duration: 0.01ms !important;
+		/* biome-ignore lint/complexity/noImportantStyles: canonical
+		   prefers-reduced-motion override pattern */
+		animation-iteration-count: 1 !important;
+		/* biome-ignore lint/complexity/noImportantStyles: canonical
+		   prefers-reduced-motion override pattern */
+		transition-duration: 0.01ms !important;
+		/* biome-ignore lint/complexity/noImportantStyles: canonical
+		   prefers-reduced-motion override pattern */
+		scroll-behavior: auto !important;
+	}
+}

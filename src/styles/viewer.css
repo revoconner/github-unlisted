@@ -1,7 +1,9 @@
 /* github unlisted - the VIEWER stylesheet. This is the one surface that
    deliberately departs from the site language: the recipient's read-only
-   file browser. Everything else (home, FAQ, privacy, status, dashboard)
-   shares normal.css.
+   file browser. It is ENTIRELY SELF-CONTAINED: the viewer route imports
+   only this file, and no other route loads it. The site's global.css is
+   never loaded alongside it, so the reset, page shell, topbar layout and
+   type tokens the viewer needs are all defined here.
 
    WHY IT LOOKS LIKE GITHUB: the recipient is the owner's customer, not
    ours. They did not ask for our product and may never see it again, so
@@ -18,17 +20,125 @@
 
    Monospace also appears HERE and nowhere else on the site, and only on
    actual code: the code block's <pre>, and <pre>/<code> inside a
-   rendered README.
+   rendered README. */
 
-   Adopted from the style-update-aug26 branch and imported ONLY by the
-   viewer route ([...slug]); no other page loads it. The reset, page shell
-   and site-wide tokens still come from globals.css; the few tokens that
-   branch kept in globals but this file needs are redefined, scoped to
-   .viewer-shell, in the block below so no other page is affected.
-   Breakpoint overrides live in viewer_override.css. */
+/* gsans, the site sans (variable, weights 100-900). Own @font-face copy
+   because this file never loads global.css; the bundler dedupes the
+   underlying font asset. */
+@font-face {
+	font-family: "gsans";
+	src: url("../fonts/gsans.ttf") format("truetype-variations");
+	font-weight: 100 900;
+	font-display: swap;
+}
 
-/* Scoped to .viewer-shell rather than :root so nothing here can leak into
-   the site pages, which share the same document and the same globals. */
+/* ----- Base (reset + document) ------------------------------------- */
+/* Same preflight-faithful reset as global.css; duplicated on purpose so
+   the two surfaces stay fully independent. */
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+html,
+body {
+	margin: 0;
+	padding: 0;
+	min-height: 100vh;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	margin: 0;
+	font-size: inherit;
+	font-weight: inherit;
+}
+p,
+blockquote,
+figure {
+	margin: 0;
+}
+ul,
+ol {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+img,
+svg,
+video {
+	display: block;
+	max-width: 100%;
+}
+body {
+	/* gsans is registered by the @font-face above this rule, own copy
+	   since this file never loads global.css. Background mirrors
+	   --gh-canvas (custom properties scoped to .viewer-shell cannot
+	   reach body). */
+	font-family:
+		"gsans", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
+		sans-serif;
+	background: hsl(212, 18.5%, 15.9%);
+	color: hsl(210, 30%, 92%);
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
+	letter-spacing: -0.005em;
+	font-feature-settings: "ss01", "cv11";
+	position: relative;
+	overflow-x: hidden;
+}
+a {
+	color: inherit;
+	text-decoration: none;
+}
+button,
+input,
+select,
+textarea {
+	font: inherit;
+	color: inherit;
+	letter-spacing: inherit;
+}
+button {
+	background: transparent;
+	border: 0;
+	padding: 0;
+	cursor: pointer;
+}
+
+/* Lock background scroll while the file-tree sheet is open. */
+body[data-viewer-tree="open"] {
+	overflow: hidden;
+}
+
+/* Flex column so the content area fills the viewport under the topbar. */
+.page-shell {
+	position: relative;
+	z-index: 1;
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+
+/* Page fade-in, replayed by template.tsx on every navigation. */
+.page-fade {
+	animation: page-fade-in 0.28s ease;
+}
+@keyframes page-fade-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+/* ----- Viewer tokens ----------------------------------------------- */
+/* Scoped to .viewer-shell rather than :root out of habit and safety;
+   nothing else loads this file, but nothing here should ever leak. */
 .viewer-shell {
 	/* The canvas the recipient sees, and the ramp around it. */
 	--gh-canvas: hsl(212, 18.5%, 15.9%);
@@ -44,8 +154,8 @@
 	--gh-fg-muted: hsl(212, 9%, 61%);
 	--gh-fg-subtle: hsl(212, 9%, 48%);
 
-	/* GitHub dark's link blue replaces the site's orange accent inside the
-	   viewer. Scoped here, every rgb(from var(--accent) ...) tint follows. */
+	/* GitHub dark's link blue. Every rgb(from var(--accent) ...) tint in
+	   this file follows it. */
 	--accent: #4493f8;
 
 	/* One corner value everywhere, GitHub-style. */
@@ -53,12 +163,19 @@
 	/* Control height for the toolbar row. */
 	--gh-ctl-h: 2rem;
 
-	/* Tokens this stylesheet needs that the site's globals.css does not
-	   define. On the style-update-aug26 branch these live in globals.css;
-	   here they are scoped to .viewer-shell so the viewer can adopt that
-	   branch's look without changing any other page. --font-mono matches
-	   that branch's deliberate viewer choice: a system stack, no webfont,
-	   applied only to the code block's <pre>. */
+	/* Fluid type scale (same values as the site's global.css; defined
+	   here because that file is not loaded on this route). Interpolates
+	   linearly over the 480px-1280px viewport window, no breakpoint
+	   re-tuning. */
+	--fs-h1: clamp(26px, 1.25vw + 20px, 36px);
+	--fs-h2: clamp(20px, 0.75vw + 16.4px, 26px);
+	--fs-h3: clamp(15px, 0.625vw + 12px, 20px);
+	--fs-body: clamp(14px, 0.625vw + 11px, 19px);
+	--fs-ui: clamp(12px, 0.375vw + 10.2px, 15px);
+	--fs-caption: clamp(10.5px, 0.3125vw + 9px, 13px);
+
+	/* Monospace is a deliberate system stack, no webfont, applied only to
+	   code surfaces. */
 	--font-mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
 	--scrim: hsla(0, 0%, 0%, 0.6);
 	--shadow-menu: 0 8px 24px hsla(0, 0%, 0%, 0.5);
@@ -74,13 +191,20 @@
 	color: var(--gh-fg);
 }
 
-/* The universal header (globals.css supplies the topbar layout) holds only
-   the attribution line. It sits on the darker inset shade, one step below
-   the canvas, so it reads as OUR chrome — clearly separate from the shared
-   repo's content that starts underneath. */
+/* ----- Universal header -------------------------------------------- */
+/* Holds only the attribution line. It sits on the darker inset shade,
+   one step below the canvas, so it reads as OUR chrome - clearly
+   separate from the shared repo's content that starts underneath. */
 .viewer-shell .topbar {
+	position: relative;
+	z-index: 5;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 16px 28px;
+	gap: 16px;
 	background: var(--gh-inset);
-	border-color: var(--gh-border-muted);
+	border-bottom: 1px solid var(--gh-border-muted);
 }
 .viewer-shell main {
 	background: var(--gh-canvas);
@@ -125,7 +249,7 @@
 	color: var(--gh-fg-muted);
 }
 
-/* --- Viewer shell --- */
+/* ----- Viewer shell ------------------------------------------------ */
 /* The viewer <main> grows to fill the gap between topbar and footer;
    min-height:0 lets the inner panes own their scroll. */
 .viewer {
@@ -185,7 +309,7 @@
 	color: var(--gh-fg-muted);
 }
 
-/* --- File tree --- */
+/* ----- File tree --------------------------------------------------- */
 .tree {
 	padding: 0 var(--sp-2) var(--sp-3);
 	overflow-y: auto;
@@ -270,7 +394,7 @@
 	font-size: var(--fs-caption);
 }
 
-/* --- Buttons (the GitHub button: raised fill, visible border, 6px) --- */
+/* ----- Buttons (the GitHub button: raised fill, visible border) ----- */
 .viewer__dl,
 .viewer__tab,
 .viewer__tree-toggle,
@@ -321,7 +445,7 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	display: block;
 }
 
-/* --- Breadcrumb / toolbar strip --- */
+/* ----- Breadcrumb / toolbar strip ---------------------------------- */
 .viewer__main {
 	overflow: auto;
 	min-width: 0;
@@ -350,12 +474,12 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	min-width: 0;
 }
 /* Files sheet toggle row: only exists on viewports where the sidebar is
-   hidden (viewer_override.css shows it under the sheet breakpoint). */
+   hidden (the phone breakpoint below shows it). */
 .viewer__row--files {
 	display: none;
 }
 /* Releases / download group: right-aligned on wide viewports; the phone
-   breakpoint stacks it onto its own row (viewer_override.css). */
+   breakpoint stacks it onto its own row. */
 .viewer__actions {
 	display: flex;
 	align-items: center;
@@ -403,8 +527,8 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	outline-offset: -1px;
 }
 
-/* --- Content card ---
-   GitHub wraps a file (or a README) in a bordered, rounded box with its
+/* ----- Content card ------------------------------------------------ */
+/* GitHub wraps a file (or a README) in a bordered, rounded box with its
    own header strip. That box is what makes the content read as a
    document rather than as page background. */
 .filebar {
@@ -423,7 +547,7 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	flex-wrap: wrap;
 }
 
-/* --- Code block (the ONLY monospace on the site) --- */
+/* ----- Code block (the ONLY monospace on the site) ------------------ */
 .codeblock {
 	margin: 0 var(--sp-5) var(--sp-5);
 	border: 1px solid var(--gh-border-muted);
@@ -448,7 +572,7 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	white-space: pre;
 }
 
-/* --- Rendered README --- */
+/* ----- Rendered README --------------------------------------------- */
 /* GitHub's README pane: the same bordered card, generous inner padding,
    and a max measure so long prose does not run the full width. */
 .readme {
@@ -612,7 +736,7 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	background: var(--gh-raised);
 }
 
-/* --- Releases view --- */
+/* ----- Releases view ----------------------------------------------- */
 .releases {
 	display: flex;
 	flex-direction: column;
@@ -697,7 +821,7 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	}
 }
 
-/* --- Notice screen (revoked / not found) --- */
+/* ----- Notice screen (revoked / not found) ------------------------- */
 .notice-screen {
 	min-height: 100vh;
 	display: flex;
@@ -730,9 +854,9 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	}
 }
 
-/* --- Soft wrap --- */
+/* ----- Soft wrap --------------------------------------------------- */
 /* The toggle sets data-wrap on the content pane; these rules then wrap
-   every code surface inside it — the highlighted file view, the plain
+   every code surface inside it - the highlighted file view, the plain
    fallback <pre>, and fenced blocks embedded in a markdown preview. */
 .viewer__wrap[aria-pressed="true"] {
 	border-color: var(--accent);
@@ -747,7 +871,7 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	word-break: break-word;
 }
 
-/* --- Markdown Preview/Code tabs (in the filebar) --- */
+/* ----- Markdown Preview/Code tabs (in the filebar) ------------------ */
 .filebar__tabs {
 	display: inline-flex;
 	border: 1px solid var(--gh-border);
@@ -779,23 +903,31 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 		color: var(--gh-fg);
 	}
 }
-/* github unlisted - breakpoint overrides for the viewer. Loaded right
-   after viewer.css.
 
-   Padding and type are clamp-driven, so nothing here re-tunes a size.
+/* ----- Breakpoint overrides ---------------------------------------- */
+/* Padding and type are clamp-driven, so nothing here re-tunes a size.
    What is left is layout switching. */
 
-/* Tablet band - narrow the file tree. */
+/* Tablet band - narrow the file tree, tighten the topbar. */
 @media (max-width: 1250px) {
 	.viewer {
 		grid-template-columns: 240px 1fr;
 	}
+	.viewer-shell .topbar {
+		padding: 14px 24px;
+	}
 }
-/* Phone - the content card loses its side gutters so a code line gets
-   the full width, and the file/readme boxes go edge to edge. The branch
-   picker and the releases/download group split onto their own rows. */
+/* Phone - the sidebar leaves the grid and becomes a fixed overlay opened
+   via the .viewer__tree-toggle button. The content card loses its side
+   gutters so a code line gets the full width, and the file/readme boxes
+   go edge to edge. The branch picker and the releases/download group
+   split onto their own rows. */
 @media (max-width: 760px) {
-		.viewer {
+	.viewer-shell .topbar {
+		padding: 12px 18px;
+		gap: 10px;
+	}
+	.viewer {
 		grid-template-columns: 1fr;
 	}
 	.viewer__sidebar {
@@ -854,5 +986,25 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
 	}
 	.releases {
 		padding: var(--sp-4) var(--sp-3);
+	}
+}
+
+/* ----- Reduced motion ---------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		/* biome-ignore lint/complexity/noImportantStyles: canonical
+		   prefers-reduced-motion override pattern */
+		animation-duration: 0.01ms !important;
+		/* biome-ignore lint/complexity/noImportantStyles: canonical
+		   prefers-reduced-motion override pattern */
+		animation-iteration-count: 1 !important;
+		/* biome-ignore lint/complexity/noImportantStyles: canonical
+		   prefers-reduced-motion override pattern */
+		transition-duration: 0.01ms !important;
+		/* biome-ignore lint/complexity/noImportantStyles: canonical
+		   prefers-reduced-motion override pattern */
+		scroll-behavior: auto !important;
 	}
 }

@@ -75,7 +75,7 @@ function ViewerShell({
 }) {
 	return (
 		// viewer-shell scopes the branch's GitHub-like tokens/theme to this
-		// surface only; page-shell (globals.css) supplies the flex layout.
+		// surface only; page-shell (also viewer.css) supplies the flex layout.
 		<div className="page-shell viewer-shell">
 			{/* Universal header: attribution only, on a darker strip so it reads
 			    as our chrome, not part of the shared repo's content. */}

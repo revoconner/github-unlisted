@@ -1,5 +1,4 @@
-import "@/styles/normal.css";
-import "@/styles/normal_override.css";
+import "@/styles/global.css";
 import { FaqAccordion } from "@/components/faq-accordion";
 import { JsonLd } from "@/components/json-ld";
 import { NavLinks } from "@/components/nav-links";
@@ -81,14 +80,9 @@ export default async function FaqPage() {
 
 			<main className="faq-content">
 				<div className="faq-content__inner">
-					<div className="faq-eyebrow">
-						<span className="rule" aria-hidden="true" />
-						<span className="label-accent">FAQ</span>
-						<span>· Common questions</span>
-					</div>
 
 					<h1 className="faq-title">
-						Questions, <em>answered.</em>
+						Questions?
 					</h1>
 
 					<p className="faq-lede">
