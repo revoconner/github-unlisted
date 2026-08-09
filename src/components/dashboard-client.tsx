@@ -78,15 +78,6 @@ function ago(ts?: number): string {
 	return `${w}w ago`;
 }
 
-// "3 : 7" reduced by gcd; the shared:private stat reads as a proportion
-// rather than two raw counts.
-function ratioOf(shared: number, priv: number): string {
-	if (priv === 0) return "n/a";
-	const gcd = (a: number, b: number): number => (b === 0 ? a : gcd(b, a % b));
-	const g = gcd(shared, priv) || 1;
-	return `${shared / g} : ${priv / g}`;
-}
-
 // Segmented filter control styled like the nav pill bar: a bordered pill
 // container whose active option fills with the accent.
 function Seg<T extends string>({
@@ -405,7 +396,7 @@ export function DashboardClient({
 					<div className="dash-stat">
 						<span className="dash-stat__label">Shared/Private</span>
 						<span className="dash-stat__value">
-							{ratioOf(stats.shared, stats.priv)}
+							{stats.shared}/{stats.priv}
 						</span>
 					</div>
 				</section>
@@ -606,7 +597,7 @@ export function DashboardClient({
 										</button>
 										<button
 											type="button"
-											className="dash-btn"
+											className="dash-btn dash-btn--set"
 											disabled={busy}
 											onClick={() => applySettings(selShare)}
 										>
