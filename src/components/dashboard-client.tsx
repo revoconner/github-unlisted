@@ -403,7 +403,7 @@ export function DashboardClient({
 						<span className="dash-stat__value">{stats.shared}</span>
 					</div>
 					<div className="dash-stat">
-						<span className="dash-stat__label">Shared : private</span>
+						<span className="dash-stat__label">Shared/Private</span>
 						<span className="dash-stat__value">
 							{ratioOf(stats.shared, stats.priv)}
 						</span>
@@ -480,34 +480,37 @@ export function DashboardClient({
 								onClick={() => setSelected(isSel ? null : r.fullName)}
 							>
 								<span className="repo-card__name">{r.name}</span>
+								{/* One line: share state left (the meta stats stand in for
+								    "shared", since only one of the two can apply), repo
+								    visibility pinned to the right. */}
 								<span className="repo-card__state">
-									<span className={share ? "is-shared" : undefined}>
-										{share ? "shared" : "unshared"}
+									{share ? (
+										<span className="repo-card__meta">
+											{share.createdAt && (
+												<span>created {ago(share.createdAt)}</span>
+											)}
+											<span>
+												{share.expiresAt
+													? `revokes ${until(share.expiresAt)}`
+													: "no auto-revoke"}
+											</span>
+											<span>
+												{share.ref
+													? `locked to ${share.ref}`
+													: share.showBranches
+														? "branch list shown"
+														: "default branch"}
+											</span>
+											{share.allowDownload && <span>zip enabled</span>}
+											{share.showReleases && <span>releases shown</span>}
+										</span>
+									) : (
+										<span>unshared</span>
+									)}
+									<span className="repo-card__vis">
+										{r.private ? "private" : "public"}
 									</span>
-									<span className="sep">|</span>
-									<span>{r.private ? "private" : "public"}</span>
 								</span>
-								{share && (
-									<span className="repo-card__meta">
-										{share.createdAt && (
-											<span>created {ago(share.createdAt)}</span>
-										)}
-										<span>
-											{share.expiresAt
-												? `revokes ${until(share.expiresAt)}`
-												: "no auto-revoke"}
-										</span>
-										<span>
-											{share.ref
-												? `locked to ${share.ref}`
-												: share.showBranches
-													? "branch list shown"
-													: "default branch"}
-										</span>
-										{share.allowDownload && <span>zip enabled</span>}
-										{share.showReleases && <span>releases shown</span>}
-									</span>
-								)}
 							</button>
 						);
 					})}

@@ -5,8 +5,15 @@
    search + filters, the selectable repo list, and a control panel that
    sticks to the bottom of the viewport while the list scrolls. */
 
+/* The dashboard page never scrolls as a document: the shell is pinned to
+   the viewport and only the repo list scrolls internally, so the welcome,
+   stats, filters, and the control panel stay visible at all times. */
+.page-shell:has(.dashboard) {
+	height: 100vh;
+}
 .dashboard {
 	flex: 1;
+	min-height: 0;
 	display: flex;
 	flex-direction: column;
 	gap: 28px;
@@ -31,28 +38,26 @@
 /* ----- Row 2: stats ------------------------------------------------ */
 .dash-stats {
 	display: grid;
-	grid-template-columns: repeat(5, 1fr);
-	gap: 14px;
+	grid-template-columns: repeat(5, minmax(0, 1fr));
+	gap: 0;
 }
 .dash-stat {
 	display: flex;
-	flex-direction: column;
+	flex-direction: row;
 	gap: 6px;
-	padding: 16px 18px;
-	background: var(--surface);
-	border: 1px solid var(--border-soft);
+	padding: 0 7px;
 	border-radius: var(--radius-md);
+	align-items: center;
 }
 .dash-stat__label {
 	font-size: var(--fs-caption);
 	color: var(--text-muted);
 	letter-spacing: 0.08em;
-	text-transform: uppercase;
 }
 .dash-stat__value {
-	font-size: var(--fs-h1);
-	font-weight: 620;
-	color: var(--text);
+	font-size: var(--fs-h3);
+	font-weight: 350;
+	color: var(--accent);
 	font-variant-numeric: tabular-nums;
 }
 
@@ -68,7 +73,7 @@
 	display: flex;
 	align-items: center;
 	gap: 10px;
-	height: 44px;
+	height: 40px;
 	padding: 0 18px;
 	background: var(--surface);
 	border: 1px solid hsl(from var(--text) h s l / 0.2);
@@ -134,9 +139,15 @@
 /* ----- Row 4: repo list -------------------------------------------- */
 .dash-repos {
 	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
+	padding-right: 4px;
+	border: 1px solid var(--border-soft);
+	padding: 10px;
+	border-radius: 12px;
 }
 .dash-repos__empty {
 	padding: 24px 4px;
@@ -170,30 +181,32 @@
 }
 .repo-card__name {
 	font-size: var(--fs-h3);
-	font-weight: 600;
+	font-weight: 400;
 	color: var(--text);
 	overflow-wrap: anywhere;
 }
+/* One line: share meta (or "unshared") on the left, visibility pinned to
+   the right edge. */
 .repo-card__state {
 	display: flex;
-	gap: 8px;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 16px;
+	margin-top: 15px;
 	font-size: var(--fs-ui);
 	color: var(--text-muted);
 }
-.repo-card__state .is-shared {
-	color: var(--accent);
-	font-weight: 600;
-}
-.repo-card__state .sep {
-	color: var(--text-faint);
+.repo-card__vis {
+	margin-left: auto;
+	white-space: nowrap;
 }
 .repo-card__meta {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 4px 14px;
+	gap: 4px 60px;
 	font-size: var(--fs-caption);
-	color: var(--text-faint);
-	font-family: var(--font-mono);
+	color: var(--accent);
+	font-weight: bold;
 }
 
 /* ----- Final row: sticky control panel ----------------------------- */
