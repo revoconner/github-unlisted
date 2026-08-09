@@ -12,7 +12,13 @@ const SUBJECTS: { value: SubjectKey; label: string }[] = [
 	{ value: "other", label: "Others" },
 ];
 
-export function ContactButton() {
+export function ContactButton({
+	className = "nav-contact",
+	label = "Contact",
+}: {
+	className?: string;
+	label?: string;
+}) {
 	const [open, setOpen] = useState(false);
 	const [mounted, setMounted] = useState(false);
 	const [status, setStatus] = useState<Status>("idle");
@@ -221,8 +227,8 @@ export function ContactButton() {
 
 	return (
 		<>
-			<button type="button" className="site-footer__contact" onClick={start}>
-				Contact
+			<button type="button" className={className} onClick={start}>
+				{label}
 			</button>
 			{mounted && open && createPortal(modal, document.body)}
 		</>

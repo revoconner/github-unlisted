@@ -14,7 +14,7 @@
 	   r g b / a) for tints, hsl(from var(--accent) h s l) for shades.
 	   Build-time OG/icon images can't read CSS vars - their source is
 	   ACCENT in src/lib/brand.ts; keep the two in sync. */
-	--accent:  hsl(88.4, 46.4%, 64.41%);
+	--accent: hsl(88.4, 46.4%, 64.41%);
 
 	/* Surfaces (shared site-wide) */
 	--bg: hsl(0, 0%, 4%);
@@ -230,18 +230,19 @@ main {
 /* Inline desktop / tablet navigation links. */
 .nav-links {
 	background: var(--surface-2);
-	border: 1px solid hsl(from var(--text) h s l / .2);
+	border: 1px solid hsl(from var(--text) h s l / 0.2);
 	border-radius: 999px;
 	grid-auto-columns: 1fr;
 	grid-auto-flow: column;
 	justify-self: start;
 	align-items: stretch;
-	gap: .25rem;
+	gap: 0.25rem;
 	width: fit-content;
-	padding: .25rem;
+	padding: 0.25rem;
 	display: grid;
 }
-.nav-links a {
+.nav-links a,
+.nav-links .nav-contact {
 	padding: 0.7rem 0.3rem;
 	border-radius: 999px;
 	color: var(--text-2);
@@ -250,15 +251,18 @@ main {
 	white-space: nowrap;
 	justify-content: center;
 	align-items: center;
-	font-size: .875rem;
+	font-size: 0.875rem;
 	font-weight: 600;
-	transition: background .2s, color .2s;
+	transition:
+		background 0.2s,
+		color 0.2s;
 	display: flex;
 	background: var(--bg);
 	min-width: 150px;
 }
 @media (hover: hover) {
-	.nav-links a:hover {
+	.nav-links a:hover,
+	.nav-links .nav-contact:hover {
 		background: var(--surface-2);
 	}
 }
@@ -316,31 +320,10 @@ main {
 	}
 }
 
-/* ----- Contact (footer button + modal form) ------------------------ */
-/* Matches the landing hero CTA (.btn--outline-accent below), but restyled
-   here since the footer is site-wide. */
-.site-footer__contact {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	gap: 10px;
-	padding: 2px 15px;
-	border-radius: 9px;
-	background: transparent;
-	border: 1.5px solid rgb(159, 159, 159);
-	color: var(--accent);
-	font-family: var(--font-sans);
-	font-weight: 500;
-	font-size: var(--fs-btn);
-	letter-spacing: 0.15em;
-	text-transform: uppercase;
-	cursor: pointer;
-	transition:
-		background 0.15s ease,
-		border-color 0.15s ease,
-		color 0.15s ease;
-}
-
+/* ----- Contact modal ----------------------------------------------- */
+/* The trigger lives in the nav (.nav-contact pill, styled with the
+   .nav-links rules above) and in the drawer (.drawer-contact row, styled
+   with the .drawer-panel__links rules); only the modal is styled here. */
 .contact-backdrop {
 	position: fixed;
 	inset: 0;
@@ -495,10 +478,6 @@ main {
 }
 
 @media (hover: hover) {
-	.site-footer__contact:hover {
-		background: rgb(from var(--accent) r g b / 0.08);
-		border-color: var(--accent);
-	}
 	.contact-modal__close:hover {
 		color: var(--text);
 		border-color: var(--border-strong);
@@ -687,7 +666,9 @@ main {
 	flex-direction: column;
 	padding: 6px 0;
 }
-.drawer-panel__links a {
+.drawer-panel__links a,
+.drawer-panel__links .drawer-contact {
+	text-align: left;
 	padding: 14px 22px;
 	font-size: var(--fs-body);
 	color: var(--text-2);
@@ -698,7 +679,8 @@ main {
 		background 0.15s ease;
 }
 @media (hover: hover) {
-	.drawer-panel__links a:hover {
+	.drawer-panel__links a:hover,
+	.drawer-panel__links .drawer-contact:hover {
 		color: var(--text);
 		background: rgba(255, 255, 255, 0.025);
 	}
@@ -728,9 +710,7 @@ main {
 		border-color 0.15s ease,
 		color 0.15s ease;
 }
-.btn--outline-accent,
-.hero-cta__label
- {
+.btn--outline-accent {
 	padding: 14px 28px;
 	border-radius: 75px;
 	background: var(--accent);
@@ -741,8 +721,7 @@ main {
 	text-transform: uppercase;
 }
 @media (hover: hover) {
-	.btn--outline-accent:hover,
-	.hero-cta__label:hover {
+	.btn--outline-accent:hover {
 		background: var(--bg);
 		border-color: var(--accent);
 		color: var(--accent);
@@ -818,7 +797,7 @@ main {
 	gap: 18px;
 	padding-bottom: 100px;
 }
-.hero-cta__row  .btn {
+.hero-cta__row .btn {
 	min-width: 310px;
 }
 .hero-cta__divider {
@@ -826,7 +805,6 @@ main {
 	height: 1px;
 	background: var(--border-strong);
 }
-
 
 /* ----- FAQ page ---------------------------------------------------- */
 .faq-content {
