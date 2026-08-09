@@ -68,10 +68,15 @@
 	/* Frosted chrome backdrop shared by the nav + footer. */
 	--chrome-backdrop: blur(4px) brightness(134%) grayscale(100%);
 
+	/* Viewport width as a unitless number, for fluid variable-font
+	   weights (tan(atan2()) because plain length division is not
+	   supported in Firefox; see the hero title/sub rules). */
+	--vw-n: tan(atan2(100vw, 1px));
+
 	/* Marketing radii + hero shadow */
 	--radius-pill: 999px;
 	--radius-md: 12px;
-	--shadow-hero: 0 4px 40px rgba(0, 0, 0, 0.6);
+	--shadow-hero: 0 0 22px 2px hsl(from var(--accent) h s l / 0.4);
 }
 
 /* ----- Reset ------------------------------------------------------- */
@@ -759,13 +764,8 @@ main {
 }
 
 .hero__title {
-	/* Fluid variable-font weight: 440 at a 460px viewport up to 660 at
-	   1280px, linear in between (slope 220/820 per px). tan(atan2()) turns
-	   the viewport width into a unitless number so it can feed
-	   font-weight; the direct calc(100vw / 1px) division needs Chrome
-	   140 / Safari 18.2 typed arithmetic and Firefox lacks it, which
-	   left the whole declaration invalid and the weight at 400. */
-	--vw-n: tan(atan2(100vw, 1px));
+	/* Fluid variable-font weight over the 460-1280 window (slope 220/820
+	   per px); --vw-n comes from :root. */
 	--fluid-weight: calc(316.59 + 0.26829 * var(--vw-n));
 	font-weight: clamp(500, var(--fluid-weight), 660);
 	margin: 0;
@@ -775,12 +775,15 @@ main {
 	letter-spacing: clamp(0.325rem, calc(0.126rem + 0.662vw), 0.656rem);
 	color: var(--text);
 	text-wrap: balance;
-	text-shadow: var(--shadow-hero);
 	margin-left: auto;
 	margin-right: auto;
 }
 
 .hero__sub {
+	/* Fluid weight like the title: 400 at 460px up to 525 at 1280px
+	   (slope 125/820 per px). */
+	--fluid-weight: calc(329.88 + 0.15244 * var(--vw-n));
+	font-weight: clamp(400, var(--fluid-weight), 525);
 	margin: clamp(18px, 2.25vw + 7.2px, 36px) auto 0;
 	font-size: var(--fs-body);
 	line-height: 1.6;
@@ -873,7 +876,6 @@ main {
 	letter-spacing: -0.028em;
 	color: var(--text);
 	text-wrap: balance;
-	text-shadow: var(--shadow-hero);
 }
 .faq-title em {
 	color: var(--accent);
@@ -1087,7 +1089,6 @@ main {
 	letter-spacing: -0.028em;
 	color: var(--text);
 	text-wrap: balance;
-	text-shadow: var(--shadow-hero);
 }
 
 /* Section wrapper. h2 lives only inside .status-section so no global

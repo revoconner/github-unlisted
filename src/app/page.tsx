@@ -92,7 +92,7 @@ export default async function Page() {
 					<h1 className="hero__title">Github Unlisted</h1>
 					<p className="hero__sub">
 						Share a private repo with a read-only link. No GitHub account needed
-						for the recipient. You retain all control. The service is free for
+						for the recipient. <br /> The service is free for
 						use and open source.
 					</p>
 				</div>
