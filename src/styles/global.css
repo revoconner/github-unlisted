@@ -8,6 +8,17 @@
    (1250 tablet / 760 phone) at the end. Dashboard-specific styles live
    in dashboard.css (being redesigned; intentionally empty for now). */
 
+/* gsans, the site sans (variable, weights 100-900). Registered here as a
+   plain @font-face because the next/font injection in layout.tsx loses
+   the custom-property tie against this file's :root and never applied;
+   "gsans" leads the --font-sans stack below so this copy always wins. */
+@font-face {
+	font-family: "gsans";
+	src: url("../fonts/gsans.ttf") format("truetype-variations");
+	font-weight: 100 900;
+	font-display: swap;
+}
+
 :root {
 	/* Brand accent - THE single CSS source. Every accent colour in the
 	   browser derives from this via relative color: rgb(from var(--accent)
@@ -31,24 +42,28 @@
 	--text-muted: hsl(0, 0%, 65%);
 	--text-faint: hsl(0, 0%, 60%);
 
-	/* Type families */
+	/* Type families. gsans comes from the @font-face above; serif is
+	   retired and aliases sans. Mono stays. */
 	--font-sans:
-		"Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
+		"gsans", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
 		sans-serif;
 	--font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
 	--font-serif: var(--font-sans);
-	/* --font-serif: "Instrument Serif", "Iowan Old Style", Georgia, serif; */
 
 	/* Fluid type scale. Site-facing font-sizes route through these;
-	   component-internal sizes (icon glyphs, chip text) stay fixed-px. */
-	--fs-display: clamp(36px, 2.9vw, 59px);
-	--fs-h1: clamp(26px, 1.2vw + 1.2rem, 36px);
-	--fs-h2: clamp(20px, 0.3vw + 1.2rem, 26px);
-	--fs-h3: clamp(15px, 0.25vw + 0.9rem, 20px);
-	--fs-body: clamp(14px, 0.28vw + 0.8125rem, 19px);
-	--fs-ui: clamp(12px, 0.19vw + 0.7rem, 15px);
-	--fs-caption: clamp(10.5px, 0.1vw + 0.7rem, 13px);
-	--fs-btn: clamp(12px, 0.19vw + 0.7rem, 15px);
+	   component-internal sizes (icon glyphs, chip text) stay fixed-px.
+	   Every token interpolates linearly across the SAME 480px-1280px
+	   viewport window (preferred = (max-min)/8 vw + min - 0.6(max-min)),
+	   so the sizes ramp together, no tier ever jumps at a breakpoint,
+	   and the hierarchy holds at every width. */
+	--fs-display: clamp(36px, 2.875vw + 22.2px, 59px);
+	--fs-h1: clamp(26px, 1.25vw + 20px, 36px);
+	--fs-h2: clamp(20px, 0.75vw + 16.4px, 26px);
+	--fs-h3: clamp(15px, 0.625vw + 12px, 20px);
+	--fs-body: clamp(14px, 0.625vw + 11px, 19px);
+	--fs-ui: clamp(12px, 0.375vw + 10.2px, 15px);
+	--fs-caption: clamp(10.5px, 0.3125vw + 9px, 13px);
+	--fs-btn: clamp(12px, 0.375vw + 10.2px, 15px);
 
 	/* Frosted chrome backdrop shared by the nav + footer. */
 	--chrome-backdrop: blur(4px) brightness(134%) grayscale(100%);
@@ -229,7 +244,7 @@ main {
 
 /* Inline desktop / tablet navigation links. */
 .nav-links {
-	background: var(--surface-2);
+	background: var(--bg);
 	border: 1px solid hsl(from var(--text) h s l / 0.2);
 	border-radius: 999px;
 	grid-auto-columns: 1fr;
@@ -243,10 +258,11 @@ main {
 }
 .nav-links a,
 .nav-links .nav-contact {
-	padding: 0.7rem 0.3rem;
+padding: 0.5rem 0rem;
+box-shadow: inset 0 0 1px 1px hsl(from var(--text-muted) h s l / 0.4);
+background: var(--surface);
 	border-radius: 999px;
 	color: var(--text-2);
-	box-shadow: inset 0 0 1px 1px hsl(from var(--text-muted) h s l / 0.3);
 	text-align: center;
 	white-space: nowrap;
 	justify-content: center;
@@ -257,7 +273,6 @@ main {
 		background 0.2s,
 		color 0.2s;
 	display: flex;
-	background: var(--bg);
 	min-width: 150px;
 }
 @media (hover: hover) {
@@ -730,12 +745,14 @@ main {
 
 /* ----- Landing hero ------------------------------------------------ */
 /* The home hero is the one <main> that stays transparent so the bloom
-   shows through here only (every other main carries var(--bg)). */
+   shows through here only (every other main carries var(--bg)).
+   Purely fluid: no breakpoint rules; every size interpolates over the
+   same 480-1280 viewport window as the type scale. */
 .hero {
 	flex: 1;
 	display: grid;
 	place-items: center;
-	padding: 60px;
+	padding: clamp(22px, 4.75vw - 0.8px, 60px);
 	position: relative;
 	z-index: 2;
 	background: transparent;
@@ -760,11 +777,11 @@ main {
 }
 
 .hero__sub {
-	margin: 36px auto 0;
+	margin: clamp(18px, 2.25vw + 7.2px, 36px) auto 0;
 	font-size: var(--fs-body);
 	line-height: 1.6;
 	color: var(--text-muted);
-	text-wrap: pretty;
+	text-wrap:  balance;
 	max-width: 920px;
 }
 
@@ -789,13 +806,13 @@ main {
 	flex-direction: column;
 	align-items: center;
 	gap: 14px;
-	padding: 0 0 70px;
+	padding: 0 0 clamp(40px, 3.75vw + 22px, 70px);
 }
 .hero-cta__row {
 	display: flex;
 	align-items: center;
-	gap: 18px;
-	padding-bottom: 100px;
+	gap: clamp(16px, 0.25vw + 14.8px, 18px);
+	padding-bottom: clamp(40px, 7.5vw + 4px, 100px);
 }
 .hero-cta__row .btn {
 	min-width: 310px;
@@ -1279,9 +1296,6 @@ main {
 	.topbar .nav-cta {
 		display: none;
 	}
-	.hero {
-		padding: 50px 32px;
-	}
 	.faq-content {
 		padding: 50px 32px 70px;
 	}
@@ -1300,21 +1314,10 @@ main {
 	}
 }
 
-/* Tablet-strict: tighten the display heading so 761-1250 isn't oversized. */
-@media (min-width: 761px) and (max-width: 1250px) {
-	:root {
-		--fs-display: clamp(46px, 4.4vw, 56px);
-	}
-}
-
-/* Phone (760): +1px bump on body/ui/caption for readability, pack the
-   nav, stack the footer, shrink the hero, tighten every page gutter. */
+/* Phone (760): pack the nav, stack the footer, tighten every page
+   gutter. Type is NOT re-tuned here anymore - the fluid tokens above
+   cover the whole 480-1280 range without breakpoint jumps. */
 @media (max-width: 760px) {
-	:root {
-		--fs-body: clamp(15px, 0.28vw + 0.875rem, 20px);
-		--fs-ui: clamp(13px, 0.19vw + 0.75rem, 16px);
-		--fs-caption: clamp(11.5px, 0.1vw + 0.75rem, 14px);
-	}
 	.topbar {
 		padding: 12px 18px;
 		gap: 10px;
@@ -1330,28 +1333,6 @@ main {
 		align-items: flex-start;
 		gap: 10px;
 		margin-top: auto;
-	}
-
-	/* Phone home hero: shrink to content (no flex:1 stretch), drop the
-	   centering so the title sits near the top. */
-	.hero {
-		flex: 0 0 auto;
-		padding: 100px 22px;
-		place-items: start center;
-	}
-	.hero__sub {
-		margin-top: 18px;
-	}
-	.hero-cta {
-		padding-bottom: 40px;
-	}
-	.hero-cta__row {
-		flex-direction: column;
-		gap: 16px;
-		padding-bottom: 40px;
-	}
-	.hero-cta__divider {
-		display: none;
 	}
 
 	.faq-content {
