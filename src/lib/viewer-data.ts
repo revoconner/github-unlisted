@@ -1,18 +1,9 @@
 import type { RenderedRelease } from "@/components/releases-list";
-import { getInstallationOctokit } from "@/lib/github-app";
-import {
-	type Contents,
-	type DirEntry,
-	getContents,
-	getRepoMeta,
-	getRepoTree,
-	listBranches,
-	listReleases,
-	type TreeItem,
-} from "@/lib/github-repo";
+import { adapterForTarget } from "@/lib/forge/target";
+import type { Contents, DirEntry, TreeItem } from "@/lib/github-repo";
 import { highlight } from "@/lib/highlight";
 import { isMarkdown, renderMarkdown } from "@/lib/markdown";
-import { renderMarkdownGitHub } from "@/lib/markdown-github";
+import { rewriteGitHubAttachmentReferences } from "@/lib/repo-asset";
 import {
 	buildHref,
 	parseView,
@@ -39,6 +30,7 @@ export type ViewerPayload =
 			owner: string;
 			repo: string;
 			shareId: string;
+			portfolioId?: string;
 			releases: RenderedRelease[];
 	  }
 	| {
@@ -49,6 +41,7 @@ export type ViewerPayload =
 			owner: string;
 			repo: string;
 			shareId: string;
+			portfolioId?: string;
 			contents: Contents;
 			codeHtml: string | null;
 			mdHtml: string | null;
@@ -67,10 +60,8 @@ export type ViewerPayload =
 export async function resolveViewer(
 	slug: string[],
 	shareId: string,
+	appOrigin = "",
 ): Promise<ViewerPayload> {
-	const parsed = parseView(slug);
-	if (!parsed) return { kind: "notice", title: "Not found" };
-
 	if (!shareId) {
 		return {
 			kind: "notice",
@@ -87,17 +78,25 @@ export async function resolveViewer(
 			detail: "This share link no longer works. Ask the owner for a new one.",
 		};
 	}
-	if (target.owner !== parsed.owner || target.repo !== parsed.repo) {
+	// Parsed only now: how many leading segments are the repository (GitLab owners nest) is known only from the share record.
+	const parsed = parseView(slug, target);
+	if (!parsed) {
 		return {
 			kind: "notice",
 			title: "This link does not match this repository",
 		};
 	}
-
-	const octokit = getInstallationOctokit(target.installationId);
-	let meta: Awaited<ReturnType<typeof getRepoMeta>>;
+	// GitHub shares and shares on connected forges are served through the same adapter interface; a connection that is gone or no longer decryptable reads as revoked access.
+	const adapter = await adapterForTarget(target);
+	const revoked: ViewerPayload = {
+		kind: "notice",
+		title: "Access revoked",
+		detail: "The app no longer has access to this repository.",
+	};
+	if (!adapter) return revoked;
+	let meta: Awaited<ReturnType<typeof adapter.getRepoMeta>>;
 	try {
-		meta = await getRepoMeta(octokit, target.owner, target.repo);
+		meta = await adapter.getRepoMeta(target.owner, target.repo);
 	} catch {
 		return {
 			kind: "notice",
@@ -107,7 +106,9 @@ export async function resolveViewer(
 	}
 
 	const isReleases = parsed.viewType === "releases";
-	if (isReleases && target.showReleases !== true) {
+	const releasesOn =
+		target.showReleases === true && adapter.capabilities.releases;
+	if (isReleases && !releasesOn) {
 		return {
 			kind: "notice",
 			title: "Releases are not available for this link",
@@ -118,7 +119,7 @@ export async function resolveViewer(
 	// Only for an unlocked share whose owner opted in. A locked share must never enumerate branches, which is the point of locking. The releases view addresses no ref, so it never shows the switcher.
 	const switcherOn = !isReleases && !target.ref && target.showBranches === true;
 	const branches = switcherOn
-		? await listBranches(octokit, target.owner, target.repo)
+		? await adapter.listBranches(target.owner, target.repo)
 		: null;
 
 	// A locked share pins one branch. Redirect (rather than error) so deep links that predate the lock, or point at another branch, still land somewhere useful. path is re-split here because a slashed branch name occupies more than one URL segment.
@@ -161,7 +162,7 @@ export async function resolveViewer(
 	if (isReleases) {
 		// Release notes go through markdown-it (html:false) rather than GitHub's renderer: one API call per release would be dozens per page, and the notes do not need issue/@user linking to read correctly.
 		const releases: RenderedRelease[] = (
-			await listReleases(octokit, target.owner, target.repo)
+			await adapter.listReleases(target.owner, target.repo)
 		).map((r) => ({
 			...r,
 			bodyHtml: r.body.trim() ? renderMarkdown(r.body) : null,
@@ -175,16 +176,17 @@ export async function resolveViewer(
 			owner: target.owner,
 			repo: target.repo,
 			shareId,
+			portfolioId: target.portfolioId,
 			releases,
 		};
 	}
 
-	const contents = await getContents(
-		octokit,
+	const contents = await adapter.getContents(
 		target.owner,
 		target.repo,
 		path,
 		ref,
+		parsed.viewType === "blob" ? "blob" : "tree",
 	);
 
 	// The bare repo link opens the README as a file (not a directory listing).
@@ -213,7 +215,7 @@ export async function resolveViewer(
 	// Whole-repo tree for the sidebar (one recursive call). Falls back to the
 	// current directory's listing if the ref can't be read or the tree is too
 	// large for the API to return in full.
-	const tree = await getRepoTree(octokit, target.owner, target.repo, ref);
+	const tree = await adapter.getRepoTree(target.owner, target.repo, ref);
 	const fullTree =
 		tree && !tree.truncated && tree.items.length > 0 ? tree.items : null;
 
@@ -226,12 +228,12 @@ export async function resolveViewer(
 		const parentPath = path.includes("/")
 			? path.slice(0, path.lastIndexOf("/"))
 			: "";
-		const parent = await getContents(
-			octokit,
+		const parent = await adapter.getContents(
 			target.owner,
 			target.repo,
 			parentPath,
 			ref,
+			"tree",
 		);
 		if (parent.kind === "dir") sidebarEntries = parent.entries;
 	}
@@ -244,13 +246,37 @@ export async function resolveViewer(
 		// (preview is the default; both present = show the tabs).
 		codeHtml = await highlight(contents.text, contents.name);
 		if (isMarkdown(contents.name)) {
-			mdHtml =
-				(await renderMarkdownGitHub(
-					octokit,
-					target.owner,
-					target.repo,
-					contents.text,
-				)) ?? renderMarkdown(contents.text);
+			// Rewrite GitHub attachment URLs to this app's share-scoped endpoint.
+			// IMPORTANT: do not send this rewritten Markdown to GitHub's Markdown API.
+			// GitHub tries to proxy image URLs while rendering and may reject our own
+			// endpoint with "Cannot proxy the given URL". Markdown containing these
+			// attachments is therefore rendered locally; all other files retain
+			// GitHub's renderer and its GFM-specific features.
+			const markdownForPreview =
+				adapter.forge === "github"
+					? rewriteGitHubAttachmentReferences(
+						contents.text,
+						{ owner: target.owner, repo: target.repo, ref, filePath: path },
+						shareId,
+						appOrigin,
+					)
+					: contents.text;
+
+			if (markdownForPreview !== contents.text) {
+				// The local renderer preserves a restricted, sanitized set of <img>
+				// attributes and therefore accepts the internal attachment endpoint
+				// without exposing that URL to GitHub's image proxy.
+				mdHtml = renderMarkdown(markdownForPreview);
+			} else {
+				// Only GitHub has a Markdown API; all other forges use markdown-it.
+				// The local fallback allows sanitized <img> tags, not arbitrary HTML.
+				mdHtml =
+					(await adapter.renderMarkdown?.(
+						target.owner,
+						target.repo,
+						contents.text,
+					)) ?? renderMarkdown(contents.text);
+			}
 		}
 	}
 
@@ -262,6 +288,7 @@ export async function resolveViewer(
 		owner: target.owner,
 		repo: target.repo,
 		shareId,
+		portfolioId: target.portfolioId,
 		contents,
 		codeHtml,
 		mdHtml,
@@ -270,7 +297,8 @@ export async function resolveViewer(
 		crumbs,
 		path,
 		branches,
-		showReleases: Boolean(target.showReleases),
-		allowDownload: Boolean(target.allowDownload),
+		showReleases: releasesOn,
+		allowDownload:
+			Boolean(target.allowDownload) && adapter.capabilities.archive,
 	};
 }

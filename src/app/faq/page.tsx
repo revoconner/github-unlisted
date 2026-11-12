@@ -2,6 +2,7 @@ import "@/styles/global.css";
 import { FaqAccordion } from "@/components/faq-accordion";
 import { JsonLd } from "@/components/json-ld";
 import { NavLinks } from "@/components/nav-links";
+import { SignOutControl } from "@/components/sign-out-control";
 import { SiteDrawer } from "@/components/site-drawer";
 import { SiteFooter } from "@/components/site-footer";
 import { breadcrumbLd, pageMetadata } from "@/lib/seo";
@@ -66,11 +67,9 @@ export default async function FaqPage() {
 				<NavLinks signedIn={Boolean(session)} active="faq" />
 
 				{session ? (
-					<a className="nav-cta" href="/api/github/logout">
-						Sign Out
-					</a>
+					<SignOutControl className="nav-cta" label="Sign Out" />
 				) : (
-					<a className="nav-cta" href="/api/github/login">
+					<a className="nav-cta" href="/app">
 						Sign In
 					</a>
 				)}
@@ -80,10 +79,7 @@ export default async function FaqPage() {
 
 			<main className="faq-content">
 				<div className="faq-content__inner">
-
-					<h1 className="faq-title">
-						Questions?
-					</h1>
+					<h1 className="faq-title">Questions?</h1>
 
 					<p className="faq-lede">
 						A short list. If you have something else on your mind, the source is

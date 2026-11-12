@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { getInstallationToken } from "@/lib/github-app";
+import { adapterForTarget } from "@/lib/forge/target";
+import { ForgeHttpError } from "@/lib/forge/types";
+import { isSafeRepoPath } from "@/lib/repo-path";
 import { resolveShare } from "@/lib/share-store";
 
 export const dynamic = "force-dynamic";
@@ -16,6 +18,9 @@ const MIME_TYPES: Record<string, string> = {
 	".ico": "image/x-icon",
 };
 
+// Images in a README are small. Anything bigger is refused rather than relayed, so a repository cannot turn this route into a bandwidth pipe.
+const MAX_ASSET_BYTES = 15 * 1024 * 1024;
+
 function getImageContentType(path: string): string | null {
 	const lower = path.toLowerCase();
 	const dot = lower.lastIndexOf(".");
@@ -23,32 +28,6 @@ function getImageContentType(path: string): string | null {
 	if (dot === -1) return null;
 
 	return MIME_TYPES[lower.slice(dot)] ?? null;
-}
-
-function encodePath(path: string): string {
-	return path
-		.split("/")
-		.map((segment) => encodeURIComponent(segment))
-		.join("/");
-}
-
-function encodeRef(ref: string): string {
-	return ref
-		.split("/")
-		.map((segment) => encodeURIComponent(segment))
-		.join("/");
-}
-
-function isSafeRepoPath(path: string): boolean {
-	if (!path || path.startsWith("/")) {
-		return false;
-	}
-
-	const segments = path.split("/");
-
-	return segments.every(
-		(segment) => segment !== "" && segment !== "." && segment !== "..",
-	);
 }
 
 export async function GET(request: Request) {
@@ -91,28 +70,22 @@ export async function GET(request: Request) {
 		);
 	}
 
-	const refPath = encodeRef(ref);
-	const filePath = encodePath(path);
-
-	const githubUrl =
-		`https://api.github.com/repos/` +
-		`${encodeURIComponent(target.owner)}/` +
-		`${encodeURIComponent(target.repo)}/` +
-		`contents/${filePath}?ref=${refPath}`;
+	const adapter = await adapterForTarget(target);
+	if (!adapter) {
+		return NextResponse.json({ error: "Asset unavailable" }, { status: 404 });
+	}
 
 	try {
-		const token = await getInstallationToken(target.installationId);
-
-		const response = await fetch(githubUrl, {
-			headers: {
-				Authorization: `Bearer ${token}`,
-				Accept: "application/vnd.github.raw+json",
-				"X-GitHub-Api-Version": "2022-11-28",
-				"User-Agent": "github-unlisted",
-			},
-		});
+		// Only a path inside the shared repository reaches the forge: this route accepts no URL, so it cannot be pointed at any other host.
+		const response = await adapter.getRawFile(
+			target.owner,
+			target.repo,
+			path,
+			ref,
+		);
 
 		if (!response.ok) {
+			await response.body?.cancel().catch(() => {});
 			return NextResponse.json(
 				{
 					error:
@@ -127,15 +100,30 @@ export async function GET(request: Request) {
 			);
 		}
 
+		const declared = Number(response.headers.get("content-length"));
+		if (Number.isFinite(declared) && declared > MAX_ASSET_BYTES) {
+			await response.body?.cancel().catch(() => {});
+			return NextResponse.json({ error: "Asset too large" }, { status: 413 });
+		}
+
 		return new NextResponse(response.body, {
 			headers: {
 				"Cache-Control": "private, no-store",
 				"Content-Disposition": "inline",
 				"Content-Type": contentType,
 				"X-Content-Type-Options": "nosniff",
+				// A repository controls these bytes. Opening an SVG directly would otherwise run its scripts on this origin; sandboxed with no script allowance it still renders in an <img>.
+				"Content-Security-Policy":
+					"default-src 'none'; style-src 'unsafe-inline'; sandbox",
 			},
 		});
-	} catch {
+	} catch (error) {
+		if (error instanceof ForgeHttpError && error.status === 400) {
+			return NextResponse.json(
+				{ error: "Invalid asset request" },
+				{ status: 400 },
+			);
+		}
 		return NextResponse.json({ error: "Asset unavailable" }, { status: 502 });
 	}
 }

@@ -8,9 +8,11 @@ import { BranchSwitcher } from "@/components/branch-switcher";
 import { ReleasesList } from "@/components/releases-list";
 import { RepoTree } from "@/components/repo-tree";
 import { SidebarTree } from "@/components/sidebar-tree";
+import { ViewerAttribution } from "@/components/viewer-attribution";
 import { ViewerTreeToggle } from "@/components/viewer-tree-toggle";
 import { repairRepoImages } from "@/lib/repo-asset";
 import { buildHref, buildReleasesHref } from "@/lib/repo-path";
+import { portfolioPath } from "@/lib/portfolio";
 import type { ViewerPayload } from "@/lib/viewer-data";
 
 function Notice({ title, detail }: { title: string; detail?: string }) {
@@ -62,7 +64,7 @@ function FileIcon() {
 	);
 }
 
-// Supported image formats to ensure that most of the common extensions become visible 
+// Supported image formats to ensure that most of the common extensions become visible
 const IMAGE_EXTENSIONS = new Set([
 	".png",
 	".jpg",
@@ -88,10 +90,12 @@ function isImagePath(path: string) {
 function ViewerShell({
 	fullName,
 	refName,
+	portfolioId,
 	children,
 }: {
 	fullName: string;
 	refName: string;
+	portfolioId?: string;
 	children: ReactNode;
 }) {
 	return (
@@ -101,24 +105,12 @@ function ViewerShell({
 			{/* Universal header: attribution only, on a darker strip so it reads
 			    as our chrome, not part of the shared repo's content. */}
 			<header className="topbar">
-				<span className="viewer-attrib">
-					Private repo shared using{" "}
-					<a
-						href="https://github-unlisted.com"
-						target="_blank"
-						rel="noopener noreferrer"
-					>
-						Github-Unlisted
-					</a>{" "}
-					hosted by{" "}
-					<a
-						href="https://revoconner.com"
-						target="_blank"
-						rel="noopener noreferrer"
-					>
-						Rév
-					</a>
-				</span>
+				<ViewerAttribution />
+				{portfolioId && (
+					<Link className="viewer-portfolio-back" href={portfolioPath(portfolioId)}>
+						Back to portfolio
+					</Link>
+				)}
 			</header>
 
 			{/* The repo's content starts here: owner/repo on its own row, with
@@ -160,7 +152,7 @@ function RepoHtml({
 
 	const repairedHtml = React.useMemo(
 		() =>
-			repairRepoImages(html, {owner, repo, ref: repoRef, filePath,}, shareId),
+			repairRepoImages(html, { owner, repo, ref: repoRef, filePath }, shareId),
 		[html, owner, repo, repoRef, filePath, shareId],
 	);
 
@@ -210,7 +202,7 @@ function ReleasesView({
 }) {
 	const { owner, repo, shareId, refName } = payload;
 	return (
-		<ViewerShell fullName={payload.fullName} refName={refName}>
+		<ViewerShell fullName={payload.fullName} refName={refName} portfolioId={payload.portfolioId}>
 			<main className="viewer viewer--wide">
 				<section className="viewer__main">
 					<div className="viewer__topinfo">
@@ -283,7 +275,7 @@ function FileOrDirView({
 	const isImage = contents.kind === "file" && isImagePath(path);
 
 	return (
-		<ViewerShell fullName={fullName} refName={ref}>
+		<ViewerShell fullName={fullName} refName={ref} portfolioId={payload.portfolioId}>
 			<main className="viewer">
 				<aside className="viewer__sidebar">
 					{fullTree ? (
@@ -477,9 +469,7 @@ function FileOrDirView({
 									/>
 								</div>
 							) : contents.isBinary ? (
-								<div className="tree__empty">
-									Binary file not shown.
-								</div>
+								<div className="tree__empty">Binary file not shown.</div>
 							) : showPreview && mdHtml ? (
 								<RepoHtml
 									className="readme"

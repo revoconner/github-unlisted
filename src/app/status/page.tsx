@@ -1,6 +1,7 @@
 import "@/styles/global.css";
 import { JsonLd } from "@/components/json-ld";
 import { NavLinks } from "@/components/nav-links";
+import { SignOutControl } from "@/components/sign-out-control";
 import { SiteDrawer } from "@/components/site-drawer";
 import { SiteFooter } from "@/components/site-footer";
 import { breadcrumbLd, pageMetadata } from "@/lib/seo";
@@ -41,7 +42,7 @@ const log: LogEntry[] = [
 		endedUtc: "2026-08-07 00:35 UTC",
 		category: "maintenance",
 		severity: "medium",
-		body: "Nothing was affected, just testing things to make sure nothing was broken. All in all, no user or viewer were affected.",	
+		body: "Nothing was affected, just testing things to make sure nothing was broken. All in all, no user or viewer were affected.",
 	},
 	{
 		id: "2026-08-04-share-controls",
@@ -159,11 +160,9 @@ export default async function StatusPage() {
 				<NavLinks signedIn={Boolean(session)} active="status" />
 
 				{session ? (
-					<a className="nav-cta" href="/api/github/logout">
-						Sign Out
-					</a>
+					<SignOutControl className="nav-cta" label="Sign Out" />
 				) : (
-					<a className="nav-cta" href="/api/github/login">
+					<a className="nav-cta" href="/app">
 						Sign In
 					</a>
 				)}

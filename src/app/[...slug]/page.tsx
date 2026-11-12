@@ -1,4 +1,5 @@
 import "@/styles/viewer.css";
+import { notFound } from "next/navigation";
 import { ViewerContent } from "@/components/viewer-content";
 import { pageMetadata } from "@/lib/seo";
 
@@ -24,6 +25,8 @@ export default async function ViewPage({
 	searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
 	const { slug = [] } = await params;
+	// Missing API routes must never be interpreted as repository links.
+	if (slug[0] === "api") notFound();
 	const sp = await searchParams;
 	const shareId = typeof sp.s === "string" ? sp.s : "";
 

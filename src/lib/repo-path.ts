@@ -10,17 +10,29 @@ export interface ParsedView {
 	path: string;
 }
 
-// URL shape: /{owner}/{repo}[/{tree|blob}/{ref}/{...path}] or /{owner}/{repo}/releases
-export function parseView(slug: string[]): ParsedView | null {
-	const seg = slug.filter(Boolean);
-	if (seg.length < 2) return null;
+// The repository a share points at, as stored in the share record. owner may contain slashes: GitLab namespaces nest ("group/subgroup"), and the URL carries them as extra path segments.
+export interface RepoRef {
+	owner: string;
+	repo: string;
+}
 
-	const [owner, repo, viewType, ref, ...rest] = seg;
+// URL shape: /{owner...}/{repo}[/{tree|blob}/{ref}/{...path}] or /{owner...}/{repo}/releases
+//
+// This must run AFTER the share is resolved. Without knowing how many leading segments are the repository, "group/sub/project/tree/main" cannot be told apart from an owner "group" with a repo "sub" and a path, and that ambiguity would let a link for one project read another one. Stripping the exact owner + repo segments from the share record removes the guesswork, and also keeps a repo that happens to be called "tree" or "releases" from being mistaken for a view keyword. Returns null when the URL does not start with the share's repository.
+export function parseView(slug: string[], target: RepoRef): ParsedView | null {
+	const seg = slug.filter(Boolean);
+	const prefix = [...target.owner.split("/").filter(Boolean), target.repo];
+	if (prefix.length < 2 || seg.length < prefix.length) return null;
+	for (let i = 0; i < prefix.length; i++) {
+		if (seg[i] !== prefix[i]) return null;
+	}
+
+	const [viewType, ref, ...rest] = seg.slice(prefix.length);
 	const isFileView = viewType === "tree" || viewType === "blob";
 
 	return {
-		owner,
-		repo,
+		owner: target.owner,
+		repo: target.repo,
 		viewType:
 			viewType === "releases"
 				? "releases"
@@ -30,6 +42,16 @@ export function parseView(slug: string[]): ParsedView | null {
 		ref: isFileView ? (ref ?? "") : "",
 		path: isFileView ? rest.join("/") : "",
 	};
+}
+
+// A repo-relative path that is safe to splice into an upstream URL. Empty segments, "." and ".." are refused so a request cannot climb out of the directory it names, and backslashes and control characters are refused because some servers normalise them into separators. Used by the adapters' raw-file call, and by the asset route once it goes through an adapter; the upstream forge would reject most of these too, but this is the only check that does not depend on how each forge happens to parse them.
+export function isSafeRepoPath(path: string): boolean {
+	if (!path || path.startsWith("/")) return false;
+	// biome-ignore lint/suspicious/noControlCharactersInRegex: control characters are exactly what is being rejected
+	if (/[\\\u0000-\u001f\u007f]/.test(path)) return false;
+	return path
+		.split("/")
+		.every((segment) => segment !== "" && segment !== "." && segment !== "..");
 }
 
 export function buildReleasesHref(

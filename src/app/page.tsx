@@ -1,6 +1,7 @@
 import "@/styles/global.css";
 import { getImageProps } from "next/image";
 import { NavLinks } from "@/components/nav-links";
+import { SignOutControl } from "@/components/sign-out-control";
 import { SiteDrawer } from "@/components/site-drawer";
 import { SiteFooter } from "@/components/site-footer";
 import shotDesktop from "@/images/1080p.png";
@@ -75,11 +76,9 @@ export default async function Page() {
 				<NavLinks signedIn={Boolean(session)} active="home" />
 
 				{session ? (
-					<a className="nav-cta" href="/api/github/logout">
-						Sign Out
-					</a>
+					<SignOutControl className="nav-cta" label="Sign Out" />
 				) : (
-					<a className="nav-cta" href="/api/github/login">
+					<a className="nav-cta" href="/app">
 						Sign In
 					</a>
 				)}
@@ -106,7 +105,7 @@ export default async function Page() {
 								Open your repositories
 							</a>
 						) : (
-							<a className="btn btn--outline-accent" href="/api/github/login">
+							<a className="btn btn--outline-accent" href="/app">
 								<svg
 									width="14"
 									height="14"
@@ -116,7 +115,7 @@ export default async function Page() {
 								>
 									<path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2.1c-3.3.7-4-1.6-4-1.6-.5-1.4-1.3-1.8-1.3-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1.1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.7-5.5 6 .4.4.8 1.1.8 2.2v3.2c0 .3.2.7.8.6A12 12 0 0 0 12 .3" />
 								</svg>
-								Install on GitHub
+								Sign in or install an app
 							</a>
 						)}
 					</div>

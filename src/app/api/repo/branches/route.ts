@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
+import { adapterForConnection } from "@/lib/forge/connections";
 import {
 	getInstallationOctokit,
 	listInstallationRepos,
 } from "@/lib/github-app";
 import { listBranches } from "@/lib/github-repo";
-import { getSession } from "@/lib/session";
+import { getSession, ownsConnection } from "@/lib/session";
 
 // Branch list for the dashboard's per-repo branch picker. Owner-only: same authorization as creating a share, since knowing a private repo's branch names is itself information the recipient of a share never needs.
 export async function GET(request: Request) {
@@ -14,6 +15,39 @@ export async function GET(request: Request) {
 	}
 
 	const sp = new URL(request.url).searchParams;
+
+	// Connected forge: ownership is membership of the connection in the signed session, then the repo must be in that account's own listing.
+	const connectionId = sp.get("connectionId");
+	if (connectionId) {
+		const cOwner = sp.get("owner") ?? "";
+		const cRepo = sp.get("repo") ?? "";
+		if (!cOwner || !cRepo) {
+			return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+		}
+		if (!ownsConnection(session, connectionId)) {
+			return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+		}
+		try {
+			const adapter = await adapterForConnection(connectionId);
+			const repos = adapter ? await adapter.listRepos() : [];
+			const found = repos.find((r) => r.owner === cOwner && r.name === cRepo);
+			if (!adapter || !found) {
+				return NextResponse.json(
+					{ error: "Repo not in this connection" },
+					{ status: 403 },
+				);
+			}
+			return NextResponse.json({
+				branches: await adapter.listBranches(cOwner, cRepo),
+				defaultBranch: found.defaultBranch,
+			});
+		} catch {
+			return NextResponse.json(
+				{ error: "Could not read branches" },
+				{ status: 502 },
+			);
+		}
+	}
 	const installationId = Number(sp.get("installationId"));
 	const owner = sp.get("owner") ?? "";
 	const repo = sp.get("repo") ?? "";

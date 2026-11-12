@@ -210,6 +210,21 @@ body[data-viewer-tree="open"] {
 	background: var(--gh-canvas);
 }
 
+.viewer-portfolio-back {
+	font-size: var(--fs-caption);
+	font-weight: 600;
+	white-space: nowrap;
+	color: var(--gh-fg);
+	text-decoration: none;
+	border: 1px solid var(--gh-border-muted);
+	border-radius: 6px;
+	padding: 6px 10px;
+}
+.viewer-portfolio-back:hover {
+	background: var(--gh-canvas);
+	text-decoration: none;
+}
+
 /* "Private repo shared using Github-Unlisted by Rév" */
 .viewer-attrib {
 	font-size: var(--fs-caption);
@@ -734,6 +749,32 @@ body[data-viewer-tree="open"] .viewer__tree-backdrop {
    one readable without vertical rules doing all the work. */
 .readme tr:nth-child(2n) td {
 	background: var(--gh-raised);
+}
+
+/* Native GitHub-README disclosure blocks (<details>/<summary>). */
+.readme details {
+	margin: 0 0 var(--sp-4);
+	padding: 0.65em 1em;
+	border: 1px solid var(--gh-border-muted);
+	border-radius: var(--gh-r);
+	background: var(--gh-canvas);
+}
+.readme details > summary {
+	cursor: pointer;
+	font-weight: 600;
+	color: var(--gh-fg);
+}
+.readme details > summary::marker {
+	color: var(--gh-fg-muted);
+}
+.readme details[open] > summary {
+	margin-bottom: var(--sp-3);
+}
+.readme details > :last-child {
+	margin-bottom: 0;
+}
+.readme details img {
+	margin-block: var(--sp-2);
 }
 
 /* ----- Releases view ----------------------------------------------- */

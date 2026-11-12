@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
-import { getInstallationOctokit, getInstallationToken } from "@/lib/github-app";
-import { listReleases } from "@/lib/github-repo";
+import { adapterForTarget } from "@/lib/forge/target";
+import { ForgeHttpError } from "@/lib/forge/types";
 import { resolveShare } from "@/lib/share-store";
 
-// Never cache: the URL this hands back is signed and expires within minutes.
+// Never cache: a GitHub redirect URL is signed and short-lived, and a streamed download is per-request.
 export const dynamic = "force-dynamic";
 
 // Release downloads for a recipient. Two shapes, both gated on the share's showReleases:
 //   ?s=<id>&asset=<assetId>  an uploaded release asset
 //   ?s=<id>&tag=<tag>        the source archive for a published release
-// Both resolve to a signed, short-lived GitHub URL that needs no authentication, so the 302 is forwarded rather than followed and no bytes pass through this deployment. A private repo's browser_download_url would 404 in the recipient's browser, which is why this proxy exists at all.
+// GitHub's answer is a signed redirect that is forwarded, not followed. On other forges the adapter either streams the file with the stored token or hands the browser an https link; the token never leaves the server either way.
 export async function GET(request: Request) {
 	const sp = new URL(request.url).searchParams;
 
@@ -32,6 +32,14 @@ export async function GET(request: Request) {
 		);
 	}
 
+	const adapter = await adapterForTarget(target);
+	if (!adapter?.capabilities.releases) {
+		return NextResponse.json(
+			{ error: "Releases are not available for this link" },
+			{ status: 404 },
+		);
+	}
+
 	const assetParam = sp.get("asset");
 	const tagParam = (sp.get("tag") ?? "").trim();
 	if (!assetParam && !tagParam) {
@@ -42,10 +50,9 @@ export async function GET(request: Request) {
 	}
 
 	// Everything on offer is checked against the repo's own published releases. That keeps the tag parameter from reaching arbitrary refs and keeps the asset id from addressing a release this share should not see, notably a draft.
-	let releases: Awaited<ReturnType<typeof listReleases>>;
+	let releases: Awaited<ReturnType<typeof adapter.listReleases>>;
 	try {
-		const octokit = getInstallationOctokit(target.installationId);
-		releases = await listReleases(octokit, target.owner, target.repo);
+		releases = await adapter.listReleases(target.owner, target.repo);
 	} catch {
 		return NextResponse.json(
 			{ error: "This repository is no longer available" },
@@ -53,53 +60,55 @@ export async function GET(request: Request) {
 		);
 	}
 
-	let url: string;
-	let accept: string;
+	let assetId: number | undefined;
+	let tag: string | undefined;
 	if (assetParam) {
-		const assetId = Number(assetParam);
+		assetId = Number(assetParam);
 		const known = releases.some((r) => r.assets.some((a) => a.id === assetId));
 		if (!Number.isFinite(assetId) || !known) {
 			return NextResponse.json({ error: "Asset not found" }, { status: 404 });
 		}
-		url = `https://api.github.com/repos/${encodeURIComponent(target.owner)}/${encodeURIComponent(target.repo)}/releases/assets/${assetId}`;
-		accept = "application/octet-stream";
 	} else {
 		if (!releases.some((r) => r.tag === tagParam)) {
 			return NextResponse.json({ error: "Release not found" }, { status: 404 });
 		}
-		const tagPath = tagParam.split("/").map(encodeURIComponent).join("/");
-		url = `https://api.github.com/repos/${encodeURIComponent(target.owner)}/${encodeURIComponent(target.repo)}/zipball/refs/tags/${tagPath}`;
-		accept = "application/vnd.github+json";
+		tag = tagParam;
 	}
 
-	let location: string | null = null;
+	let out: Awaited<ReturnType<typeof adapter.releaseDownloadResponse>>;
 	try {
-		const token = await getInstallationToken(target.installationId);
-		const res = await fetch(url, {
-			headers: {
-				Authorization: `Bearer ${token}`,
-				Accept: accept,
-				"X-GitHub-Api-Version": "2022-11-28",
-				"User-Agent": "github-unlisted",
-			},
-			redirect: "manual",
-		});
-		location = res.headers.get("location");
-	} catch {
+		out = await adapter.releaseDownloadResponse(
+			target.owner,
+			target.repo,
+			assetId,
+			tag,
+		);
+	} catch (error) {
+		const status = error instanceof ForgeHttpError ? error.status : 502;
 		return NextResponse.json(
 			{ error: "Download unavailable" },
-			{ status: 502 },
+			{ status: status === 404 || status === 403 ? 404 : 502 },
 		);
 	}
 
-	if (!location) {
-		return NextResponse.json(
-			{ error: "Download unavailable" },
-			{ status: 502 },
-		);
+	if (out.kind === "redirect") {
+		const res = NextResponse.redirect(out.url, 302);
+		res.headers.set("Cache-Control", "no-store");
+		return res;
 	}
 
-	const out = NextResponse.redirect(location, 302);
-	out.headers.set("Cache-Control", "no-store");
-	return out;
+	const upstream = out.response;
+	const name = (
+		tag ??
+		releases.flatMap((r) => r.assets).find((a) => a.id === assetId)?.name ??
+		"download"
+	).replace(/[^A-Za-z0-9._-]+/g, "-");
+	return new NextResponse(upstream.body, {
+		headers: {
+			"Content-Type": "application/octet-stream",
+			"Content-Disposition": `attachment; filename="${tag ? `${name}.zip` : name}"`,
+			"Cache-Control": "no-store",
+			"X-Content-Type-Options": "nosniff",
+		},
+	});
 }

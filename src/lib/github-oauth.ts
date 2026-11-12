@@ -21,6 +21,10 @@ export function authorizeUrl(redirectUri: string, state: string): string {
 	u.searchParams.set("client_id", clientId);
 	u.searchParams.set("redirect_uri", redirectUri);
 	u.searchParams.set("state", state);
+	// A previously authorized GitHub account can otherwise complete OAuth
+	// without showing any UI, silently reusing the last account after sign-out.
+	// Ask GitHub to show its account picker whenever the user starts sign-in.
+	u.searchParams.set("prompt", "select_account");
 	return u.toString();
 }
 

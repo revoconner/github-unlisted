@@ -130,6 +130,29 @@ export function resolveRepoImagePath(
 	return null;
 }
 
+const GITHUB_ATTACHMENT_ID_RE =
+	/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Returns the stable ID from GitHub's anonymized user-attachment image URL. */
+export function resolveGitHubAttachmentId(rawSrc: string): string | null {
+	let url: URL;
+	try {
+		url = new URL(rawSrc);
+	} catch {
+		return null;
+	}
+
+	if (url.protocol !== "https:" || url.hostname.toLowerCase() !== "github.com") {
+		return null;
+	}
+
+	const match = url.pathname.match(
+		/^\/user-attachments\/assets\/([^/]+)\/?$/i,
+	);
+	if (!match || !GITHUB_ATTACHMENT_ID_RE.test(match[1])) return null;
+	return match[1];
+}
+
 export function buildRepoAssetPath(
 	path: string,
 	ref: string,
@@ -144,6 +167,71 @@ export function buildRepoAssetPath(
 	return `/api/asset?${params.toString()}`;
 }
 
+export function buildRepoAttachmentPath(
+	assetId: string,
+	path: string,
+	ref: string,
+	shareId: string,
+): string {
+	const params = new URLSearchParams({ asset: assetId, path, ref, s: shareId });
+	return `/api/attachment?${params.toString()}`;
+}
+
+/**
+ * Rewrites stable GitHub attachments in the raw Markdown before GitHub renders
+ * it. GitHub's renderer can replace attachment URLs with short-lived signed
+ * URLs; rewriting first keeps the share link stable and lets our server fetch
+ * the image using the repository's existing authorization.
+ */
+export function rewriteGitHubAttachmentReferences(
+	markdown: string,
+	context: RepoAssetContext,
+	shareId: string,
+	appOrigin: string,
+): string {
+	const idPattern =
+		"([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})";
+	const buildUrl = (assetId: string) =>
+		`${appOrigin}${
+			buildRepoAttachmentPath(assetId, context.filePath, context.ref, shareId)
+		}`;
+
+	// Match image elements only, not ordinary links or prose containing an URL.
+	let result = markdown.replace(
+		new RegExp(
+			`(<img\\b[^>]*?\\bsrc\\s*=\\s*)` +
+				`([\"'])(https://github\\.com/user-attachments/assets/${idPattern})\\2`,
+			"gi",
+		),
+		(_match, prefix: string, quote: string, _url: string, assetId: string) =>
+			`${prefix}${quote}${buildUrl(assetId)}${quote}`,
+	);
+
+	// Markdown image syntax: ![alt](URL), also supporting optional angle brackets
+	// around the URL and an optional title attribute.
+	result = result.replace(
+		new RegExp(
+			`(!\\[[^\\]]*\\]\\()(<?)` +
+				`(https://github\\.com/user-attachments/assets/${idPattern})` +
+				`(>?)(\\s+(?:\"[^\"]*\"|'[^']*'))?(\\))`,
+			"gi",
+		),
+		(
+			_match: string,
+			prefix: string,
+			openAngle: string,
+			_url: string,
+			assetId: string,
+			closeAngle: string,
+			title: string | undefined,
+			closing: string,
+		) =>
+			`${prefix}${openAngle}${buildUrl(assetId)}${closeAngle}${title ?? ""}${closing}`,
+	);
+
+	return result;
+}
+
 export function repairRepoImages(
 	html: string,
 	context: RepoAssetContext,
@@ -152,14 +240,21 @@ export function repairRepoImages(
 	return html.replace(
 		/(<img\b[^>]*\bsrc\s*=\s*)(["'])([^"']+)\2/gi,
 		(match, prefix: string, quote: string, rawSrc: string) => {
-			const path = resolveRepoImagePath(rawSrc, context);
-
-			if (!path) {
-				return match;
+			const attachmentId = resolveGitHubAttachmentId(rawSrc);
+			if (attachmentId) {
+				const src = buildRepoAttachmentPath(
+					attachmentId,
+					context.filePath,
+					context.ref,
+					shareId,
+				);
+				return `${prefix}${quote}${src}${quote}`;
 			}
 
-			const src = buildRepoAssetPath(path, context.ref, shareId);
+			const path = resolveRepoImagePath(rawSrc, context);
+			if (!path) return match;
 
+			const src = buildRepoAssetPath(path, context.ref, shareId);
 			return `${prefix}${quote}${src}${quote}`;
 		},
 	);

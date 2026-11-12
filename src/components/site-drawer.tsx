@@ -3,6 +3,7 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { ContactButton } from "@/components/contact-button";
+import { SignOutControl } from "@/components/sign-out-control";
 import { NAV_ITEMS, type NavActive } from "@/lib/nav";
 import {
 	CURRENT_STATUS,
@@ -106,9 +107,9 @@ export function SiteDrawer({ signedIn, active = null }: Props) {
 					    here keeps the two menus identical. */}
 					<ContactButton className="drawer-contact" label="Contact" />
 					{signedIn ? (
-						<a href="/api/github/logout">Sign out</a>
+						<SignOutControl className="drawer-signout" label="Sign out" />
 					) : (
-						<a href="/api/github/login" className="is-cta">
+						<a href="/app" className="is-cta">
 							Sign in
 						</a>
 					)}

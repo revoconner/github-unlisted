@@ -1,6 +1,7 @@
 import "@/styles/global.css";
 import { JsonLd } from "@/components/json-ld";
 import { NavLinks } from "@/components/nav-links";
+import { SignOutControl } from "@/components/sign-out-control";
 import { SiteDrawer } from "@/components/site-drawer";
 import { SiteFooter } from "@/components/site-footer";
 import { breadcrumbLd, pageMetadata } from "@/lib/seo";
@@ -65,11 +66,9 @@ export default async function PrivacyPage() {
 				<NavLinks signedIn={Boolean(session)} active="privacy" />
 
 				{session ? (
-					<a className="nav-cta" href="/api/github/logout">
-						Sign Out
-					</a>
+					<SignOutControl className="nav-cta" label="Sign Out" />
 				) : (
-					<a className="nav-cta" href="/api/github/login">
+					<a className="nav-cta" href="/app">
 						Sign In
 					</a>
 				)}
@@ -98,8 +97,10 @@ export default async function PrivacyPage() {
 						The data controller for the purposes of the EU and UK General Data
 						Protection Regulation (GDPR) is the Operator. For any privacy
 						enquiry, or to exercise the rights set out in this policy, contact:{" "}
-						<a href="mailto:github-unlisted@revoconner.com">github-unlisted@revoconner.com</a>. The
-						source code is publicly available at the{" "}
+						<a href="mailto:github-unlisted@revoconner.com">
+							github-unlisted@revoconner.com
+						</a>
+						. The source code is publicly available at the{" "}
 						<a
 							href="https://github.com/revoconner/github-unlisted"
 							target="_blank"
@@ -139,17 +140,47 @@ export default async function PrivacyPage() {
 						<li>
 							<strong>Share configuration.</strong> When you create a share
 							link, we store a record containing the GitHub installation
-							identifier, the repository owner and name, a creation timestamp,
-							and an optional expiry. Each link is identified by a random,
-							opaque identifier. No repository content and no access credentials
-							are stored.
+							identifier (or, for other services, the identifier of the
+							connected account), the repository owner and name, a creation
+							timestamp, and an optional expiry. Each link is identified by a
+							random, opaque identifier. No repository content is stored, and
+							the record itself holds no credential.
 						</li>
 						<li>
-							<strong>Authentication tokens.</strong> During sign-in, a
-							short-lived GitHub user access token is used in memory only,
-							solely to confirm your identity and list your installations. It is
-							never persisted. Server-side installation tokens used to read
-							repositories are short-lived and never sent to the browser.
+							<strong>Portfolio configuration.</strong> If you group shared
+							repositories into a portfolio, we store the title and
+							description you type, your username (used for the default
+							title), the ordered list of share identifiers, and the same
+							account identifier and timestamps as above. A portfolio page
+							reads each repository&apos;s README on demand to show a
+							preview; that content is not stored or cached. If you add a
+							picture, a copy of that image (uploaded, or downloaded once from
+							the URL you give) is stored until you remove it or delete the
+							portfolio. Visitors load it from this service, never from the
+							original address.
+							If you add a repository that has no share link yet, the portfolio
+							creates one for it, stored exactly like any other share link. It
+							expires on the portfolio&apos;s revoke date, if you set one, and
+							is deleted when you remove the repository or the portfolio.
+						</li>
+						<li>
+							<strong>Authentication tokens.</strong> For GitHub, a short-lived
+							user access token is used in memory only, solely to confirm your
+							identity and list your installations. It is never persisted.
+							Server-side installation tokens used to read repositories are
+							short-lived and never sent to the browser.
+						</li>
+						<li>
+							<strong>OAuth authorization credentials.</strong> If you connect
+							GitLab, Gitea, Forgejo, Codeberg, Gitee or a self-hosted instance,
+							we receive OAuth authorization credentials from that service. Access
+							and refresh tokens are stored encrypted (AES-256-GCM) in our key-value
+							store, together with the service address and your username there. For
+							self-hosted OAuth, the client secret is also stored encrypted so an
+							access token can be refreshed when supported. These credentials are
+							used server-side only, never returned to the browser, placed in a URL,
+							cookie or log, and are deleted together with the connected account
+							when you press Disconnect.
 						</li>
 						<li>
 							<strong>Repository content.</strong> Not collected. It is fetched
@@ -239,8 +270,10 @@ export default async function PrivacyPage() {
 					<h2>8. Data Retention</h2>
 					<ul>
 						<li>
-							The session cookie expires approximately seven days after sign-in,
-							or sooner if you sign out.
+							The session cookie expires at the end of the date you choose during
+							sign-in, at 00:00 local time on the following day, or sooner if you
+							sign out. If no date is supplied by an older sign-in link, the service
+							uses a 30-day default.
 						</li>
 						<li>
 							A share-link record is retained until you revoke the link, the
@@ -276,16 +309,21 @@ export default async function PrivacyPage() {
 						repository access, or uninstall the GitHub App, from your GitHub
 						settings. Revocation takes effect at once. For any other request,
 						contact{" "}
-						<a href="mailto:github-unlisted@revoconner.com">github-unlisted@revoconner.com</a>.
+						<a href="mailto:github-unlisted@revoconner.com">
+							github-unlisted@revoconner.com
+						</a>
+						.
 					</p>
 
 					<h2>11. Security</h2>
 					<p>
-						Access credentials are held server-side only, are short-lived, and
-						are never placed in a URL or sent to the browser. Share links
-						contain only an opaque identifier. Session cookies are signed and
-						verified. No method of transmission or storage is completely secure,
-						and we cannot guarantee absolute security.
+						Access credentials are held server-side only and are never placed in
+						a URL or sent to the browser. GitHub credentials are short-lived;
+						OAuth credentials you authorize for other services are stored encrypted until you
+						disconnect them. Share links contain only an opaque identifier.
+						Session cookies are signed and verified. No method of transmission
+						or storage is completely secure, and we cannot guarantee absolute
+						security.
 					</p>
 
 					<h2>12. Children</h2>
@@ -307,8 +345,10 @@ export default async function PrivacyPage() {
 					<p>
 						Questions about this policy or our handling of your information can
 						be sent to{" "}
-						<a href="mailto:github-unlisted@revoconner.com">github-unlisted@revoconner.com</a>, or
-						raised on the{" "}
+						<a href="mailto:github-unlisted@revoconner.com">
+							github-unlisted@revoconner.com
+						</a>
+						, or raised on the{" "}
 						<a
 							href="https://github.com/revoconner/github-unlisted"
 							target="_blank"

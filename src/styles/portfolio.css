@@ -1,0 +1,210 @@
+/* github unlisted - PORTFOLIO viewer stylesheet. Loaded by /portfolio together
+   with viewer.css, which supplies the reset, the --gh-* tokens, the topbar,
+   the notice screen and the .readme typography. Everything here only lays out
+   the collection page and shrinks .readme to card scale; it adds no tokens of
+   its own, so the page stays visually one family with the repository viewer
+   a card leads to (bordered surfaces, a flat 6px radius). */
+
+.pf {
+	flex: 1;
+	width: 100%;
+	max-width: 1180px;
+	margin: 0 auto;
+	padding: var(--sp-7) var(--sp-6);
+	display: flex;
+	flex-direction: column;
+	gap: var(--sp-5);
+}
+
+/* ----- Heading ----------------------------------------------------- */
+.pf-head {
+	display: flex;
+	align-items: center;
+	gap: var(--sp-4);
+	min-width: 0;
+}
+.pf-head__icon {
+	flex: none;
+	width: 44px;
+	height: 44px;
+	display: grid;
+	place-items: center;
+	background: var(--gh-raised);
+	border: 1px solid var(--gh-border);
+	border-radius: var(--gh-r);
+	color: var(--gh-fg);
+}
+.pf-head__copy {
+	min-width: 0;
+}
+/* The title is whatever the owner typed: it must wrap, never push the layout. */
+.pf-head__title {
+	font-size: var(--fs-h2);
+	font-weight: 650;
+	line-height: 1.2;
+	color: var(--gh-fg);
+	overflow-wrap: anywhere;
+}
+.pf-head__sub {
+	margin-top: 2px;
+	font-size: var(--fs-caption);
+	color: var(--gh-fg-muted);
+}
+/* pre-line keeps the owner's line breaks without letting them inject markup:
+   the text is rendered as a text node, never as HTML. */
+.pf-desc {
+	max-width: 72ch;
+	font-size: var(--fs-body);
+	line-height: 1.55;
+	color: var(--gh-fg-muted);
+	white-space: pre-line;
+	overflow-wrap: anywhere;
+}
+
+/* ----- Card grid --------------------------------------------------- */
+.pf-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
+	gap: var(--sp-5);
+	align-items: stretch;
+}
+.pf-card {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	background: var(--gh-inset);
+	border: 1px solid var(--gh-border-muted);
+	border-radius: var(--gh-r);
+	overflow: hidden;
+}
+.pf-card__head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: var(--sp-3);
+	padding: var(--sp-4) var(--sp-4) var(--sp-3);
+}
+.pf-card__name {
+	min-width: 0;
+	font-size: var(--fs-h3);
+	font-weight: 600;
+	color: var(--accent);
+	overflow-wrap: anywhere;
+}
+@media (hover: hover) {
+	.pf-card__name:hover {
+		text-decoration: underline;
+	}
+}
+.pf-card__ref {
+	flex: none;
+	max-width: 40%;
+	font-size: var(--fs-caption);
+	color: var(--gh-fg-muted);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* The README teaser scrolls inside the card, so a long README never makes one
+   card tower over its neighbours. */
+.pf-card__preview {
+	flex: 1;
+	min-height: 160px;
+	max-height: 300px;
+	overflow: auto;
+	background: var(--gh-canvas);
+	border-top: 1px solid var(--gh-border-muted);
+	border-bottom: 1px solid var(--gh-border-muted);
+}
+.pf-card__preview:focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: -2px;
+}
+/* .readme is sized for a full page (page margin, big padding, h1 at 36px).
+   Inside a card it drops its own frame and scales down. The selectors here are
+   longer than viewer.css's on purpose, so they win without !important. */
+.pf-card__preview .readme {
+	margin: 0;
+	padding: var(--sp-4);
+	max-width: none;
+	border: 0;
+	border-radius: 0;
+	background: transparent;
+	font-size: var(--fs-ui);
+	line-height: 1.5;
+}
+.pf-card__preview .readme h1 {
+	margin: 0 0 var(--sp-3);
+	font-size: var(--fs-h3);
+}
+.pf-card__preview .readme h2 {
+	margin: var(--sp-5) 0 var(--sp-3);
+	font-size: var(--fs-body);
+}
+.pf-card__preview .readme h3,
+.pf-card__preview .readme h4 {
+	font-size: var(--fs-ui);
+}
+.pf-card__empty,
+.pf-card__more {
+	padding: var(--sp-4);
+	font-size: var(--fs-caption);
+	color: var(--gh-fg-muted);
+}
+.pf-card__empty {
+	display: grid;
+	place-items: center;
+	min-height: 160px;
+}
+.pf-card__more {
+	padding-top: 0;
+}
+
+.pf-card__foot {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--sp-3);
+	padding: var(--sp-3) var(--sp-4);
+	font-size: var(--fs-caption);
+	color: var(--gh-fg-muted);
+}
+.pf-card__open {
+	display: grid;
+	place-items: center;
+	width: var(--gh-ctl-h);
+	height: var(--gh-ctl-h);
+	border-radius: var(--gh-r);
+	color: var(--gh-fg-muted);
+}
+@media (hover: hover) {
+	.pf-card__open:hover {
+		background: var(--gh-raised);
+		color: var(--gh-fg);
+	}
+}
+.pf-card__open:focus-visible {
+	outline: 2px solid var(--accent);
+}
+
+@media (max-width: 480px) {
+	.pf {
+		padding: var(--sp-5) var(--sp-4);
+	}
+	.pf-card__preview {
+		max-height: 240px;
+	}
+}
+
+/* The owner's own picture replaces the icon. object-fit:cover keeps any aspect
+   ratio from stretching; the frame stays the same size either way. */
+.pf-head__icon--image {
+	overflow: hidden;
+	background: var(--gh-inset);
+}
+.pf-head__icon--image img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}

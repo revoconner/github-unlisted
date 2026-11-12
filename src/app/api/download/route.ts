@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { getInstallationOctokit, getInstallationToken } from "@/lib/github-app";
-import { getRepoMeta, listBranches } from "@/lib/github-repo";
+import { adapterForTarget } from "@/lib/forge/target";
+import { ForgeHttpError } from "@/lib/forge/types";
 import { resolveShare } from "@/lib/share-store";
 
-// Never cache: the URL this hands back is signed and expires within minutes.
+// Never cache: a GitHub redirect URL is signed and short-lived, and a streamed archive is per-request.
 export const dynamic = "force-dynamic";
 
-// Whole-branch zip for a recipient. GitHub's archive endpoint answers 302 with a signed, short-lived codeload URL that needs no authentication, so the redirect is forwarded verbatim: no archive bytes pass through this deployment, no memory or duration ceiling, and the installation token never leaves the server.
+// Whole-branch zip for a recipient. GitHub answers with a signed redirect that is forwarded as is, so no bytes pass through this deployment. Other forges are streamed through with the stored token, never buffered, so the token never leaves the server.
 export async function GET(request: Request) {
 	const sp = new URL(request.url).searchParams;
 
@@ -29,18 +29,24 @@ export async function GET(request: Request) {
 		);
 	}
 
+	const adapter = await adapterForTarget(target);
+	if (!adapter?.capabilities.archive) {
+		return NextResponse.json(
+			{ error: "Download is not available for this link" },
+			{ status: 404 },
+		);
+	}
+
 	// A locked share always downloads its locked branch, never whatever the query string asks for.
 	const requested = (sp.get("ref") ?? "").trim();
 
-	// Resolved and validated up front. GitHub answers 302 even for a ref that does not exist, and codeload then serves a bare text/plain 404, so without this check a mistyped ref would dump the recipient on an unbranded GitHub error page.
+	// Resolved and validated up front against the real branch list, so a mistyped ref is a clean 404 here instead of an unbranded error page on the forge, and nothing the recipient typed reaches an upstream URL unless it is a branch that exists.
 	let ref: string;
 	try {
-		const octokit = getInstallationOctokit(target.installationId);
-		const meta = await getRepoMeta(octokit, target.owner, target.repo);
-		// requested is always a string, so an empty one falls through to the repo default.
+		const meta = await adapter.getRepoMeta(target.owner, target.repo);
 		ref = target.ref || requested || meta.defaultBranch;
 
-		const branches = await listBranches(octokit, target.owner, target.repo);
+		const branches = await adapter.listBranches(target.owner, target.repo);
 		if (!branches.includes(ref)) {
 			return NextResponse.json(
 				{ error: "That branch is not available" },
@@ -55,31 +61,12 @@ export async function GET(request: Request) {
 		);
 	}
 
-	// Slashes inside a branch name are path separators here, so each segment is encoded on its own.
-	const refPath = ref.split("/").map(encodeURIComponent).join("/");
-	const url = `https://api.github.com/repos/${encodeURIComponent(target.owner)}/${encodeURIComponent(target.repo)}/zipball/${refPath}`;
-
-	let location: string | null = null;
-	let status = 502;
+	let archive: Awaited<ReturnType<typeof adapter.archiveResponse>>;
 	try {
-		const token = await getInstallationToken(target.installationId);
-		const res = await fetch(url, {
-			headers: {
-				Authorization: `Bearer ${token}`,
-				Accept: "application/vnd.github+json",
-				"X-GitHub-Api-Version": "2022-11-28",
-				"User-Agent": "github-unlisted",
-			},
-			redirect: "manual",
-		});
-		status = res.status;
-		location = res.headers.get("location");
-	} catch {
-		return NextResponse.json({ error: "Archive unavailable" }, { status: 502 });
-	}
-
-	if (!location) {
-		// 404 covers both a missing branch and a repository the app can no longer read, which is the same "gone" story for the recipient.
+		archive = await adapter.archiveResponse(target.owner, target.repo, ref);
+	} catch (error) {
+		// 404 covers both a missing branch and a repository that can no longer be read, which is the same "gone" story for the recipient.
+		const status = error instanceof ForgeHttpError ? error.status : 502;
 		return NextResponse.json(
 			{
 				error:
@@ -91,7 +78,20 @@ export async function GET(request: Request) {
 		);
 	}
 
-	const out = NextResponse.redirect(location, 302);
-	out.headers.set("Cache-Control", "no-store");
-	return out;
+	if (archive.kind === "redirect") {
+		const out = NextResponse.redirect(archive.url, 302);
+		out.headers.set("Cache-Control", "no-store");
+		return out;
+	}
+
+	// Headers are chosen here, not copied from the forge: its Content-Type, Set-Cookie and Location are not ours to relay.
+	const safe = (v: string) => v.replace(/[^A-Za-z0-9._-]+/g, "-");
+	return new NextResponse(archive.response.body, {
+		headers: {
+			"Content-Type": "application/zip",
+			"Content-Disposition": `attachment; filename="${safe(target.repo)}-${safe(ref)}.zip"`,
+			"Cache-Control": "no-store",
+			"X-Content-Type-Options": "nosniff",
+		},
+	});
 }

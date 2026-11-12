@@ -306,6 +306,121 @@ main {
 	}
 }
 
+/* ----- Sign-out confirmation -------------------------------------- */
+.signout-backdrop {
+	position: fixed;
+	inset: 0;
+	z-index: 90;
+	padding: 0;
+	border: 0;
+	background: rgba(0, 0, 0, 0.62);
+	backdrop-filter: blur(2px);
+	cursor: pointer;
+}
+.signout-modal {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: min(92vw, 520px);
+	max-height: 88vh;
+	overflow-y: auto;
+	z-index: 91;
+	padding: 24px;
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: 14px;
+	box-shadow: 0 18px 70px rgba(0, 0, 0, 0.32);
+}
+.signout-modal__title {
+	margin: 0 0 12px;
+	color: var(--text);
+	font-size: var(--fs-h3);
+	font-weight: 650;
+	line-height: 1.3;
+}
+.signout-modal__copy {
+	margin: 0;
+	color: var(--text-2);
+	font-size: var(--fs-body);
+	line-height: 1.65;
+}
+.signout-modal__actions {
+	display: flex;
+	justify-content: flex-end;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-top: 22px;
+}
+.signout-modal__button {
+	min-height: 40px;
+	padding: 8px 14px;
+	border: 1px solid var(--border-strong);
+	border-radius: var(--radius-pill);
+	background: var(--surface-2);
+	color: var(--text-2);
+	font: inherit;
+	font-size: var(--fs-ui);
+	font-weight: 600;
+	cursor: pointer;
+}
+.signout-modal__button--danger {
+	background: hsl(0, 62%, 52%, 0.14);
+	border-color: hsl(0, 62%, 52%, 0.48);
+	color: var(--text);
+}
+.signout-modal__button:disabled,
+.signout-backdrop:disabled {
+	opacity: 0.55;
+	cursor: not-allowed;
+}
+.signout-modal__error {
+	margin: 14px 0 0;
+	color: hsl(0, 75%, 68%);
+	font-size: var(--fs-caption);
+	line-height: 1.5;
+}
+.topbar button.nav-cta {
+	cursor: pointer;
+	font-family: var(--font-sans);
+}
+.drawer-panel__links .drawer-signout {
+	width: 100%;
+	text-align: left;
+	padding: 14px 22px;
+	font-size: var(--fs-body);
+	color: var(--text-2);
+	background: transparent;
+	border: 0;
+	border-bottom: 1px solid var(--border-soft);
+	letter-spacing: 0.04em;
+	cursor: pointer;
+}
+@media (hover: hover) {
+	.signout-modal__button:hover {
+		border-color: var(--accent);
+		color: var(--text);
+	}
+	.signout-modal__button--danger:hover {
+		background: hsl(0, 62%, 52%, 0.24);
+	}
+	.drawer-panel__links .drawer-signout:hover {
+		color: var(--text);
+		background: rgba(255, 255, 255, 0.025);
+	}
+}
+@media (max-width: 480px) {
+	.signout-modal {
+		padding: 18px;
+	}
+	.signout-modal__actions {
+		flex-direction: column-reverse;
+	}
+	.signout-modal__button {
+		width: 100%;
+	}
+}
+
 /* ----- Footer (shared) --------------------------------------------- */
 .site-footer {
 	position: relative;
@@ -696,7 +811,8 @@ main {
 }
 @media (hover: hover) {
 	.drawer-panel__links a:hover,
-	.drawer-panel__links .drawer-contact:hover {
+	.drawer-panel__links .drawer-contact:hover,
+	.drawer-panel__links .drawer-signout:hover {
 		color: var(--text);
 		background: rgba(255, 255, 255, 0.025);
 	}

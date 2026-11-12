@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { adapterForTarget } from "@/lib/forge/target";
 import { getInstallationOctokit } from "@/lib/github-app";
 import { resolveShare } from "@/lib/share-store";
 
@@ -58,7 +59,60 @@ export async function GET(request: Request): Promise<Response> {
 		return NextResponse.json({ error: "Invalid ref" }, { status: 403 });
 	}
 
-	const octokit = getInstallationOctokit(target.installationId);
+	// Shares on connected forges are served through their adapter and streamed (never buffered). GitHub keeps its original Octokit path below, unchanged.
+	if (target.installationId === undefined) {
+		const adapter = await adapterForTarget(target);
+		if (!adapter) {
+			return NextResponse.json(
+				{ error: "Unable to read file" },
+				{ status: 404 },
+			);
+		}
+		try {
+			const res = await adapter.getRawFile(
+				target.owner,
+				target.repo,
+				path,
+				ref,
+			);
+			const declared = Number(res.headers.get("content-length"));
+			if (
+				!res.ok ||
+				(Number.isFinite(declared) && declared > 15 * 1024 * 1024)
+			) {
+				await res.body?.cancel().catch(() => {});
+				return NextResponse.json(
+					{ error: "File not found" },
+					{
+						status: res.ok
+							? 413
+							: res.status === 404 || res.status === 403
+								? 404
+								: 502,
+					},
+				);
+			}
+			return new Response(res.body, {
+				status: 200,
+				headers: {
+					"Content-Type": contentType,
+					"Content-Disposition": "inline",
+					"Cache-Control": "private, no-store",
+					"X-Content-Type-Options": "nosniff",
+					"Content-Security-Policy":
+						"default-src 'none'; style-src 'unsafe-inline'; sandbox",
+				},
+			});
+		} catch {
+			return NextResponse.json(
+				{ error: "Unable to read file" },
+				{ status: 502 },
+			);
+		}
+	}
+	const installationId = target.installationId;
+
+	const octokit = getInstallationOctokit(installationId);
 
 	try {
 		const { data } = await octokit.rest.repos.getContent({
@@ -69,10 +123,7 @@ export async function GET(request: Request): Promise<Response> {
 		});
 
 		if (Array.isArray(data) || data.type !== "file" || !data.sha) {
-			return NextResponse.json(
-				{ error: "File not found" },
-				{ status: 404 },
-			);
+			return NextResponse.json({ error: "File not found" }, { status: 404 });
 		}
 
 		const blob = await octokit.rest.git.getBlob({
@@ -97,9 +148,6 @@ export async function GET(request: Request): Promise<Response> {
 	} catch (error) {
 		console.error("share-file failed", error);
 
-		return NextResponse.json(
-			{ error: "Unable to read file" },
-			{ status: 500 },
-		);
+		return NextResponse.json({ error: "Unable to read file" }, { status: 500 });
 	}
 }

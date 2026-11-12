@@ -40,9 +40,15 @@ Done with it? Revoke the link in one click, or remove the repo's access in your 
 - **One dashboard.** See every repo, which ones are shared, copy or revoke links, filter and search.
 - **Uninstall the app to remove your access at once** Grant or revoke access anytime from GitHub; revoking takes effect right away.
 
+## Other git services
+
+Besides GitHub, owners can connect GitLab, Gitee, Gitea and Codeberg through OAuth2. Self-hosted GitLab, Gitea, Forgejo and OAuth2-compatible Gogs instances can be connected from the web UI by entering the instance domain and its OAuth Client ID/Secret. Self-hosted instances must be reachable from the public internet over HTTPS; VPN or private-network instances are refused by design, as a guard against server-side request forgery.
+
+The sign-in screen lets the user choose a calendar date for the session to expire. The session ends automatically at 00:00 local time on the following day. Stored OAuth access/refresh credentials are encrypted with a key derived from `SESSION_SECRET`. Changing `SESSION_SECRET` signs everyone out and makes stored credentials unreadable, so those accounts must be reconnected. `FORGE_TOKEN_KEY` (base64, 32 bytes) is an optional override if you want the encryption key to be independent.
+
 ## Privacy
 
-Your code is read on demand through GitHub's official app permissions and shown in the browser. Share links carry no passwords or tokens — only an opaque, single-purpose identifier tied to one repository. Nothing about your repository is stored on our side beyond the link mapping you create. Read [Privacy](https://www.github-unlisted.com/privacy) for the complete statement.
+Your code is read on demand through GitHub's official app permissions and shown in the browser. Share links carry no passwords or tokens — only an opaque, single-purpose identifier tied to one repository. For GitHub nothing about your repository is stored beyond the link mapping you create. For other services (GitLab, Gitea/Forgejo, Codeberg, Gitee, self-hosted) OAuth access/refresh credentials are stored encrypted on the server, never returned to the browser, and deleted with the connection and its links when you press "Disconnect". Read [Privacy](https://www.github-unlisted.com/privacy) for the complete statement.
 
 ## Questions
 

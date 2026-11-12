@@ -3,18 +3,34 @@
 import { useRouter } from "next/navigation";
 import * as React from "react";
 import { NavLinks } from "@/components/nav-links";
+import {
+	type PortfolioItem,
+	PortfolioManager,
+} from "@/components/portfolio-manager";
 import { SiteDrawer } from "@/components/site-drawer";
 import { SiteFooter } from "@/components/site-footer";
+import { SignOutControl } from "@/components/sign-out-control";
 
 interface Repo {
-	installationId: number;
+	installationId?: number;
+	connectionId?: string;
+	forge: string;
+	host: string;
 	owner: string;
 	name: string;
 	fullName: string;
 	private: boolean;
 }
+interface Connection {
+	id: string;
+	forge: string;
+	host: string;
+	login: string;
+	error: boolean;
+}
 interface Share {
 	id: string;
+	forge?: string;
 	owner: string;
 	repo: string;
 	createdAt?: number;
@@ -23,7 +39,16 @@ interface Share {
 	showBranches?: boolean;
 	allowDownload?: boolean;
 	showReleases?: boolean;
+	installationId?: number;
+	connectionId?: string;
+	portfolioId?: string;
 }
+
+// A repository is identified by forge AND name: the same owner/name on two forges is two repositories, and one share must never be shown on the other.
+const repoKey = (r: { forge: string; fullName: string }) =>
+	`${r.forge}:${r.fullName}`.toLowerCase();
+const shareKey = (s: Share) =>
+	`${s.forge ?? "github"}:${s.owner}/${s.repo}`.toLowerCase();
 
 type VisFilter = "all" | "private" | "public";
 type ShareFilter = "all" | "shared" | "unshared";
@@ -163,11 +188,18 @@ function YesNo({
 export function DashboardClient({
 	repos,
 	shares,
+	portfolios,
 	login,
+	connections,
+	repositoryInstallUrl,
 }: {
 	repos: Repo[];
 	shares: Share[];
+	portfolios: PortfolioItem[];
 	login: string;
+	connections: Connection[];
+	repositoryInstallUrl: string | null;
+	canManageForgeOAuth?: boolean;
 }) {
 	const router = useRouter();
 	const [query, setQuery] = React.useState("");
@@ -186,15 +218,26 @@ export function DashboardClient({
 
 	const shareByRepo = React.useMemo(() => {
 		const m = new Map<string, Share>();
-		for (const s of shares) m.set(`${s.owner}/${s.repo}`.toLowerCase(), s);
+		for (const s of shares) m.set(shareKey(s), s);
 		return m;
 	}, [shares]);
+
+	// The portfolio editor follows the Private/Public tab, and a share does not
+	// record its repository's visibility, so it is looked up from the repo list.
+	const managerShares = React.useMemo(() => {
+		const byKey = new Map(repos.map((r) => [repoKey(r), r.private]));
+		return shares.map((s) => ({
+			...s,
+			private: byKey.get(shareKey(s)),
+			managedBy: s.portfolioId,
+		}));
+	}, [repos, shares]);
 
 	const stats = React.useMemo(() => {
 		let shared = 0;
 		let pub = 0;
 		for (const r of repos) {
-			if (shareByRepo.has(r.fullName.toLowerCase())) shared++;
+			if (shareByRepo.has(repoKey(r))) shared++;
 			if (!r.private) pub++;
 		}
 		const priv = repos.length - pub;
@@ -202,7 +245,7 @@ export function DashboardClient({
 	}, [repos, shareByRepo]);
 
 	const visible = repos.filter((r) => {
-		const isShared = shareByRepo.has(r.fullName.toLowerCase());
+		const isShared = shareByRepo.has(repoKey(r));
 		if (visFilter === "private" && !r.private) return false;
 		if (visFilter === "public" && r.private) return false;
 		if (shareFilter === "shared" && !isShared) return false;
@@ -212,14 +255,12 @@ export function DashboardClient({
 		return true;
 	});
 
-	const selRepo = repos.find((r) => r.fullName === selected) ?? null;
-	const selShare = selRepo
-		? shareByRepo.get(selRepo.fullName.toLowerCase())
-		: undefined;
+	const selRepo = repos.find((r) => repoKey(r) === selected) ?? null;
+	const selShare = selRepo ? shareByRepo.get(repoKey(selRepo)) : undefined;
 
 	// Panel control values fall back to what is stored on the share, so an
 	// existing link shows its real settings before the user touches anything.
-	const key = selRepo?.fullName ?? "";
+	const key = selRepo ? repoKey(selRepo) : "";
 	const ttl = ttlSel[key] ?? { amount: 1, unit: "never" as Unit };
 	const dl = dlSel[key] ?? selShare?.allowDownload ?? false;
 	const rel = relSel[key] ?? selShare?.showReleases ?? false;
@@ -240,7 +281,9 @@ export function DashboardClient({
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
-					installationId: r.installationId,
+					...(r.connectionId
+						? { connectionId: r.connectionId }
+						: { installationId: r.installationId }),
 					owner: r.owner,
 					repo: r.name,
 					ttlSeconds: ttlFor(ttl),
@@ -308,6 +351,32 @@ export function DashboardClient({
 		}
 	};
 
+	const disconnect = async (c: Connection) => {
+		if (
+			!confirm(
+				`Disconnect ${c.login} on ${c.host.replace("https://", "")}? Its stored authorization and every link created from it will be deleted.`,
+			)
+		)
+			return;
+		setBusy(true);
+		setError(null);
+		try {
+			const res = await fetch(
+				`/api/forge/connect?id=${encodeURIComponent(c.id)}`,
+				{ method: "DELETE" },
+			);
+			if (!res.ok) {
+				await failure(res, "Could not disconnect");
+				return;
+			}
+			router.refresh();
+		} catch {
+			setError("Could not disconnect");
+		} finally {
+			setBusy(false);
+		}
+	};
+
 	const copy = async (s: Share) => {
 		const url = `${window.location.origin}/${s.owner}/${s.repo}?s=${s.id}`;
 		await navigator.clipboard.writeText(url);
@@ -361,9 +430,7 @@ export function DashboardClient({
 
 				<NavLinks signedIn={true} active="dashboard" />
 
-				<a className="nav-cta" href="/api/github/logout">
-					Sign Out
-				</a>
+				<SignOutControl className="nav-cta" label="Sign Out" />
 
 				<SiteDrawer signedIn={true} active="dashboard" />
 			</header>
@@ -371,8 +438,18 @@ export function DashboardClient({
 			<main className="dashboard">
 				{/* Row 1: welcome */}
 				<section className="dash-welcome">
-					<p className="dash-welcome__hi">Welcome,</p>
-					<h1 className="dash-welcome__name">{login}</h1>
+					<div className="dash-welcome__copy">
+						<p className="dash-welcome__hi">Welcome,</p>
+						<h1 className="dash-welcome__name">{login}</h1>
+					</div>
+					{repositoryInstallUrl && (
+						<a
+							className="dash-btn dash-btn--repositories"
+							href={repositoryInstallUrl}
+						>
+							Add or manage repositories
+						</a>
+					)}
 				</section>
 
 				{/* Row 2: stats */}
@@ -448,11 +525,44 @@ export function DashboardClient({
 					/>
 				</section>
 
+				<section className="dash-conns" aria-label="Connected accounts">
+					{connections.map((c) => (
+						<div className="dash-conn" key={c.id}>
+							<span className="dash-conn__name">
+								{c.forge} · {c.host.replace("https://", "")} · {c.login}
+							</span>
+							{c.error && (
+								<span className="dash-conn__err">
+									could not load, reconnect this account
+								</span>
+							)}
+							<button
+								type="button"
+								className="dash-btn"
+								disabled={busy}
+								onClick={() => disconnect(c)}
+							>
+								Disconnect
+							</button>
+						</div>
+					))}
+				</section>
+
 				{error && (
 					<div className="signin-error" role="alert">
 						{error}
 					</div>
 				)}
+
+				{/* Portfolios: one link for several shared repositories */}
+				<PortfolioManager
+					portfolios={portfolios}
+					shares={managerShares}
+					repos={repos}
+					visibility={visFilter}
+					connections={connections}
+					login={login}
+				/>
 
 				{/* Row 4: selectable repo rows */}
 				<section className="dash-repos" aria-label="Repositories">
@@ -460,17 +570,24 @@ export function DashboardClient({
 						<p className="dash-repos__empty">No repositories match.</p>
 					)}
 					{visible.map((r) => {
-						const share = shareByRepo.get(r.fullName.toLowerCase());
-						const isSel = selected === r.fullName;
+						const share = shareByRepo.get(repoKey(r));
+						const isSel = selected === repoKey(r);
 						return (
 							<button
 								type="button"
 								className="repo-card"
-								key={r.fullName}
+								key={repoKey(r)}
 								aria-pressed={isSel}
-								onClick={() => setSelected(isSel ? null : r.fullName)}
+								onClick={() => setSelected(isSel ? null : repoKey(r))}
 							>
-								<span className="repo-card__name">{r.name}</span>
+								<span className="repo-card__name">
+									{r.name}
+									{r.forge !== "github" && (
+										<span className="repo-card__host">
+											{r.host.replace("https://", "")}
+										</span>
+									)}
+								</span>
 								{/* One line: share state left (the meta stats stand in for
 								    "shared", since only one of the two can apply), repo
 								    visibility pinned to the right. */}

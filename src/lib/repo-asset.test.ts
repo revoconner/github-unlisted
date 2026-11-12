@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
 	buildRepoAssetPath,
+	buildRepoAttachmentPath,
 	repairRepoImages,
+	rewriteGitHubAttachmentReferences,
+	resolveGitHubAttachmentId,
 	resolveRepoImagePath,
 } from "./repo-asset";
 
@@ -77,6 +80,52 @@ describe("resolveRepoImagePath", () => {
 	});
 });
 
+describe("GitHub user attachments", () => {
+	const attachmentUrl =
+		"https://github.com/user-attachments/assets/ac0d2c11-b338-43b1-ac55-37394abe6427";
+
+	it("recognizes only stable GitHub attachment URLs", () => {
+		expect(resolveGitHubAttachmentId(attachmentUrl)).toBe(
+			"ac0d2c11-b338-43b1-ac55-37394abe6427",
+		);
+		expect(
+			resolveGitHubAttachmentId(
+				"https://example.com/user-attachments/assets/ac0d2c11-b338-43b1-ac55-37394abe6427",
+			),
+		).toBeNull();
+	});
+
+	it("builds a share-scoped attachment URL", () => {
+		expect(
+			buildRepoAttachmentPath(
+				"ac0d2c11-b338-43b1-ac55-37394abe6427",
+				"README.md",
+				"main",
+				"share 123",
+			),
+		).toBe(
+			"/api/attachment?asset=ac0d2c11-b338-43b1-ac55-37394abe6427&path=README.md&ref=main&s=share+123",
+		);
+	});
+
+	it("rewrites HTML and Markdown image references for local rendering", () => {
+		const source =
+			`<img alt="image" src="${attachmentUrl}" />\n` +
+			`![also image](${attachmentUrl})`;
+		const result = rewriteGitHubAttachmentReferences(
+			source,
+			context,
+			"share-123",
+			"https://github-unlisted.example",
+		);
+		const proxy =
+			"https://github-unlisted.example/api/attachment?" +
+			"asset=ac0d2c11-b338-43b1-ac55-37394abe6427&path=README.md&ref=main&s=share-123";
+		expect(result).toContain(`src="${proxy}"`);
+		expect(result).toContain(`![also image](${proxy})`);
+	});
+});
+
 describe("buildRepoAssetPath", () => {
 	it("builds an asset URL with encoded parameters", () => {
 		expect(
@@ -118,6 +167,15 @@ describe("repairRepoImages", () => {
 
 		expect(repaired).toBe(
 			'<img src="/api/asset?path=docs%2Fimages%2Fimage.png&ref=main&s=share-123" alt="example">',
+		);
+	});
+
+	it("rewrites GitHub user-attachment images", () => {
+		const html =
+			'<img src="https://github.com/user-attachments/assets/' +
+			'ac0d2c11-b338-43b1-ac55-37394abe6427" alt="example">';
+		expect(repairRepoImages(html, context, "share-123")).toContain(
+			"/api/attachment?asset=ac0d2c11-b338-43b1-ac55-37394abe6427&path=README.md&ref=main&s=share-123",
 		);
 	});
 

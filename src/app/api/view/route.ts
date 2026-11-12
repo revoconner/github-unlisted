@@ -35,7 +35,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 	const shareId = typeof record.shareId === "string" ? record.shareId : "";
 
 	try {
-		const payload = await resolveViewer(slug, shareId);
+		const payload = await resolveViewer(slug, shareId, new URL(request.url).origin);
 		return NextResponse.json(payload);
 	} catch (err) {
 		// The old server component let unexpected throws bubble to Next's error

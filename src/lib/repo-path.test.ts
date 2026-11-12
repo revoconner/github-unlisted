@@ -1,19 +1,22 @@
 import { describe, expect, it } from "vitest";
 import {
 	buildHref,
+	isSafeRepoPath,
 	parseView,
 	resolveRef,
 	splitRefFromBranches,
 } from "./repo-path";
 
+const T = { owner: "o", repo: "r" };
+
 describe("parseView", () => {
 	it("returns null with fewer than two segments", () => {
-		expect(parseView([])).toBeNull();
-		expect(parseView(["owner"])).toBeNull();
+		expect(parseView([], T)).toBeNull();
+		expect(parseView(["owner"], T)).toBeNull();
 	});
 
 	it("parses a bare owner/repo as a tree root", () => {
-		expect(parseView(["o", "r"])).toEqual({
+		expect(parseView(["o", "r"], T)).toEqual({
 			owner: "o",
 			repo: "r",
 			viewType: "tree",
@@ -23,7 +26,7 @@ describe("parseView", () => {
 	});
 
 	it("parses a tree view with ref and nested path", () => {
-		expect(parseView(["o", "r", "tree", "main", "src", "lib"])).toEqual({
+		expect(parseView(["o", "r", "tree", "main", "src", "lib"], T)).toEqual({
 			owner: "o",
 			repo: "r",
 			viewType: "tree",
@@ -33,7 +36,7 @@ describe("parseView", () => {
 	});
 
 	it("parses a blob view", () => {
-		expect(parseView(["o", "r", "blob", "dev", "a", "b.ts"])).toEqual({
+		expect(parseView(["o", "r", "blob", "dev", "a", "b.ts"], T)).toEqual({
 			owner: "o",
 			repo: "r",
 			viewType: "blob",
@@ -43,7 +46,7 @@ describe("parseView", () => {
 	});
 
 	it("parses the releases view, which carries no ref or path", () => {
-		expect(parseView(["o", "r", "releases"])).toEqual({
+		expect(parseView(["o", "r", "releases"], T)).toEqual({
 			owner: "o",
 			repo: "r",
 			viewType: "releases",
@@ -53,7 +56,7 @@ describe("parseView", () => {
 	});
 
 	it("ignores trailing segments on the releases view", () => {
-		expect(parseView(["o", "r", "releases", "v1.0", "x"])).toEqual({
+		expect(parseView(["o", "r", "releases", "v1.0", "x"], T)).toEqual({
 			owner: "o",
 			repo: "r",
 			viewType: "releases",
@@ -63,7 +66,7 @@ describe("parseView", () => {
 	});
 
 	it("treats an unknown view type as a tree with no ref/path", () => {
-		expect(parseView(["o", "r", "wat", "x"])).toEqual({
+		expect(parseView(["o", "r", "wat", "x"], T)).toEqual({
 			owner: "o",
 			repo: "r",
 			viewType: "tree",
@@ -73,7 +76,7 @@ describe("parseView", () => {
 	});
 
 	it("ignores empty segments", () => {
-		expect(parseView(["o", "r", "", ""])).toEqual({
+		expect(parseView(["o", "r", "", ""], T)).toEqual({
 			owner: "o",
 			repo: "r",
 			viewType: "tree",
@@ -81,6 +84,98 @@ describe("parseView", () => {
 			path: "",
 		});
 	});
+});
+
+describe("parseView with a share's repository", () => {
+	const gl = { owner: "group/sub", repo: "project" };
+
+	it("strips a nested GitLab owner before reading the view", () => {
+		expect(
+			parseView(["group", "sub", "project", "blob", "main", "src", "a.ts"], gl),
+		).toEqual({
+			owner: "group/sub",
+			repo: "project",
+			viewType: "blob",
+			ref: "main",
+			path: "src/a.ts",
+		});
+	});
+
+	it("parses a bare nested repository and its releases view", () => {
+		expect(parseView(["group", "sub", "project"], gl)).toMatchObject({
+			viewType: "tree",
+			ref: "",
+			path: "",
+		});
+		expect(
+			parseView(["group", "sub", "project", "releases"], gl),
+		).toMatchObject({ viewType: "releases" });
+	});
+
+	it("returns null when the URL names a different repository", () => {
+		expect(parseView(["group", "sub", "other", "tree", "main"], gl)).toBeNull();
+		expect(parseView(["group", "other", "project"], gl)).toBeNull();
+		expect(parseView(["other", "sub", "project"], gl)).toBeNull();
+	});
+
+	// Without the share record, "group/sub/project" could be read as owner "group", repo "sub", path "project": a link for one project would address another.
+	it("reads the URL relative to the share's repository instead of guessing the split", () => {
+		expect(
+			parseView(["group", "sub", "project", "tree", "main"], {
+				owner: "group",
+				repo: "sub",
+			}),
+		).toMatchObject({ viewType: "tree", ref: "", path: "" });
+		expect(parseView(["group", "sub"], gl)).toBeNull();
+	});
+
+	it("is not confused by a repository named like a view keyword", () => {
+		expect(
+			parseView(["o", "tree", "blob", "main", "tree", "x.ts"], {
+				owner: "o",
+				repo: "tree",
+			}),
+		).toMatchObject({ viewType: "blob", ref: "main", path: "tree/x.ts" });
+		expect(
+			parseView(["o", "releases", "releases"], {
+				owner: "o",
+				repo: "releases",
+			}),
+		).toMatchObject({ viewType: "releases" });
+	});
+
+	it("compares segments exactly, including case", () => {
+		expect(parseView(["O", "r"], T)).toBeNull();
+		expect(parseView(["o", "R"], T)).toBeNull();
+	});
+
+	it("refuses a degenerate target with no owner", () => {
+		expect(parseView(["r"], { owner: "", repo: "r" })).toBeNull();
+		expect(parseView(["x", "r"], { owner: "/", repo: "r" })).toBeNull();
+	});
+});
+
+describe("isSafeRepoPath", () => {
+	it.each(["a", "src/a.ts", "dir with space/é.png", ".github/x.yml", "a..b/c"])(
+		"accepts %s",
+		(p) => expect(isSafeRepoPath(p)).toBe(true),
+	);
+
+	it.each([
+		"",
+		"/abs",
+		"a//b",
+		"a/",
+		".",
+		"..",
+		"a/../b",
+		"../a",
+		"a/./b",
+		"a\\b",
+		"a\u0000b",
+		"a\nb",
+		"a\u007fb",
+	])("rejects %j", (p) => expect(isSafeRepoPath(p)).toBe(false));
 });
 
 describe("resolveRef", () => {
@@ -255,6 +350,12 @@ describe("buildHref", () => {
 	it("encodes the share id", () => {
 		expect(buildHref("o", "r", "tree", "main", "", "a/b c")).toBe(
 			"/o/r/tree/main?s=a%2Fb%20c",
+		);
+	});
+
+	it("keeps the slashes of a nested owner as path separators", () => {
+		expect(buildHref("group/sub", "p", "blob", "main", "a.ts", "abc")).toBe(
+			"/group/sub/p/blob/main/a.ts?s=abc",
 		);
 	});
 });
