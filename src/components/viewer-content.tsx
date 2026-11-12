@@ -9,6 +9,7 @@ import { ReleasesList } from "@/components/releases-list";
 import { RepoTree } from "@/components/repo-tree";
 import { SidebarTree } from "@/components/sidebar-tree";
 import { ViewerTreeToggle } from "@/components/viewer-tree-toggle";
+import { repairRepoImages } from "@/lib/repo-asset";
 import { buildHref, buildReleasesHref } from "@/lib/repo-path";
 import type { ViewerPayload } from "@/lib/viewer-data";
 
@@ -59,6 +60,26 @@ function FileIcon() {
 			</svg>
 		</span>
 	);
+}
+
+// Supported image formats to ensure that most of the common extensions become visible 
+const IMAGE_EXTENSIONS = new Set([
+	".png",
+	".jpg",
+	".jpeg",
+	".gif",
+	".webp",
+	".avif",
+	".svg",
+	".bmp",
+	".ico",
+]);
+
+function isImagePath(path: string) {
+	const lower = path.toLowerCase();
+	const dot = lower.lastIndexOf(".");
+
+	return dot >= 0 && IMAGE_EXTENSIONS.has(lower.slice(dot));
 }
 
 // Chrome shared by the file view and the releases view. The viewer carries
@@ -122,12 +143,26 @@ function RepoHtml({
 	html,
 	className,
 	shareId,
+	owner,
+	repo,
+	repoRef,
+	filePath,
 }: {
 	html: string;
 	className: string;
 	shareId: string;
+	owner: string;
+	repo: string;
+	repoRef: string;
+	filePath: string;
 }) {
 	const ref = React.useRef<HTMLDivElement>(null);
+
+	const repairedHtml = React.useMemo(
+		() =>
+			repairRepoImages(html, {owner, repo, ref: repoRef, filePath,}, shareId),
+		[html, owner, repo, repoRef, filePath, shareId],
+	);
 
 	// html is a real dependency even though the body never reads it: a new
 	// html string replaces the markup, re-creating the anchors, and the
@@ -156,14 +191,14 @@ function RepoHtml({
 			if (!url.searchParams.has("s")) url.searchParams.set("s", shareId);
 			a.setAttribute("href", `${url.pathname}${url.search}${url.hash}`);
 		}
-	}, [html, shareId]);
+	}, [repairedHtml, shareId]);
 
 	return (
 		<div
 			ref={ref}
 			className={className}
 			// biome-ignore lint/security/noDangerouslySetInnerHtml: GitHub-sanitized HTML (or markdown-it html:false fallback)
-			dangerouslySetInnerHTML={{ __html: html }}
+			dangerouslySetInnerHTML={{ __html: repairedHtml }}
 		/>
 	);
 }
@@ -245,6 +280,7 @@ function FileOrDirView({
 	const hasMdTabs = Boolean(mdHtml && codeHtml);
 	const [mdTab, setMdTab] = React.useState<"preview" | "code">("preview");
 	const showPreview = Boolean(mdHtml) && (!hasMdTabs || mdTab === "preview");
+	const isImage = contents.kind === "file" && isImagePath(path);
 
 	return (
 		<ViewerShell fullName={fullName} refName={ref}>
@@ -401,7 +437,7 @@ function FileOrDirView({
 										</button>
 									</div>
 								)}
-								{!contents.isBinary && (
+								{!contents.isBinary && !isImage && (
 									<button
 										type="button"
 										className="viewer__tab viewer__wrap"
@@ -412,10 +448,48 @@ function FileOrDirView({
 									</button>
 								)}
 							</div>
-							{contents.isBinary ? (
-								<div className="tree__empty">Binary file not shown.</div>
+							{isImage ? (
+								<div
+									className="image-preview"
+									style={{
+										display: "flex",
+										justifyContent: "center",
+										alignItems: "center",
+										padding: "24px",
+										width: "100%",
+									}}
+								>
+									<img
+										src={`/api/share-file?s=${encodeURIComponent(
+											shareId,
+										)}&ref=${encodeURIComponent(ref)}&path=${encodeURIComponent(
+											path,
+										)}`}
+										alt={contents.name}
+										style={{
+											display: "block",
+											maxWidth: "100%",
+											maxHeight: "80vh",
+											width: "auto",
+											height: "auto",
+											objectFit: "contain",
+										}}
+									/>
+								</div>
+							) : contents.isBinary ? (
+								<div className="tree__empty">
+									Binary file not shown.
+								</div>
 							) : showPreview && mdHtml ? (
-								<RepoHtml className="readme" html={mdHtml} shareId={shareId} />
+								<RepoHtml
+									className="readme"
+									html={mdHtml}
+									shareId={shareId}
+									owner={owner}
+									repo={repo}
+									repoRef={ref}
+									filePath={path}
+								/>
 							) : codeHtml ? (
 								<div
 									className="codeblock"
