@@ -113,3 +113,11 @@ export function buildHref(
 		: `/${owner}/${repo}/${viewType}/${ref}`;
 	return `${base}?s=${encodeURIComponent(shareId)}`;
 }
+
+// A repo-relative path that is safe to pass to the GitHub API. Empty, "." and ".." segments are refused so a request cannot climb out of the shared repository.
+export function isSafeRepoPath(path: string): boolean {
+	if (!path || path.startsWith("/")) return false;
+	return path
+		.split("/")
+		.every((segment) => segment !== "" && segment !== "." && segment !== "..");
+}
