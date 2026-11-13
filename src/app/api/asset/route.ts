@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getInstallationToken } from "@/lib/github-app";
+import { isSafeRepoPath } from "@/lib/repo-path";
 import { resolveShare } from "@/lib/share-store";
 
 export const dynamic = "force-dynamic";
@@ -37,18 +38,6 @@ function encodeRef(ref: string): string {
 		.split("/")
 		.map((segment) => encodeURIComponent(segment))
 		.join("/");
-}
-
-function isSafeRepoPath(path: string): boolean {
-	if (!path || path.startsWith("/")) {
-		return false;
-	}
-
-	const segments = path.split("/");
-
-	return segments.every(
-		(segment) => segment !== "" && segment !== "." && segment !== "..",
-	);
 }
 
 export async function GET(request: Request) {
@@ -133,6 +122,9 @@ export async function GET(request: Request) {
 				"Content-Disposition": "inline",
 				"Content-Type": contentType,
 				"X-Content-Type-Options": "nosniff",
+				// The repository controls these bytes. Without the sandbox an SVG opened directly would run its scripts on this origin. It still renders inside an <img>.
+				"Content-Security-Policy":
+					"default-src 'none'; style-src 'unsafe-inline'; img-src data:; sandbox",
 			},
 		});
 	} catch {

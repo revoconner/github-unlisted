@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getInstallationOctokit } from "@/lib/github-app";
+import { isSafeRepoPath } from "@/lib/repo-path";
 import { resolveShare } from "@/lib/share-store";
 
 export const dynamic = "force-dynamic";
@@ -31,7 +32,7 @@ export async function GET(request: Request): Promise<Response> {
 	const ref = url.searchParams.get("ref") ?? "";
 	const path = url.searchParams.get("path") ?? "";
 
-	if (!shareId || !ref || !path) {
+	if (!shareId || !ref || !isSafeRepoPath(path)) {
 		return NextResponse.json({ error: "Bad request" }, { status: 400 });
 	}
 
@@ -92,6 +93,10 @@ export async function GET(request: Request): Promise<Response> {
 					data.name,
 				)}"`,
 				"Cache-Control": "private, no-store",
+				"X-Content-Type-Options": "nosniff",
+				// The repository controls these bytes. Without the sandbox an SVG opened directly would run its scripts on this origin. It still renders inside an <img>.
+				"Content-Security-Policy":
+					"default-src 'none'; style-src 'unsafe-inline'; img-src data:; sandbox",
 			},
 		});
 	} catch (error) {
